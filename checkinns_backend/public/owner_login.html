@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Sign In • Check-Inns</title>
+  <link rel="stylesheet" href="checkinns3.css">
+</head>
+<body>
+  <div class="owner-auth-container">
+    <img src="images/logo.png" alt="Check-Inns" class="logo">
+    <h1>Owner Sign In</h1>
+    <form id="owner-login-form">
+      <input type="email" id="owner-login-email" placeholder="Business Email" required>
+      <input type="password" id="owner-login-password" placeholder="Password" required>
+      <button type="submit">Sign In</button>
+    </form>
+    <a href="owner_signup.html">Need an owner account? Create one</a>
+  </div>
+
+  <script>
+    const form = document.getElementById('owner-login-form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('owner-login-email').value.trim();
+      const password = document.getElementById('owner-login-password').value.trim();
+
+      if (!email || !password) {
+        alert('Please enter email and password');
+        return;
+      }
+
+      try {
+        const res = await fetch('/api/owner/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: email, password })
+        });
+        if (!res.ok) {
+          const errText = await res.text();
+          throw new Error(errText || 'Login failed');
+        }
+        const data = await res.json();
+        // Store separately to distinguish from user token
+        localStorage.setItem('ownerToken', data.token);
+        localStorage.setItem('ownerName', data.owner?.name || '');
+        // Redirect to owner dashboard
+        const redirect = new URLSearchParams(window.location.search).get('redirect') || 'owner_dashboard.html';
+        window.location.href = redirect;
+      } catch (err) {
+        console.error('Owner login error:', err);
+        alert('Owner login failed: ' + err.message);
+      }
+    });
+  </script>
+</body>
+</html>

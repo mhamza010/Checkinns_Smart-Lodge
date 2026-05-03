@@ -1,0 +1,2470 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Dashboard - Check-Inns</title>
+  <link rel="stylesheet" href="checkinns3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.15/index.global.min.js"></script>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    :root {
+      --bg1: #0f1020;
+      --bg2: #1b1d3a;
+      --accent: #9e8bff;
+      --accent2: #68d4ff;
+      --panel: #0f1229;
+      --text: #e8e9ff;
+      --muted: #9aa0c3;
+      --ok: #3bd45a;
+      --err: #ff5e7e;
+    }
+
+    .login-page {
+      display: flex;
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(1000px 600px at 10% -10%, #2a2e68 0%, transparent 60%), radial-gradient(1200px 800px at 110% 10%, #1a1e52 0%, transparent 55%), linear-gradient(160deg, var(--bg1), var(--bg2));
+      z-index: 2000;
+      place-items: center;
+      justify-content: center;
+    }
+
+    .login-page.hidden {
+      display: none;
+    }
+
+    .shell {
+      position: relative;
+      width: min(1020px, 96vw);
+      height: min(680px, 96vh);
+      background: linear-gradient(180deg, #121437aa, #0f1229cc);
+      border: 1px solid #232756;
+      border-radius: 28px;
+      box-shadow: 0 30px 120px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(255, 255, 255, .03);
+      overflow: hidden;
+    }
+
+    .lux-brand {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      height: 100%;
+    }
+
+    @media (max-width: 860px) {
+      .lux-brand {
+        grid-template-columns: 1fr;
+      }
+
+      .right {
+        display: none
+      }
+    }
+
+    .left {
+      position: relative;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .hero {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .badge {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-weight: 700;
+      letter-spacing: .3px;
+      color: #cfd2ff
+    }
+
+    .badge .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .lux-icon {
+      width: 180px;
+      height: 180px;
+      position: relative;
+    }
+
+    .lux-icon .gem {
+      position: absolute;
+      inset: 0;
+      border-radius: 26px;
+      background: conic-gradient(from 0deg, #bbaaff, #87ddff, #bbaaff);
+      animation: spin 10s linear infinite;
+    }
+
+    .lux-icon .ring {
+      position: absolute;
+      inset: -16px;
+      border-radius: 50%;
+      border: 2px dashed rgba(158, 139, 255, .45);
+      animation: ring 18s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @keyframes ring {
+      to {
+        transform: rotate(-360deg)
+      }
+    }
+
+    .tagline {
+      color: #cfd2ff;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .right {
+      position: relative;
+      padding: 48px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 28px;
+      background: linear-gradient(135deg, rgba(158, 139, 255, .05), rgba(104, 212, 255, .05));
+      border-left: 1px solid #232756;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      background: #0d0e1e;
+      padding: 4px;
+      border-radius: 12px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 20px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .3s;
+    }
+
+    .tab-btn.active {
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: 0 4px 12px rgba(158, 139, 255, .25);
+    }
+
+    .auth-form {
+      display: none;
+      animation: fadeIn .3s;
+    }
+
+    .auth-form.active {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #9aa0c3;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .input-group input {
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid #232756;
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      transition: all .2s;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(158, 139, 255, .25);
+      background: rgba(158, 139, 255, .08);
+    }
+
+    .form-error {
+      font-size: 13px;
+      color: var(--err);
+      margin-top: -4px;
+    }
+
+    .auth-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 10px;
+      color: #0f1020;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .3s;
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(158, 139, 255, .35);
+    }
+
+    .dashboard-wrapper {
+      display: none;
+      height: 100vh;
+      background: linear-gradient(160deg, var(--bg1), var(--bg2));
+      overflow: hidden;
+    }
+
+    .dashboard-wrapper.active {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #121437, #0d0e1e);
+      border-right: 1px solid #232756;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .logo-section {
+      margin-bottom: 30px;
+    }
+
+    .logo-section .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu-item {
+      padding: 12px 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .menu-item:hover {
+      background: rgba(158, 139, 255, .1);
+      color: var(--text);
+    }
+
+    .menu-item.active {
+      background: rgba(158, 139, 255, .2);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .logout-btn {
+      margin-top: auto;
+      padding: 10px 16px;
+      background: var(--err);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .main-content {
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .content-section {
+      display: none;
+      animation: fadeIn .3s;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(158, 139, 255, .1), rgba(104, 212, 255, .1));
+      border: 1px solid #232756;
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      color: var(--text);
+      font-size: 24px;
+      font-weight: 700;
+    }
+
+    .properties-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .property-card {
+      background: linear-gradient(135deg, rgba(158, 139, 255, .1), rgba(104, 212, 255, .1));
+      border: 1px solid #232756;
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .property-name {
+      color: var(--text);
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .property-detail {
+      color: var(--muted);
+      font-size: 13px;
+      margin: 8px 0;
+    }
+
+    .chart-container {
+      background: linear-gradient(135deg, rgba(158, 139, 255, .1), rgba(104, 212, 255, .1));
+      border: 1px solid #232756;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 30px;
+      position: relative;
+      height: 350px;
+    }
+
+    .property-form {
+      background: linear-gradient(135deg, rgba(158, 139, 255, .1), rgba(104, 212, 255, .1));
+      border: 1px solid #232756;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 600px;
+      margin-bottom: 30px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid #232756;
+      border-radius: 8px;
+      color: var(--text);
+      font-family: inherit;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: var(--accent);
+      background: rgba(158, 139, 255, .08);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .image-upload-area {
+      border: 2px dashed #232756;
+      border-radius: 10px;
+      padding: 20px;
+      text-align: center;
+      cursor: pointer;
+      transition: all .3s;
+    }
+
+    .image-upload-area:hover {
+      border-color: var(--accent);
+      background: rgba(158, 139, 255, .05);
+    }
+
+    .image-upload-area.dragover {
+      border-color: var(--accent);
+      background: rgba(158, 139, 255, .15);
+    }
+
+    .image-preview {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .preview-img {
+      width: 100%;
+      height: 100px;
+      object-fit: cover;
+      border-radius: 8px;
+      border: 1px solid #232756;
+    }
+
+    .preview-container {
+      position: relative;
+    }
+
+    .remove-img {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      background: var(--err);
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 24px;
+      height: 24px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+    }
+
+    .add-btn,
+    .save-btn,
+    .submit-btn {
+      padding: 10px 24px;
+      background: var(--ok);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all .3s;
+    }
+
+    .add-btn:hover,
+    .save-btn:hover,
+    .submit-btn:hover {
+      background: #2ba049;
+      transform: translateY(-2px);
+    }
+
+    .upload-status {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 8px;
+    }
+
+    body.light-mode {
+      --bg1: #f5f7fa;
+      --bg2: #e4e7eb;
+      --accent: #6b4ce6;
+      --accent2: #0099cc;
+      --panel: #ffffff;
+      --text: #2d3748;
+      --muted: #718096;
+    }
+
+    body.light-mode .shell {
+      background: #ffffff;
+      border: 1px solid #cbd5e0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .1);
+    }
+
+    body.light-mode .login-page {
+      background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    }
+
+    body.light-mode input,
+    body.light-mode textarea,
+    body.light-mode select {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+
+    .theme-toggle-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: var(--panel);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      transform: translateY(-3px) rotate(15deg);
+      box-shadow: 0 6px 16px rgba(158, 139, 255, 0.4);
+    }
+
+    @media (max-width: 860px) {
+      .dashboard-wrapper.active {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        height: 100vh;
+      }
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid #232756;
+        padding: 15px;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+      }
+      .sidebar-menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5px;
+        width: 100%;
+        order: 3;
+      }
+      .menu-item {
+        padding: 8px 12px;
+        font-size: 13px;
+        flex: 1;
+        text-align: center;
+      }
+      .logo-section { margin-bottom: 0; }
+      .logout-btn { margin-top: 0; padding: 6px 12px; font-size: 12px; }
+      .main-content { padding: 15px; }
+      .chart-container { height: 250px; }
+      .stats-grid { grid-template-columns: 1fr; }
+      .property-form { max-width: 100%; }
+      .property-card { flex-direction: column; }
+    }
+  </style>
+</head>
+
+<body>
+  <button class="theme-toggle-btn" onclick="toggleTheme()"><i class="fas fa-sun"></i></button>
+  <!-- LOGIN PAGE -->
+  <div id="loginPage" class="login-page">
+    <div class="shell">
+      <div class="lux-brand">
+        <div class="left">
+          <div class="badge">
+            <div class="dot"></div>Business Partner
+          </div>
+          <div class="hero">
+            <div class="lux-icon">
+              <div class="gem"></div>
+              <div class="ring"></div>
+            </div>
+          </div>
+          <div class="tagline">Manage Your Properties Efficiently</div>
+        </div>
+        <div class="right">
+          <div class="tabs">
+            <button class="tab-btn active" onclick="setTab('login')">Login</button>
+            <button class="tab-btn" onclick="setTab('signup')">Sign Up</button>
+          </div>
+
+          <form id="form-login" class="auth-form active">
+            <div class="input-group">
+              <label>Email</label>
+              <input type="email" id="input-login-email" placeholder="you@example.com" required>
+            </div>
+            <div class="input-group">
+              <label>Password</label>
+              <input type="password" id="input-login-password" placeholder="" required>
+            </div>
+            <div id="login-error" class="form-error"></div>
+            <button type="submit" class="auth-btn">Sign In</button>
+          </form>
+
+          <form id="form-signup" class="auth-form">
+            <div class="input-group">
+              <label>Business Name</label>
+              <input type="text" id="input-signup-name" placeholder="Your Business" required>
+            </div>
+            <div class="input-group">
+              <label>Email</label>
+              <input type="email" id="input-signup-email" placeholder="you@example.com" required>
+            </div>
+            <div class="input-group">
+              <label>Password</label>
+              <input type="password" id="input-signup-password" placeholder="" required>
+            </div>
+            <div class="contract-section" style="margin: 15px 0; text-align: left; font-size: 0.85rem; color: #ffd700;">
+                <input type="checkbox" id="dash-contract-agree" required style="width: auto; margin-right: 10px;">
+                <label for="dash-contract-agree">I agree to the Check-Inns Owner Contract:
+                <ul style="margin: 5px 0 0 20px; font-size: 0.8rem; color: #e0e0e0; list-style: disc;">
+                    <li>15% service fee/tax on every booking.</li>
+                    <li>Up to 3 users/month on free tier.</li>
+                    <li>Upgrade to Silver/Gold/Premium to scale.</li>
+                </ul>
+                </label>
+            </div>
+            <div id="signup-error" class="form-error"></div>
+            <button type="submit" class="auth-btn">Request OTP</button>
+          </form>
+
+          <form id="form-verify-otp" class="auth-form" style="display:none;">
+            <div class="input-group">
+              <label>Enter 6-digit OTP sent to your email</label>
+              <input type="text" id="input-signup-otp" placeholder="123456" required>
+            </div>
+            <div style="text-align: right; margin-bottom: 15px; font-size: 0.9em;">
+              <span id="otp-timer" style="color: #ccc;">01:00</span>
+              <button type="button" id="btn-resend-otp" disabled style="background: none; border: none; color: var(--accent); cursor: not-allowed; text-decoration: underline; margin-left: 10px;">Resend OTP</button>
+            </div>
+            <div id="otp-error" class="form-error"></div>
+            <button type="submit" class="auth-btn">Verify & Sign Up</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboardWrapper" class="dashboard-wrapper">
+    <div class="sidebar">
+      <div class="logo-section" style="display:flex; align-items:center;">
+        <img src="/images/Logo Checkinns.png" alt="Logo" style="height:35px; background:white; padding:2px; border-radius:5px; margin-right:10px;">
+        <div class="logo-text"> Properties</div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-item active" onclick="showSection('overview')"> Overview</div>
+        <div class="menu-item" onclick="showSection('hotels')"> Hotels</div>
+        <div class="menu-item" onclick="showSection('restaurants')"> Restaurants</div>
+        <div class="menu-item" onclick="showSection('lounges')"> Lounges</div>
+        <div class="menu-item" onclick="showSection('reviews')"> <i class="fas fa-star" style="margin-right: 8px;"></i>
+          Reviews</div>
+        <div class="menu-item" onclick="showSection('bookings')"> <i class="fas fa-calendar-check"
+            style="margin-right: 8px;"></i>
+          Bookings</div>
+        <div class="menu-item" onclick="showSection('analytics')"> <i class="fas fa-chart-pie"
+            style="margin-right: 8px;"></i>
+          Analytics</div>
+        <div class="menu-item" onclick="showSection('notifications')"> <i class="fas fa-bell"
+            style="margin-right: 8px;"></i>
+          Notifications <span id="notif-badge" style="background:var(--err); color:#fff; border-radius:12px; padding:2px 6px; font-size:10px; display:none; margin-left:5px;">0</span></div>
+        <div class="menu-item" onclick="showSection('settings')"> <i class="fas fa-cog"
+            style="margin-right: 8px;"></i>
+          Settings</div>
+      </div>
+      <button class="logout-btn" onclick="logoutOwner()">Logout</button>
+    </div>
+
+    <div class="main-content">
+      <!-- OVERVIEW SECTION -->
+      <section id="overview-section" class="content-section active">
+        <h1 class="section-title">Dashboard Overview</h1>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Hotels</div>
+            <div class="stat-value" id="stat-hotels">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Restaurants</div>
+            <div class="stat-value" id="stat-restaurants">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Lounges</div>
+            <div class="stat-value" id="stat-lounges">0</div>
+          </div>
+          <div class="stat-card">
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+              <div class="stat-label" style="margin-bottom: 0;">Total Revenue</div>
+              <button onclick="document.getElementById('tax-details').style.display = document.getElementById('tax-details').style.display === 'none' ? 'block' : 'none'" style="background: rgba(158, 139, 255, 0.2); color: var(--accent); border: 1px solid var(--accent); padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.3s;">Tax Est.</button>
+            </div>
+            <div class="stat-value" id="stat-revenue"></div>
+            <div id="tax-details" style="display: none; margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 13px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 6px; color: var(--text);"><span>Est. Monthly Tax:</span> <span id="tax-monthly" style="color: var(--err); font-weight: bold;">$0</span></div>
+              <div style="display: flex; justify-content: space-between; color: var(--text);"><span>Est. Yearly Tax:</span> <span id="tax-yearly" style="color: var(--err); font-weight: bold;">$0</span></div>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Live Occupancy (Today)</div>
+            <div class="stat-value" id="stat-occupancy" style="color:var(--ok);">0%</div>
+          </div>
+        </div>
+        <div class="chart-container">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </section>
+
+      <!-- HOTELS SECTION -->
+      <section id="hotels-section" class="content-section">
+        <h1 class="section-title">Your Hotels</h1>
+        <button class="add-btn" onclick="showHotelForm()" style="margin-bottom:20px;">+ Add Hotel</button>
+        <div id="hotel-form-container" style="display:none;">
+          <form id="hotelForm" class="property-form">
+            <div class="form-group"><label>Hotel Name</label><input type="text" id="hotel-name" required></div>
+            <div class="form-group"><label>Location</label><input type="text" id="hotel-location" required></div>
+            <div class="form-group"><label>Price Per Night ($)</label><input type="number" id="hotel-price" required>
+            </div>
+            <div class="form-group"><label>Description</label><textarea id="hotel-description" required></textarea>
+            </div>
+            <div class="form-group" id="hotel-amenities-container">
+              <label>Amenities</label>
+              <!-- Amenities go here. Empty by default for new form. -->
+            </div>
+            <button type="button" onclick="addHotelAmenityField()"
+              style="padding: 8px 16px; background:var(--accent2); color:#111; border:none; border-radius:8px; cursor:pointer; font-weight:600; margin-bottom: 20px;">+
+              Add Amenity</button>
+            <div id="hotel-rooms-container">
+              <div class="room-entry"
+                style="border: 1px solid #232756; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.02); position: relative;">
+                <button type="button" class="remove-room-btn" onclick="this.parentElement.remove()"
+                  style="position:absolute; top:10px; right:10px; background:var(--err); color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">X</button>
+                <div class="form-group"><label>Room Type Name</label><input type="text" class="hotel-room-name"
+                    placeholder="e.g. Standard Room, Suite"></div>
+                <div class="form-group"><label>Room Price ($)</label><input type="number" class="hotel-room-price">
+                </div>
+                <div class="form-group"><label>Room Description</label><textarea class="hotel-room-description"
+                    placeholder="Room details..."></textarea></div>
+                <div class="form-group"><label>Total Rooms (Quantity)</label><input type="number" class="hotel-room-qty"
+                    value="10"></div>
+              </div>
+            </div>
+            <button type="button" onclick="addHotelRoomField()"
+              style="padding: 8px 16px; background:var(--accent2); color:#111; border:none; border-radius:8px; cursor:pointer; font-weight:600; margin-bottom: 20px;">+
+              Add Another Room</button>
+            <div class="form-group"><label>Upload Images (up to 5)</label>
+              <div class="image-upload-area" id="hotel-upload" onclick="document.getElementById('hotel-files').click()"
+                ondrop="handleDrop(event, 'hotel')" ondragover="handleDragOver(event)"
+                ondragleave="handleDragLeave(event)"><input type="file" id="hotel-files" multiple accept="image/*"
+                  style="display:none;" onchange="handleFileSelect(event, 'hotel')">
+                <p style="color:var(--muted); margin:0;">Drag images here or click to browse</p>
+              </div>
+              <div id="hotel-previews" class="image-preview"></div>
+            </div>
+            <button type="submit" class="submit-btn">Add Hotel</button><button type="button" class="submit-btn"
+              style="background:#666;margin-left:10px;"
+              onclick="document.getElementById('hotel-form-container').style.display='none'">Cancel</button>
+          </form>
+        </div>
+        <div id="hotels-list" class="properties-grid">
+          <p>Loading hotels...</p>
+        </div>
+      </section>
+
+      <!-- RESTAURANTS SECTION -->
+      <section id="restaurants-section" class="content-section">
+        <h1 class="section-title">Your Restaurants</h1>
+        <button class="add-btn" onclick="showRestaurantForm()" style="margin-bottom:20px;">+ Add Restaurant</button>
+        <div id="restaurant-form-container" style="display:none;">
+          <form id="restaurantForm" class="property-form">
+            <div class="form-group"><label>Restaurant Name</label><input type="text" id="rest-name" required></div>
+            <div class="form-group"><label>Location</label><input type="text" id="rest-location" required></div>
+            <div class="form-group"><label>Cuisine Type</label><input type="text" id="rest-cuisine" required></div>
+            <div class="form-group"><label>Price Range</label><select id="rest-price">
+                <option>$</option>
+                <option>$$</option>
+                <option>$$$</option>
+                <option>$$$$</option>
+              </select></div>
+            <div class="form-group"><label>Description</label><textarea id="rest-description" required></textarea></div>
+            <div class="form-group"><label>Seating Capacity</label><input type="number" id="rest-seats" required></div>
+            <div class="form-group"><label>Upload Images (up to 5)</label>
+              <div class="image-upload-area" id="restaurant-upload"
+                onclick="document.getElementById('restaurant-files').click()" ondrop="handleDrop(event, 'restaurant')"
+                ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"><input type="file"
+                  id="restaurant-files" multiple accept="image/*" style="display:none;"
+                  onchange="handleFileSelect(event, 'restaurant')">
+                <p style="color:var(--muted); margin:0;">Drag images here or click to browse</p>
+              </div>
+              <div id="restaurant-previews" class="image-preview"></div>
+            </div>
+            <button type="submit" class="submit-btn">Add Restaurant</button><button type="button" class="submit-btn"
+              style="background:#666;margin-left:10px;"
+              onclick="document.getElementById('restaurant-form-container').style.display='none'">Cancel</button>
+          </form>
+        </div>
+        <div id="restaurants-list" class="properties-grid">
+          <p>Loading restaurants...</p>
+        </div>
+      </section>
+
+      <!-- LOUNGES SECTION -->
+      <section id="lounges-section" class="content-section">
+        <h1 class="section-title">Your Lounges</h1>
+        <button class="add-btn" onclick="showLoungeForm()" style="margin-bottom:20px;">+ Add Lounge</button>
+        <div id="lounge-form-container" style="display:none;">
+          <form id="loungeForm" class="property-form">
+            <div class="form-group"><label>Lounge Name</label><input type="text" id="lounge-name" required></div>
+            <div class="form-group"><label>Location</label><input type="text" id="lounge-location" required></div>
+            <div class="form-group"><label>Lounge Type</label><select id="lounge-type">
+                <option>VIP Lounge</option>
+                <option>Rooftop</option>
+                <option>Luxury Lounge</option>
+                <option>Casual Bar</option>
+              </select></div>
+            <div class="form-group"><label>Capacity</label><input type="number" id="lounge-capacity" required></div>
+            <div class="form-group"><label>Price Per Person ($)</label><input type="number" id="lounge-price" required>
+            </div>
+            <div class="form-group"><label>Description</label><textarea id="lounge-description" required></textarea>
+            </div>
+            <div class="form-group"><label>Upload Images (up to 5)</label>
+              <div class="image-upload-area" id="lounge-upload"
+                onclick="document.getElementById('lounge-files').click()" ondrop="handleDrop(event, 'lounge')"
+                ondragover="handleDragOver(event)" ondragleave="handleDragLeave(event)"><input type="file"
+                  id="lounge-files" multiple accept="image/*" style="display:none;"
+                  onchange="handleFileSelect(event, 'lounge')">
+                <p style="color:var(--muted); margin:0;">Drag images here or click to browse</p>
+              </div>
+              <div id="lounge-previews" class="image-preview"></div>
+            </div>
+            <button type="submit" class="submit-btn">Add Lounge</button><button type="button" class="submit-btn"
+              style="background:#666;margin-left:10px;"
+              onclick="document.getElementById('lounge-form-container').style.display='none'">Cancel</button>
+          </form>
+        </div>
+        <div id="lounges-list" class="properties-grid">
+          <p>Loading lounges...</p>
+        </div>
+      </section>
+
+      <!-- REVIEWS SECTION -->
+      <section id="reviews-section" class="content-section">
+        <h1 class="section-title">Reviews & Analytics</h1>
+
+        <div class="stats-grid" style="grid-template-columns: repeat(2, 1fr) !important; margin-bottom: 24px;">
+          <div class="stat-card">
+            <div class="stat-label">Total Reviews</div>
+            <div class="stat-value" id="stat-total-reviews">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Average Rating</div>
+            <div class="stat-value" id="stat-avg-rating" style="color: #ffd700;">0.0 <i class="fas fa-star"
+                style="font-size: 0.8em;"></i></div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 2fr); gap: 24px;">
+          <!-- Rating Distribution -->
+          <div class="chart-container" style="height: 350px;">
+            <canvas id="ratingsChart"></canvas>
+          </div>
+
+          <!-- Recent Reviews List -->
+          <div class="property-form" style="max-width: 100%; height: 350px; overflow-y: auto;">
+            <h3 style="margin-top: 0; color: var(--text);">Recent Feedback</h3>
+            <div id="owner-reviews-list" style="display: flex; flex-direction: column; gap: 16px;">
+              <p style="color: var(--muted);">Loading reviews...</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- BOOKINGS SECTION -->
+      <section id="bookings-section" class="content-section">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px;">
+          <h1 class="section-title" style="margin: 0;">Manage Bookings</h1>
+          <div style="display:flex; gap: 10px;">
+              <button class="add-btn" style="background:#4caf50;" onclick="exportFinancialData()"><i class="fas fa-file-csv"></i> Export Accounting CSV</button>
+              <button class="add-btn" onclick="loadBookings()"><i class="fas fa-sync"></i> Refresh Grid</button>
+          </div>
+        </div>
+        
+        <h3 style="color:var(--text); margin-bottom: 15px;">Pending & Detailed Bookings List</h3>
+        <div id="bookings-list" class="properties-grid"
+          style="grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); margin-bottom: 30px;">
+          <p>Loading bookings...</p>
+        </div>
+
+        <!-- FULLCALENDAR VISUAL GRID -->
+        <div class="chart-container" style="position:relative; z-index:1; background:var(--bg2); padding: 20px; border-radius: 12px; margin-bottom: 30px; display: flex; flex-direction: column;">
+           <h3 style="margin-top:0; color:var(--text);"><i class="far fa-calendar-alt"></i> Visual Check-In Calendar</h3>
+           <div id="booking-calendar" style="color: black; background: #fff; padding:15px; border-radius:8px; min-height: 400px; overflow: hidden; width: 100%;"></div>
+        </div>
+      </section>
+
+      <!-- ANALYTICS SECTION -->
+      <section id="analytics-section" class="content-section">
+        <h1 class="section-title">Advanced Analytics Dashboard</h1>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 30px;">
+          <!-- Top Hotels -->
+          <div class="property-form" style="max-width: 100%; margin-bottom: 0;">
+            <h3 style="margin-top: 0; color: var(--text);"><i class="fas fa-trophy" style="color:var(--accent-gold)"></i> Top Performing Hotels</h3>
+            <div id="analytics-top-hotels" style="color: var(--muted); margin-top: 15px; display: flex; flex-direction: column; gap:10px;">Loading...</div>
+          </div>
+          <!-- Most Active Users -->
+          <div class="property-form" style="max-width: 100%; margin-bottom: 0;">
+            <h3 style="margin-top: 0; color: var(--text);"><i class="fas fa-users" style="color:var(--accent2)"></i> Most Active Users</h3>
+            <div id="analytics-active-users" style="color: var(--muted); margin-top: 15px; display: flex; flex-direction: column; gap:10px;">Loading...</div>
+          </div>
+        </div>
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px;">
+          <!-- Revenue Trends Chart -->
+          <div class="chart-container" style="margin-bottom: 0; position: relative; height: 350px;">
+            <h3 style="margin-top: 0; color: var(--text); padding-bottom: 10px;">Revenue Trends (Monthly)</h3>
+            <div style="position: absolute; top:40px; bottom:20px; left:20px; right:20px;">
+              <canvas id="revenueTrendsChart"></canvas>
+            </div>
+          </div>
+          <!-- Most Booked Cities -->
+          <div class="property-form" style="max-width: 100%; margin-bottom: 0;">
+            <h3 style="margin-top: 0; color: var(--text);"><i class="fas fa-city" style="color:var(--accent)"></i> Most Booked Cities</h3>
+            <div id="analytics-top-cities" style="color: var(--muted); margin-top: 15px; display: flex; flex-direction: column; gap:10px;">Loading...</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- NOTIFICATIONS SECTION -->
+      <section id="notifications-section" class="content-section">
+        <h1 class="section-title">Notifications</h1>
+        <div class="property-form" style="max-width: 100%;">
+          <div id="notifications-list" style="display: flex; flex-direction: column; gap: 15px;">
+            <p style="color:var(--muted);">Loading notifications...</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SETTINGS SECTION -->
+      <section id="settings-section" class="content-section">
+        <h1 class="section-title">Account Settings</h1>
+        <div class="property-form">
+          <h3 style="margin-top:0; color:var(--text);">Update Profile</h3>
+          <form id="ownerSettingsForm">
+            <div class="form-group">
+              <label>Name</label>
+              <input type="text" id="settings-name" placeholder="Your Name">
+            </div>
+            <h3 style="margin-top:30px; color:var(--text);">Change Password</h3>
+            <div class="form-group">
+              <label>Current Password</label>
+              <input type="password" id="settings-current-password" placeholder="Enter current to change">
+            </div>
+            <div class="form-group">
+              <label>New Password</label>
+              <input type="password" id="settings-new-password" placeholder="Enter new password">
+            </div>
+            <button type="submit" class="submit-btn" id="settings-btn">Save Changes</button>
+          </form>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <script>
+    let editingProp = { hotel: null, restaurant: null, lounge: null };
+    window.allHotels = [];
+    window.allRestaurants = [];
+    window.allLounges = [];
+
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      const icon = document.querySelector('.theme-toggle-btn i');
+      if (document.body.classList.contains('light-mode')) {
+        icon.className = 'fas fa-moon';
+      } else {
+        icon.className = 'fas fa-sun';
+      }
+    }
+
+    const loginPage = document.getElementById('loginPage');
+    const dashboardWrapper = document.getElementById('dashboardWrapper');
+    let revenueChart = null;
+
+    // Check for owner token (separate from user token)
+    const ownerToken = localStorage.getItem('ownerToken');
+    if (ownerToken) {
+      loginPage.classList.add('hidden');
+      dashboardWrapper.classList.add('active');
+      loadDashboard();
+    }
+
+    function setTab(tab) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+      event.target.classList.add('active');
+      document.getElementById('form-' + tab).classList.add('active');
+    }
+
+    // LOGIN
+    document.getElementById('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('input-login-email').value;
+      const password = document.getElementById('input-login-password').value;
+      const errorDiv = document.getElementById('login-error');
+      errorDiv.textContent = '';
+
+      try {
+        const res = await fetch('/api/owner/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: email, password })
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          errorDiv.textContent = data.msg || 'Login failed';
+          return;
+        }
+
+        localStorage.setItem('ownerToken', data.token);
+        loginPage.classList.add('hidden');
+        dashboardWrapper.classList.add('active');
+        loadDashboard();
+      } catch (err) {
+        errorDiv.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    // SIGNUP TIMER LOGIC
+    let otpInterval;
+    function startOtpTimer() {
+        let seconds = 60;
+        const timerSpan = document.getElementById('otp-timer');
+        const resendBtn = document.getElementById('btn-resend-otp');
+        resendBtn.disabled = true;
+        resendBtn.style.cursor = 'not-allowed';
+        
+        clearInterval(otpInterval);
+        otpInterval = setInterval(() => {
+            seconds--;
+            timerSpan.textContent = `00:${seconds < 10 ? '0' : ''}${seconds}`;
+            if (seconds <= 0) {
+                clearInterval(otpInterval);
+                resendBtn.disabled = false;
+                resendBtn.style.cursor = 'pointer';
+                timerSpan.textContent = "Code expired?";
+            }
+        }, 1000);
+    }
+
+    document.getElementById('btn-resend-otp').addEventListener('click', async () => {
+        if (document.getElementById('btn-resend-otp').disabled) return;
+        
+        document.getElementById('otp-error').textContent = '';
+        try {
+            const res = await fetch('/api/owner/resend-otp', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: tempSignupData.email })
+            });
+            const data = await res.json();
+            if(!res.ok) {
+                document.getElementById('otp-error').textContent = data.msg || 'Failed to resend';
+            } else {
+                startOtpTimer();
+                document.getElementById('otp-error').textContent = 'OTP resent to your email.';
+                document.getElementById('otp-error').style.color = '#11cb6e'; // Temporary success color
+                setTimeout(() => document.getElementById('otp-error').style.color = 'var(--err)', 3000);
+            }
+        } catch (e) {
+            document.getElementById('otp-error').textContent = 'Error resending OTP';
+        }
+    });
+
+    // SIGNUP (Request OTP)
+    let tempSignupData = {};
+    document.getElementById('form-signup').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      tempSignupData.name = document.getElementById('input-signup-name').value.trim();
+      tempSignupData.email = document.getElementById('input-signup-email').value.trim();
+      tempSignupData.password = document.getElementById('input-signup-password').value.trim();
+      const errorDiv = document.getElementById('signup-error');
+      errorDiv.textContent = '';
+
+      if (!tempSignupData.name || !tempSignupData.email || !tempSignupData.password) { errorDiv.textContent = 'Please fill all fields'; return; }
+      if (tempSignupData.password.length < 8) { errorDiv.textContent = 'Password must be at least 8 characters long.'; return; }
+      
+      const nameRegex = /^[A-Za-z\s\-]{3,}$/;
+      if (!nameRegex.test(tempSignupData.name)) { errorDiv.textContent = 'Business/Owner name must contain only letters and be at least 3 characters long.'; return; }
+      
+      const emailRegex = /^[a-zA-Z][a-zA-Z0-9._-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(tempSignupData.email)) { errorDiv.textContent = 'Please enter a valid email address (must end with a valid domain like .com).'; return; }
+
+      try {
+        const res = await fetch('/api/owner/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(tempSignupData)
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          errorDiv.textContent = data.msg || 'Signup failed';
+          return;
+        }
+
+        // Show OTP form
+        document.getElementById('form-signup').style.display = 'none';
+        document.getElementById('form-verify-otp').style.display = 'block';
+        startOtpTimer();
+      } catch (err) {
+        errorDiv.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    // VERIFY OTP AND SIGNUP
+    document.getElementById('form-verify-otp').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const otp = document.getElementById('input-signup-otp').value;
+      const errorDiv = document.getElementById('otp-error');
+      errorDiv.textContent = '';
+
+      try {
+        const payload = { ...tempSignupData, otp };
+        const res = await fetch('/api/owner/verify-signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          errorDiv.textContent = data.msg || 'OTP verification failed';
+          return;
+        }
+
+        localStorage.setItem('ownerToken', data.token);
+        loginPage.classList.add('hidden');
+        dashboardWrapper.classList.add('active');
+        loadDashboard();
+      } catch (err) {
+        errorDiv.textContent = 'Error: ' + err.message;
+      }
+    });
+
+    async function loadDashboard() {
+      const ownerToken = localStorage.getItem('ownerToken');
+
+      // Decode token to get owner name safely
+      function parseJwt (token) {
+        try {
+          const base64Url = token.split('.')[1];
+          const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+          const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+          }).join(''));
+          return JSON.parse(jsonPayload);
+        } catch(e) { return {}; }
+      }
+      const decoded = parseJwt(ownerToken);
+      const ownerName = decoded.username || decoded.name;
+
+      try {
+        const res = await fetch('/api/owner/summary?owner=' + ownerName, {
+          headers: { 'Authorization': 'Bearer ' + ownerToken }
+        });
+        const data = await res.json();
+
+        document.getElementById('stat-hotels').textContent = data.counts.hotels;
+        document.getElementById('stat-restaurants').textContent = data.counts.restaurants;
+        document.getElementById('stat-lounges').textContent = data.counts.lounges;
+        document.getElementById('stat-revenue').textContent = '$' + data.revenue.total.toLocaleString();
+        
+        const yearlyTax = data.revenue.total * 0.15; // Assuming 15% estimated tax
+        const monthlyTax = yearlyTax / 12;
+        document.getElementById('tax-monthly').textContent = '$' + monthlyTax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+        document.getElementById('tax-yearly').textContent = '$' + yearlyTax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+
+        // Draw revenue chart
+        drawRevenueChart({
+          hotel: data.revenue.hotel,
+          restaurant: data.revenue.restaurant,
+          lounge: data.revenue.lounge
+        });
+
+        // Load properties
+        loadProperties();
+
+        // Load reviews & analytics
+        loadReviews();
+
+        // Load Advanced Analytics
+        loadAdvancedAnalytics();
+        
+        // Load Notifications
+        loadNotifications();
+
+        // Load bookings
+        loadBookings();
+      } catch (err) {
+        console.error('Dashboard error:', err);
+      }
+    }
+
+    let globalRevenueTrendsChart = null;
+
+    async function loadAdvancedAnalytics() {
+      const ownerToken = localStorage.getItem('ownerToken');
+      const decoded = JSON.parse(atob(ownerToken.split('.')[1]));
+      const ownerName = decoded.username;
+
+      try {
+        const res = await fetch('/api/owner/analytics?owner=' + encodeURIComponent(ownerName), {
+          headers: { 'Authorization': 'Bearer ' + ownerToken }
+        });
+        const data = await res.json();
+        
+        // Render Top Hotels
+        const thEl = document.getElementById('analytics-top-hotels');
+        if (data.topHotels && data.topHotels.length > 0) {
+          thEl.innerHTML = data.topHotels.map(h => `
+            <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px 15px; border-radius:8px;">
+              <div style="font-weight:bold; color:var(--text);">${h.name}</div>
+              <div style="color:var(--ok); font-weight:bold;">$${h.totalRevenue} <span style="font-size:11px; color:var(--muted); font-weight:normal;">(${h.totalBookings} bookings)</span></div>
+            </div>
+          `).join('');
+        } else {
+          thEl.innerHTML = "No revenue data yet.";
+        }
+
+        // Render Active Users
+        const auEl = document.getElementById('analytics-active-users');
+        if (data.activeUsers && data.activeUsers.length > 0) {
+          auEl.innerHTML = data.activeUsers.map(u => `
+            <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px 15px; border-radius:8px;">
+              <div style="font-weight:bold; color:var(--text);">${u._id}</div>
+              <div style="color:var(--text);">Spent: <span style="color:var(--ok); font-weight:bold;">$${u.totalSpent}</span> <span style="font-size:11px; color:var(--muted);">(${u.bookingsCount}x)</span></div>
+            </div>
+          `).join('');
+        } else {
+          auEl.innerHTML = "No user booking data yet.";
+        }
+
+        // Render Top Cities
+        const tcEl = document.getElementById('analytics-top-cities');
+        if (data.mostBookedCities && data.mostBookedCities.length > 0) {
+          tcEl.innerHTML = data.mostBookedCities.map(c => `
+            <div style="display:flex; justify-content:space-between; background:rgba(255,255,255,0.05); padding:10px 15px; border-radius:8px;">
+              <div style="font-weight:bold; color:var(--text);"><i class="fas fa-map-marker-alt" style="color:var(--accent); margin-right:5px;"></i> ${c.city}</div>
+              <div style="color:var(--text); font-weight:bold;">${c.count} <span style="font-size:11px; color:var(--muted); font-weight:normal;">bookings</span></div>
+            </div>
+          `).join('');
+        } else {
+          tcEl.innerHTML = "No city booking data yet.";
+        }
+
+        // Render Revenue Trends Monthly Chart
+        if (data.revenueTrendsMonthly) {
+          const ctx = document.getElementById('revenueTrendsChart').getContext('2d');
+          if (globalRevenueTrendsChart) globalRevenueTrendsChart.destroy();
+          
+          const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+          const labels = data.revenueTrendsMonthly.map(t => `${monthNames[t._id.month - 1]} ${t._id.year}`);
+          const values = data.revenueTrendsMonthly.map(t => t.revenue);
+          
+          let finalLabels = labels;
+          let finalValues = values;
+
+          // If there is only one data point, add a zero base point so it doesn't just show a single dot
+          if (finalLabels.length === 1) {
+            finalLabels = ["Previous", finalLabels[0]];
+            finalValues = [0, finalValues[0]];
+          }
+
+          const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+          gradient.addColorStop(0, 'rgba(158, 139, 255, 0.6)');
+          gradient.addColorStop(1, 'rgba(158, 139, 255, 0.0)');
+
+          globalRevenueTrendsChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+              labels: finalLabels,
+              datasets: [{
+                label: 'Monthly Revenue ($)',
+                data: finalValues,
+                borderColor: '#9e8bff',
+                backgroundColor: gradient,
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#fff',
+                pointBorderColor: '#9e8bff',
+                pointRadius: 5,
+                pointHoverRadius: 7
+              }]
+            },
+            options: {
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: '#888899' }, grid: { display: false } },
+                y: { ticks: { color: '#888899' }, grid: { color: 'rgba(255, 255, 255, 0.05)' }, beginAtZero: true }
+              }
+            }
+          });
+        }
+      } catch(err) {
+        console.error("Error loading analytics:", err);
+      }
+    }
+
+    async function loadBookings() {
+      const ownerToken = localStorage.getItem('ownerToken');
+      const decoded = JSON.parse(atob(ownerToken.split('.')[1]));
+
+      const bookingsList = document.getElementById('bookings-list');
+      try {
+        const res = await fetch('/api/owner/bookings?owner=' + encodeURIComponent(decoded.username), {
+          headers: { 'Authorization': 'Bearer ' + ownerToken }
+        });
+        const bookings = await res.json();
+        
+        window.allOwnerBookings = bookings; // Save for CSV export
+
+        if (!bookings.length) {
+          bookingsList.innerHTML = '<p style="grid-column: 1/-1;">No bookings found for your properties yet.</p>';
+          return;
+        }
+
+        // Live Occupancy Radar (Approximate with adjusted today calculation)
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        const isActive = (b) => {
+            if (b.status !== 'confirmed') return false;
+            const ci = new Date(b.checkIn); ci.setHours(0,0,0,0);
+            const co = new Date(b.checkOut); co.setHours(0,0,0,0);
+            return ci <= today && co >= today;
+        };
+        const activeToday = bookings.filter(isActive).length;
+        const totalRoomsForCalc = Math.max(10, activeToday + 5); // Dummy capacity logic if properties not fully aggregated
+        const occupancyRate = Math.round((activeToday / totalRoomsForCalc) * 100);
+        document.getElementById('stat-occupancy').textContent = occupancyRate + "%";
+        document.getElementById('stat-occupancy').style.color = occupancyRate > 80 ? 'var(--ok)' : (occupancyRate > 40 ? 'orange' : 'var(--err)');
+
+        // Render FullCalendar
+        const calendarEl = document.getElementById('booking-calendar');
+        if(calendarEl) {
+            // Only show confirmed/accepted bookings
+            const calendarEvents = bookings.filter(b => b.status === 'confirmed').map(b => ({
+                title: `${b.customerName} - ${b.propertyName}`,
+                start: b.checkIn,
+                end: b.checkOut,
+                color: '#3bd45a'
+            }));
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek,timeGridDay'
+                },
+                events: calendarEvents,
+                height: 500
+            });
+            calendar.render();
+        }
+
+        bookingsList.innerHTML = bookings.map(b => {
+          let statusColor = "orange";
+          if (b.status === "confirmed") statusColor = "#3bd45a";
+          if (b.status === "rejected") statusColor = "#ff5e7e";
+          return `
+          <div class="property-card">
+            <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+              <div class="property-name" style="margin:0;">${b.propertyName}</div>
+              <span style="background:${statusColor}; color:${b.status === 'confirmed' ? '#111' : '#fff'}; padding:2px 8px; border-radius:12px; font-size:12px; font-weight:bold; text-transform:uppercase;">
+                ${b.status}
+              </span>
+            </div>
+            <div class="property-detail"><i class="fas fa-bed"></i> ${b.roomName}</div>
+            <div class="property-detail"><i class="fas fa-user"></i> Guest: ${b.customerName}</div>
+            <div class="property-detail"><i class="fas fa-calendar"></i> ${new Date(b.checkIn).toLocaleDateString()} -> ${new Date(b.checkOut).toLocaleDateString()}</div>
+            <div class="property-detail"><i class="fas fa-comment-dollar"></i> $${b.totalPrice}</div>
+            ${b.status === 'cancelled' ? `<div style="margin-top:10px; font-size:12px; color:var(--err);"><strong>Reason:</strong> ${b.cancellationReason}</div>` : ''}
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+              ${b.status === 'pending' ? `
+                <button class="save-btn" onclick="updateBookingStatus('${b._id}', 'confirmed')" style="flex:1; padding:6px; font-size:12px; background:var(--ok);">Accept</button>
+                <button class="save-btn" onclick="updateBookingStatus('${b._id}', 'rejected')" style="flex:1; padding:6px; font-size:12px; background:var(--err);">Reject</button>
+              ` : b.status === 'cancelled' ? `
+                ${b.refundStatus === 'pending' ? `
+                  <button class="save-btn" onclick="processRefund('${b._id}')" style="flex:1; padding:6px; font-size:12px; background:var(--accent2); color:#000;">Process Refund</button>
+                ` : `
+                  <div style="flex:1; text-align:center; padding:6px; font-size:12px; color:var(--muted); border: 1px solid var(--border); border-radius: 8px;">Refunded</div>
+                `}
+              ` : `
+                <div style="flex:1; text-align:center; padding:6px; font-size:12px; color:var(--muted); border: 1px solid var(--border); border-radius: 8px;">
+                  Status: ${b.status.toUpperCase()}
+                </div>
+              `}
+            </div>
+          </div>
+        `}).join('');
+      } catch (err) {
+        bookingsList.innerHTML = '<p>Error loading bookings.</p>';
+      }
+    }
+
+    function exportFinancialData() {
+        if (!window.allOwnerBookings || window.allOwnerBookings.length === 0) {
+            return alert("No booking records available to export.");
+        }
+        
+        // Define CSV headers
+        let csvContent = "data:text/csv;charset=utf-8,";
+        csvContent += "Booking ID,Customer,Property,Room,Check-In,Check-Out,Status,Price,Refund Status\n";
+
+        // Map data to rows
+        window.allOwnerBookings.forEach(b => {
+            const row = [
+                b._id,
+                `"${b.customerName}"`,
+                `"${b.propertyName}"`,
+                `"${b.roomName}"`,
+                b.checkIn.split('T')[0],
+                b.checkOut.split('T')[0],
+                b.status,
+                b.totalPrice,
+                b.refundStatus || "N/A"
+            ].join(',');
+            csvContent += row + "\n";
+        });
+
+        // Trigger Download
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `CheckInns_Financials_${new Date().toISOString().split('T')[0]}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
+    async function updateBookingStatus(id, status) {
+      if (!confirm("Are you sure you want to mark this booking as " + status + "?")) return;
+      const ownerToken = localStorage.getItem('ownerToken');
+      try {
+        const res = await fetch(`/api/owner/bookings/${id}/status`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + ownerToken
+          },
+          body: JSON.stringify({ status })
+        });
+        if (res.ok) {
+          alert('Booking status updated! An email has been sent to the customer with their updated booking status.');
+          loadBookings(); // refresh list
+        } else {
+          alert('Failed to update status.');
+        }
+      } catch (err) {
+        alert('Server error.');
+      }
+    }
+
+    async function processRefund(id) {
+      if (!confirm("Are you sure you want to process the refund for this cancelled booking?")) return;
+      const ownerToken = localStorage.getItem('ownerToken');
+      try {
+        const res = await fetch(`/api/owner/bookings/${id}/refund`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + ownerToken
+          }
+        });
+        if (res.ok) {
+          alert('Refund processed successfully!');
+          loadBookings(); // refresh list
+        } else {
+          const data = await res.json();
+          alert('Failed to process refund. ' + (data.error || ''));
+        }
+      } catch (err) {
+        alert('Server error.');
+      }
+    }
+
+    function drawRevenueChart(revenue) {
+      try {
+        const ctx = document.getElementById('revenueChart').getContext('2d');
+
+        if (revenueChart) revenueChart.destroy();
+
+        revenueChart = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: (revenue.hotel === 0 && revenue.restaurant === 0 && revenue.lounge === 0) 
+              ? ['No Revenue Yet'] 
+              : ['Hotels', 'Restaurants', 'Lounges'],
+            datasets: [{
+              data: (revenue.hotel === 0 && revenue.restaurant === 0 && revenue.lounge === 0) 
+                ? [1] 
+                : [revenue.hotel, revenue.restaurant, revenue.lounge],
+              backgroundColor: (revenue.hotel === 0 && revenue.restaurant === 0 && revenue.lounge === 0) 
+                ? ['rgba(255, 255, 255, 0.05)'] 
+                : ['#667eea', '#764ba2', '#a3b1ff'],
+              borderColor: '#232756',
+              borderWidth: 2
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                labels: { color: '#e8e9ff', font: { size: 14, weight: 'bold' } }
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Could not draw chart:', err);
+      }
+    }
+
+    async function loadProperties() {
+      const ownerToken = localStorage.getItem('ownerToken');
+      const decoded = JSON.parse(atob(ownerToken.split('.')[1]));
+      const ownerName = decoded.username;
+
+      const hotelsList = document.getElementById('hotels-list');
+      const restaurantsList = document.getElementById('restaurants-list');
+      const loungesList = document.getElementById('lounges-list');
+
+      try {
+        const query = '?owner=' + encodeURIComponent(ownerName);
+
+        const [hotelsRes, restRes, loungesRes] = await Promise.all([
+          fetch('/api/hotels' + query),
+          fetch('/api/restaurants' + query),
+          fetch('/api/lounges' + query)
+        ]);
+
+        const hotels = await hotelsRes.json();
+        const restaurants = await restRes.json();
+        const lounges = await loungesRes.json();
+
+        window.allHotels = hotels;
+        window.allRestaurants = restaurants;
+        window.allLounges = lounges;
+
+        hotelsList.innerHTML = hotels.length ? hotels.map(h => {
+             let customersDelivered = 0;
+             if (window.allOwnerBookings) {
+                const startOfMonth = new Date(); startOfMonth.setDate(1); startOfMonth.setHours(0,0,0,0);
+                customersDelivered = window.allOwnerBookings.filter(b => b.propertyName === h.name && new Date(b.createdAt || b.checkIn) >= startOfMonth && b.status !== 'cancelled').length;
+             }
+             let quota = 0;
+             let memTier = h.membershipTier || 'standard';
+             if (memTier === 'silver') quota = 5;
+             if (memTier === 'gold') quota = 10;
+             if (memTier === 'premium') quota = 15;
+             
+             let memBadge = '';
+             if (quota > 0) {
+                  memBadge = `<div style="margin-top: 10px; background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 8px; border-radius: 6px; font-size: 11px;">
+                      <strong style="color: #d4af37; text-transform: uppercase;"><i class="fas fa-crown"></i> ${memTier} MEMBERSHIP</strong> <br/>
+                      <span style="color: var(--muted);">Quota: ${customersDelivered}/${quota} Customers Delivered this month</span>
+                      ${customersDelivered < quota ? '<br/><span style="color:var(--err); font-weight: bold;">Check-Inns owes you payback</span>' : '<br/><span style="color:var(--ok); font-weight: bold;">Quota Fulfilled</span>'}
+                  </div>`;
+             }
+
+          return `
+          <div class="property-card">
+            <div class="property-name">${h.name} <span style="font-size:10px; padding:3px 8px; border-radius:12px; background:${h.isApproved ? 'var(--ok)' : 'var(--err)'}; color:#fff; vertical-align:middle; margin-left:8px; text-transform:uppercase;">${h.isApproved ? 'Approved' : 'Pending Approval'}</span></div>
+            <div class="property-detail"><i class="fas fa-map-marker-alt"></i> ${h.location}</div>
+            <div class="property-detail"><i class="fas fa-dollar-sign"></i> \$${h.pricePerNight} / night</div>
+            ${memBadge}
+            <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+              <button class="save-btn" onclick="openPackageUpgrade('${h._id}')" style="padding: 6px 12px; font-size: 12px; background:linear-gradient(135deg, #d4af37, #f3e5ab); color:#000; font-weight:bold;">Buy/Upgrade Package</button>
+              <button class="save-btn" onclick="editProperty('hotel', '${h._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--accent);">Edit</button>
+              <button class="save-btn" onclick="deleteProperty('hotel', '${h._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--err);">Delete</button>
+            </div>
+          </div>
+          `;
+        }).join('') : '<p style="grid-column: 1/-1;">No hotels yet. Create your first property to get started.</p>';
+
+        restaurantsList.innerHTML = restaurants.length ? restaurants.map(r => `
+          <div class="property-card">
+            <div class="property-name">${r.name} <span style="font-size:10px; padding:3px 8px; border-radius:12px; background:${r.isApproved ? 'var(--ok)' : 'var(--err)'}; color:#fff; vertical-align:middle; margin-left:8px; text-transform:uppercase;">${r.isApproved ? 'Approved' : 'Pending Approval'}</span></div>
+            <div class="property-detail"><i class="fas fa-map-marker-alt"></i> ${r.location}</div>
+            <div class="property-detail"><i class="fas fa-utensils"></i> ${r.cuisines?.join(', ')}</div>
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+              <button class="save-btn" onclick="editProperty('restaurant', '${r._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--accent);">Edit</button>
+              <button class="save-btn" onclick="deleteProperty('restaurant', '${r._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--err);">Delete</button>
+            </div>
+          </div>
+          `).join('') : '<p style="grid-column: 1/-1;">No restaurants yet. Create your first property to get started.</p>';
+
+        loungesList.innerHTML = lounges.length ? lounges.map(l => `
+          <div class="property-card">
+            <div class="property-name">${l.name} <span style="font-size:10px; padding:3px 8px; border-radius:12px; background:${l.isApproved ? 'var(--ok)' : 'var(--err)'}; color:#fff; vertical-align:middle; margin-left:8px; text-transform:uppercase;">${l.isApproved ? 'Approved' : 'Pending Approval'}</span></div>
+            <div class="property-detail"><i class="fas fa-map-marker-alt"></i> ${l.location}</div>
+            <div class="property-detail"><i class="fas fa-glass-martini-alt"></i> ${l.features?.join(', ')}</div>
+            <div style="margin-top: 15px; display: flex; gap: 10px;">
+              <button class="save-btn" onclick="editProperty('lounge', '${l._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--accent);">Edit</button>
+              <button class="save-btn" onclick="deleteProperty('lounge', '${l._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--err);">Delete</button>
+            </div>
+          </div>
+          `).join('') : '<p style="grid-column: 1/-1;">No lounges yet. Create your first property to get started.</p>';
+
+      } catch (err) {
+        console.error('Error fetching properties:', err);
+      }
+    }
+
+    let globalRatingsChart = null;
+
+    async function loadReviews() {
+      const ownerToken = localStorage.getItem('ownerToken');
+      const decoded = JSON.parse(atob(ownerToken.split('.')[1]));
+      const ownerName = decoded.username;
+
+      try {
+        const res = await fetch('/api/owner/reviews?owner=' + ownerName, {
+          headers: { 'Authorization': 'Bearer ' + ownerToken }
+        });
+        const data = await res.json();
+
+        if (!res.ok) throw new Error(data.error || "Failed to load reviews");
+
+        // Update Overview Stats
+        document.getElementById('stat-total-reviews').textContent = data.stats.totalReviews;
+        document.getElementById('stat-avg-rating').innerHTML = data.stats.avgRating + ' <i class="fas fa-star" style="font-size: 0.8em;"></i>';
+
+        try {
+          const ctx = document.getElementById('ratingsChart').getContext('2d');
+          if (globalRatingsChart) globalRatingsChart.destroy();
+
+          const distLabels = ['5 Stars', '4 Stars', '3 Stars', '2 Stars', '1 Star'];
+          const distData = [
+            data.stats.distribution['5'] || 0,
+            data.stats.distribution['4'] || 0,
+            data.stats.distribution['3'] || 0,
+            data.stats.distribution['2'] || 0,
+            data.stats.distribution['1'] || 0
+          ];
+
+          globalRatingsChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+              labels: distLabels,
+              datasets: [{
+                label: 'Number of Reviews',
+                data: distData,
+                backgroundColor: 'rgba(158, 139, 255, 0.6)',
+                borderColor: 'rgba(158, 139, 255, 1)',
+                borderWidth: 1,
+                borderRadius: 4
+              }]
+            },
+            options: {
+              indexAxis: 'y',
+              responsive: true,
+              maintainAspectRatio: false,
+              plugins: { legend: { display: false } },
+              scales: {
+                x: { ticks: { color: '#e8e9ff' }, grid: { display: false } },
+                y: { ticks: { color: '#e8e9ff' }, grid: { display: false } }
+              }
+            }
+          });
+        } catch (err) {
+          console.error('Failed to draw ratings chart', err);
+        }        // List Recent Reviews
+        const listEl = document.getElementById('owner-reviews-list');
+        if (data.reviews.length === 0) {
+          listEl.innerHTML = '<p style="color: var(--muted);">No reviews yet. Check back later!</p>';
+        } else {
+          listEl.innerHTML = data.reviews.map(r => `
+          <div style="background: rgba(255, 255, 255, .05); border: 1px solid #232756; border-radius: 8px; padding: 16px;">
+              <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                <strong style="color: var(--accent);">${r.propertyName} <span style="font-size: 0.8em; color: var(--muted);">(${r.propertyType})</span></strong>
+                <span class="stars" style="color: #ffd700; font-size: 0.9em;">
+                  ${'<i class="fas fa-star"></i>'.repeat(Math.round(r.rating))}${'<i class="far fa-star"></i>'.repeat(5 - Math.round(r.rating))}
+                </span>
+              </div>
+              <p style="margin: 0 0 12px 0; color: var(--text);">${r.comment}</p>
+              <div style="font-size: 0.85em; color: var(--muted); display: flex; justify-content: space-between;">
+                <span>By: ${r.user}</span>
+                <span>${new Date(r.createdAt).toLocaleDateString()}</span>
+              </div>
+            </div>
+          `).join('');
+        }
+
+      } catch (err) {
+        console.error("Error loading reviews:", err);
+      }
+    }
+
+    function showSection(section) {
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      document.getElementById(section + '-section').classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    async function deleteProperty(type, id) {
+      if (!confirm('Are you sure you want to delete this property? This cannot be undone.')) return;
+      const ownerToken = localStorage.getItem('ownerToken');
+      try {
+        const res = await fetch(`/api/${type}s/${id}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': 'Bearer ' + ownerToken
+          }
+        });
+        if (res.ok) {
+          alert('Property deleted.');
+          loadProperties();
+          loadAdvancedAnalytics();
+        } else {
+          alert('Failed to delete property.');
+        }
+      } catch (err) {
+        alert('Server error.');
+      }
+    }
+    
+    // --- Package Upgrade Processing ---
+    let upgradeHotelId = null;
+    let stripeInstance = null;
+    let elementsInstance = null;
+    let packagePrices = { silver: 50, gold: 100, premium: 200 };
+    function openPackageUpgrade(hotelId) {
+        upgradeHotelId = hotelId;
+        document.getElementById('upgrade-modal').style.display = 'flex';
+        document.getElementById('upgrade-step-1').style.display = 'block';
+        document.getElementById('upgrade-step-2').style.display = 'none';
+        
+        fetch('/api/admin/public-config').then(r=>r.json()).then(cfg => {
+             if (cfg) {
+                 packagePrices.silver = cfg.silverPackagePrice || 50;
+                 packagePrices.gold = cfg.goldPackagePrice || 100;
+                 packagePrices.premium = cfg.premiumPackagePrice || 200;
+                 
+                 document.getElementById('price-silver-display').innerText = '$' + packagePrices.silver + '/mo';
+                 document.getElementById('price-gold-display').innerText = '$' + packagePrices.gold + '/mo';
+                 document.getElementById('price-premium-display').innerText = '$' + packagePrices.premium + '/mo';
+             }
+        });
+
+        // Load Stripe Config if not loaded
+        if (!stripeInstance) {
+            fetch('/api/payments/config').then(r=>r.json()).then(cfg => {
+                if(cfg.publishableKey) {
+                    stripeInstance = Stripe(cfg.publishableKey);
+                }
+            });
+        }
+    }
+
+    function closeUpgradeModal() {
+        document.getElementById('upgrade-modal').style.display = 'none';
+    }
+
+    async function selectPackage(tier, price) {
+        if(!stripeInstance) { alert("Stripe is not configured on this server"); return; }
+        
+        document.getElementById('upgrade-step-1').style.display = 'none';
+        document.getElementById('upgrade-step-2').style.display = 'block';
+        document.getElementById('upgrade-status').textContent = 'Loading secure checkout...';
+        document.getElementById('checkout-btn').style.display = 'none';
+
+        try {
+            const res = await fetch('/api/payments/create-upgrade-intent', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ hotelId: upgradeHotelId, tier, price })
+            });
+            const data = await res.json();
+            
+            if (data.error) {
+                document.getElementById('upgrade-status').textContent = data.error;
+                return;
+            }
+
+            const appearance = { theme: 'night' }; // Matches dashboard
+            elementsInstance = stripeInstance.elements({ appearance, clientSecret: data.clientSecret });
+            const paymentElement = elementsInstance.create('payment');
+            
+            document.getElementById('stripe-payment-element').innerHTML = '';
+            paymentElement.mount('#stripe-payment-element');
+            document.getElementById('upgrade-status').textContent = `Total: $${price}.00 (Secured by Stripe)`;
+            document.getElementById('checkout-btn').style.display = 'block';
+            
+            // Set up form submission handler
+            document.getElementById('checkout-btn').onclick = async () => {
+                document.getElementById('upgrade-status').textContent = 'Processing...';
+                document.getElementById('checkout-btn').disabled = true;
+                
+                const { error, paymentIntent } = await stripeInstance.confirmPayment({
+                    elements: elementsInstance,
+                    confirmParams: {},
+                    redirect: 'if_required'
+                });
+
+                if (error) {
+                    document.getElementById('upgrade-status').textContent = error.message;
+                    document.getElementById('checkout-btn').disabled = false;
+                } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+                    // Update backend status explicitly since no redirect
+                    await fetch('/api/payments/update-upgrade-status', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ paymentIntentId: paymentIntent.id })
+                    });
+                    alert(`Success! You have officially upgraded to ${tier.toUpperCase()} membership.`);
+                    closeUpgradeModal();
+                    loadProperties(); // Refresh UI
+                }
+            };
+        } catch(e) {
+            document.getElementById('upgrade-status').textContent = "Failed to initiate payment.";
+        }
+    }
+
+    function editProperty(type, id) {
+      if (type === 'hotel') {
+        const h = window.allHotels.find(x => x._id === id);
+        if (!h) return;
+        editingProp.hotel = id;
+        document.getElementById('hotel-name').value = h.name;
+        document.getElementById('hotel-location').value = h.location;
+        document.getElementById('hotel-price').value = h.pricePerNight;
+        document.getElementById('hotel-description').value = h.description;
+
+        document.getElementById('hotel-amenities-container').innerHTML = '<label>Amenities</label>';
+        if (h.amenities && h.amenities.length > 0) {
+          h.amenities.forEach(a => {
+            const div = document.createElement('div');
+            div.className = 'amenity-entry';
+            div.style.cssText = 'display:flex; gap:10px; margin-bottom:10px; align-items:center;';
+            div.innerHTML = `
+              <input type="text" class="hotel-amenity-name" value="${a.name}" placeholder="Amenity name" required style="flex:1;">
+              <label style="margin:0;"><input type="checkbox" class="hotel-amenity-paid" ${a.isPaid ? 'checked' : ''} onchange="this.parentElement.nextElementSibling.style.display=this.checked?'block':'none'"> Paid?</label>
+              <input type="number" class="hotel-amenity-price" value="${a.price || 0}" placeholder="Price $" style="display:${a.isPaid ? 'block' : 'none'}; width:80px;">
+              <button type="button" onclick="this.parentElement.remove()" style="background:var(--err); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">X</button>
+            `;
+            document.getElementById('hotel-amenities-container').appendChild(div);
+          });
+        }
+        const roomsContainer = document.getElementById('hotel-rooms-container');
+        roomsContainer.innerHTML = '';
+        if (h.rooms && h.rooms.length > 0) {
+          h.rooms.forEach(r => {
+            roomsContainer.insertAdjacentHTML('beforeend', `
+          <div class="room-entry" style="border: 1px solid #232756; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.02); position: relative;">
+                <button type="button" class="remove-room-btn" onclick="this.parentElement.remove()" style="position:absolute; top:10px; right:10px; background:var(--err); color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">X</button>
+                <div class="form-group"><label>Room Type Name</label><input type="text" class="hotel-room-name" value="${r.name || ''}" placeholder="e.g. Standard Room, Suite"></div>
+                <div class="form-group"><label>Room Price ($)</label><input type="number" class="hotel-room-price" value="${r.price || ''}"></div>
+                <div class="form-group"><label>Room Description</label><textarea class="hotel-room-description" placeholder="Room details...">${r.description || ''}</textarea></div>
+                <div class="form-group"><label>Total Rooms (Quantity)</label><input type="number" class="hotel-room-qty" value="${r.totalRooms || 10}"></div>
+              </div>
+          `);
+          });
+        } else {
+          addHotelRoomField();
+        }
+        showSection('hotels');
+        showHotelForm();
+        window.scrollTo(0, 0);
+      } else if (type === 'restaurant') {
+        const r = window.allRestaurants.find(x => x._id === id);
+        if (!r) return;
+        editingProp.restaurant = id;
+        document.getElementById('rest-name').value = r.name;
+        document.getElementById('rest-location').value = r.location;
+        document.getElementById('rest-cuisine').value = (r.cuisines || []).join(', ');
+        document.getElementById('rest-price').value = r.priceRange || '$$';
+        document.getElementById('rest-description').value = r.description;
+        showSection('restaurants');
+        showRestaurantForm();
+        window.scrollTo(0, 0);
+      } else if (type === 'lounge') {
+        const l = window.allLounges.find(x => x._id === id);
+        if (!l) return;
+        editingProp.lounge = id;
+        document.getElementById('lounge-name').value = l.name;
+        document.getElementById('lounge-location').value = l.location;
+        document.getElementById('lounge-price').value = l.priceRange || '';
+        document.getElementById('lounge-description').value = l.description;
+        if (l.features && l.features.length) document.getElementById('lounge-type').value = l.features[0];
+        showSection('lounges');
+        showLoungeForm();
+        window.scrollTo(0, 0);
+      }
+    }
+
+    function logoutOwner() {
+      localStorage.removeItem('ownerToken');
+      loginPage.classList.remove('hidden');
+      dashboardWrapper.classList.remove('active');
+      document.getElementById('form-login').reset();
+      document.getElementById('form-signup').reset();
+      document.getElementById('login-error').textContent = '';
+      document.getElementById('signup-error').textContent = '';
+    }
+
+    // ========== FILE UPLOAD HANDLERS ==========
+    const uploadedFiles = { hotel: [], restaurant: [], lounge: [] };
+
+    function handleDragOver(e) {
+      e.preventDefault();
+      e.currentTarget.classList.add('dragover');
+    }
+
+    function handleDragLeave(e) {
+      e.currentTarget.classList.remove('dragover');
+    }
+
+    function handleDrop(e, type) {
+      e.preventDefault();
+      e.currentTarget.classList.remove('dragover');
+      const files = e.dataTransfer.files;
+      handleFileSelect({ target: { files: files, dataset: { type } }, preventDefault: () => { } }, type);
+    }
+
+    function handleFileSelect(e, type) {
+      const files = Array.from(e.target.files);
+      const container = document.getElementById(type + '-upload');
+      const previewDiv = document.getElementById(type + '-previews');
+
+      files.forEach(file => {
+        if (file.type.startsWith('image/')) {
+          uploadedFiles[type].push(file);
+          const reader = new FileReader();
+          reader.onload = (event) => {
+            const imgDiv = document.createElement('div');
+            imgDiv.className = 'preview-container';
+            imgDiv.innerHTML = `<img src="${event.target.result}" class="preview-img"><button type="button" class="remove-img" onclick="removeFile(this, '${type}')">×</button>`;
+            previewDiv.appendChild(imgDiv);
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+
+      container.querySelector('input[type="file"]').value = '';
+    }
+
+    function removeFile(btn, type) {
+      const index = Array.from(document.getElementById(type + '-previews').querySelectorAll('.preview-container')).indexOf(btn.parentElement);
+      uploadedFiles[type].splice(index, 1);
+      btn.parentElement.remove();
+    }
+
+    async function uploadImages(files) {
+      if (files.length === 0) return [];
+      const formData = new FormData();
+      files.forEach(file => formData.append('images', file));
+
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+        return data.files || [];
+      } catch (err) {
+        alert('Image upload failed: ' + err.message);
+        return [];
+      }
+    }
+
+    // ========== FORM HANDLERS ==========
+    function showHotelForm() { document.getElementById('hotel-form-container').style.display = 'block'; }
+    function showRestaurantForm() { document.getElementById('restaurant-form-container').style.display = 'block'; }
+    function showLoungeForm() { document.getElementById('lounge-form-container').style.display = 'block'; }
+
+    function addHotelAmenityField() {
+      const container = document.getElementById('hotel-amenities-container');
+      const div = document.createElement('div');
+      div.className = 'amenity-entry';
+      div.style.cssText = 'display:flex; gap:10px; margin-bottom:10px; align-items:center;';
+      div.innerHTML = `
+        <input type="text" class="hotel-amenity-name" placeholder="Amenity name" required style="flex:1;">
+        <label style="margin:0;"><input type="checkbox" class="hotel-amenity-paid" onchange="this.parentElement.nextElementSibling.style.display=this.checked?'block':'none'"> Paid?</label>
+        <input type="number" class="hotel-amenity-price" placeholder="Price $" style="display:none; width:80px;">
+        <button type="button" onclick="this.parentElement.remove()" style="background:var(--err); color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer;">X</button>
+      `;
+      container.appendChild(div);
+    }
+
+    function addHotelRoomField() {
+      const container = document.getElementById('hotel-rooms-container');
+      container.insertAdjacentHTML('beforeend', `
+          <div class="room-entry" style="border: 1px solid #232756; padding: 15px; border-radius: 8px; margin-bottom: 15px; background: rgba(255,255,255,0.02); position: relative;">
+          <button type="button" class="remove-room-btn" onclick="this.parentElement.remove()" style="position:absolute; top:10px; right:10px; background:var(--err); color:white; border:none; border-radius:4px; padding:4px 8px; cursor:pointer;">X</button>
+          <div class="form-group"><label>Room Type Name</label><input type="text" class="hotel-room-name" placeholder="e.g. Standard Room, Suite"></div>
+          <div class="form-group"><label>Room Price ($)</label><input type="number" class="hotel-room-price"></div>
+          <div class="form-group"><label>Room Description</label><textarea class="hotel-room-description" placeholder="Room details..."></textarea></div>
+          <div class="form-group"><label>Total Rooms (Quantity)</label><input type="number" class="hotel-room-qty" value="10"></div>
+        </div>
+          `);
+    }
+
+    document.getElementById('hotelForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
+
+      let images = await uploadImages(uploadedFiles.hotel);
+      const ownerToken = localStorage.getItem('ownerToken');
+      const decoded = JSON.parse(atob(ownerToken.split('.')[1]));
+      const location = document.getElementById('hotel-location').value.trim();
+      const desc = document.getElementById('hotel-description').value.trim();
+      const price = parseFloat(document.getElementById('hotel-price').value);
+
+      const isEditing = !!editingProp.hotel;
+      let finalImages = images;
+      let mainImage = images.length > 0 ? images[0] : '';
+      if (isEditing) {
+        const existingHotel = window.allHotels.find(h => h._id === editingProp.hotel);
+        if (existingHotel && images.length === 0) {
+          finalImages = existingHotel.images || [];
+          mainImage = existingHotel.mainImage || '';
+        }
+      }
+
+      const propName = document.getElementById('hotel-name').value.trim();
+      if (propName.length < 3 || !/[a-zA-Z]/.test(propName)) {
+        alert("Property name must be at least 3 characters long and contain letters.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+        return;
+      }
+      if (location.length < 3 || new Set(location.replace(/\s/g, '').split('')).size < 3) {
+        alert("Location must be meaningful and at least 3 characters long.");
+        submitBtn.disabled = false; submitBtn.textContent = originalBtnText; return;
+      }
+      if (desc.length < 10 || new Set(desc.replace(/\s/g, '').split('')).size < 5) {
+        alert("Description must be meaningful and at least 10 characters long.");
+        submitBtn.disabled = false; submitBtn.textContent = originalBtnText; return;
+      }
+      if (isNaN(price) || price <= 0) {
+        alert("Please enter a valid price.");
+        submitBtn.disabled = false; submitBtn.textContent = originalBtnText; return;
+      }
+      if (finalImages.length === 0) {
+        alert("Please upload at least one image for your property.");
+        submitBtn.disabled = false; submitBtn.textContent = originalBtnText; return;
+      }
+
+      const hotelData = {
+        name: propName,
+        country: location.split(',').pop().trim() || 'Unknown',
+        location: location,
+        pricePerNight: parseFloat(document.getElementById('hotel-price').value),
+        description: document.getElementById('hotel-description').value,
+        amenities: Array.from(document.querySelectorAll('.amenity-entry')).map(entry => {
+          return {
+            name: entry.querySelector('.hotel-amenity-name').value,
+            isPaid: entry.querySelector('.hotel-amenity-paid').checked,
+            price: parseFloat(entry.querySelector('.hotel-amenity-price').value) || 0
+          };
+        }).filter(a => a.name.trim() !== ''),
+        rooms: Array.from(document.querySelectorAll('.room-entry')).map(entry => {
+          return {
+            name: entry.querySelector('.hotel-room-name').value,
+            price: entry.querySelector('.hotel-room-price').value || 0,
+            description: entry.querySelector('.hotel-room-description').value,
+            totalRooms: parseInt(entry.querySelector('.hotel-room-qty').value) || 10
+          };
+        }).filter(r => r.name.trim() !== ''),
+        owner: decoded.username,
+        mainImage: mainImage,
+        images: finalImages
+      };
+
+      try {
+        const res = await fetch(isEditing ? `/api/hotels/${editingProp.hotel}` : '/api/hotels', {
+          method: isEditing ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ownerToken },
+          body: JSON.stringify(hotelData)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('Hotel saved successfully!');
+          editingProp.hotel = null;
+          document.getElementById('hotel-form-container').style.display = 'none';
+          document.getElementById('hotelForm').reset();
+          uploadedFiles.hotel = [];
+          document.getElementById('hotel-previews').innerHTML = '';
+          loadDashboard();
+        } else {
+          alert('Error: ' + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert('Fetch Error: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
+    });
+
+    document.getElementById('restaurantForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
+
+      let images = await uploadImages(uploadedFiles.restaurant);
+      const ownerToken = localStorage.getItem('ownerToken');
+      const decoded = JSON.parse(atob(ownerToken.split('.')[1]));
+
+      const isEditing = !!editingProp.restaurant;
+      let finalImages = images;
+      let mainImage = images.length > 0 ? images[0] : '';
+      if (isEditing) {
+        const existingRest = window.allRestaurants.find(r => r._id === editingProp.restaurant);
+        if (existingRest && images.length === 0) {
+          finalImages = existingRest.images || [];
+          mainImage = existingRest.mainImage || '';
+        }
+      }
+
+      const propName = document.getElementById('rest-name').value.trim();
+      const location = document.getElementById('rest-location').value.trim();
+      const desc = document.getElementById('rest-description').value.trim();
+
+      if (propName.length < 3 || !/[a-zA-Z]/.test(propName)) {
+        alert("Property name must be at least 3 characters long and contain letters.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+        return;
+      }
+      if (location.length < 3 || new Set(location.replace(/\s/g, '').split('')).size < 3) {
+        alert("Location must be meaningful and at least 3 characters long.");
+        submitBtn.disabled = false; submitBtn.textContent = originalBtnText; return;
+      }
+      if (desc.length < 10 || new Set(desc.replace(/\s/g, '').split('')).size < 5) {
+        alert("Description must be meaningful and at least 10 characters long.");
+        submitBtn.disabled = false; submitBtn.textContent = originalBtnText; return;
+      }
+      if (finalImages.length === 0) {
+        alert("Please upload at least one image for your property.");
+        submitBtn.disabled = false; submitBtn.textContent = originalBtnText; return;
+      }
+
+      const restData = {
+        name: propName,
+        location: document.getElementById('rest-location').value,
+        cuisines: document.getElementById('rest-cuisine').value.split(',').map(c => c.trim()),
+        priceRange: document.getElementById('rest-price').value,
+        description: document.getElementById('rest-description').value,
+        owner: decoded.username,
+        mainImage: mainImage,
+        images: finalImages
+      };
+
+      try {
+        const res = await fetch(isEditing ? `/api/restaurants/${editingProp.restaurant}` : '/api/restaurants', {
+          method: isEditing ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ownerToken },
+          body: JSON.stringify(restData)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('Restaurant saved successfully!');
+          editingProp.restaurant = null;
+          document.getElementById('restaurant-form-container').style.display = 'none';
+          document.getElementById('restaurantForm').reset();
+          uploadedFiles.restaurant = [];
+          document.getElementById('restaurant-previews').innerHTML = '';
+          loadDashboard();
+        } else {
+          alert('Error: ' + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert('Fetch Error: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
+    });
+
+    document.getElementById('loungeForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const submitBtn = e.target.querySelector('button[type="submit"]');
+      const originalBtnText = submitBtn.textContent;
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Processing...';
+
+      let images = await uploadImages(uploadedFiles.lounge);
+      const ownerToken = localStorage.getItem('ownerToken');
+      const decoded = JSON.parse(atob(ownerToken.split('.')[1]));
+
+      const isEditing = !!editingProp.lounge;
+      let finalImages = images;
+      let mainImage = images.length > 0 ? images[0] : '';
+      if (isEditing) {
+        const existingLounge = window.allLounges.find(l => l._id === editingProp.lounge);
+        if (existingLounge && images.length === 0) {
+          finalImages = existingLounge.images || [];
+          mainImage = existingLounge.mainImage || '';
+        }
+      }
+
+      const propName = document.getElementById('lounge-name').value.trim();
+      const location = document.getElementById('lounge-location').value.trim();
+      const desc = document.getElementById('lounge-description').value.trim();
+
+      if (propName.length < 3 || !/[a-zA-Z]/.test(propName)) {
+        alert("Property name must be at least 3 characters long and contain letters.");
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+        return;
+      }
+      if (location.length < 3 || new Set(location.replace(/\s/g, '').split('')).size < 3) {
+        alert("Location must be meaningful and at least 3 characters long.");
+        submitBtn.disabled = false; submitBtn.textContent = originalBtnText; return;
+      }
+      if (desc.length < 10 || new Set(desc.replace(/\s/g, '').split('')).size < 5) {
+        alert("Description must be meaningful and at least 10 characters long.");
+        submitBtn.disabled = false; submitBtn.textContent = originalBtnText; return;
+      }
+      if (finalImages.length === 0) {
+        alert("Please upload at least one image for your property.");
+        submitBtn.disabled = false; submitBtn.textContent = originalBtnText; return;
+      }
+
+      const loungeData = {
+        name: propName,
+        location: document.getElementById('lounge-location').value,
+        features: [document.getElementById('lounge-type').value],
+        priceRange: document.getElementById('lounge-price').value,
+        description: document.getElementById('lounge-description').value,
+        owner: decoded.username,
+        mainImage: mainImage,
+        images: finalImages
+      };
+
+      try {
+        const res = await fetch(isEditing ? `/api/lounges/${editingProp.lounge}` : '/api/lounges', {
+          method: isEditing ? 'PUT' : 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ownerToken },
+          body: JSON.stringify(loungeData)
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert('Lounge saved successfully!');
+          editingProp.lounge = null;
+          document.getElementById('lounge-form-container').style.display = 'none';
+          document.getElementById('loungeForm').reset();
+          uploadedFiles.lounge = [];
+          document.getElementById('lounge-previews').innerHTML = '';
+          loadDashboard();
+        } else {
+          alert('Error: ' + JSON.stringify(data));
+        }
+      } catch (err) {
+        alert('Fetch Error: ' + err.message);
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = originalBtnText;
+      }
+    });
+  // ========== NOTIFICATIONS LOGIC ==========
+    async function loadNotifications() {
+      const ownerToken = localStorage.getItem('ownerToken');
+      const decoded = JSON.parse(atob(ownerToken.split('.')[1]));
+      try {
+        const res = await fetch('/api/owner/notifications?owner=' + encodeURIComponent(decoded.username), {
+          headers: { 'Authorization': 'Bearer ' + ownerToken }
+        });
+        const data = await res.json();
+        
+        const list = document.getElementById('notifications-list');
+        const badge = document.getElementById('notif-badge');
+        
+        if (data.length === 0) {
+          list.innerHTML = '<p style="color:var(--muted);">You have no notifications.</p>';
+          badge.style.display = 'none';
+          return;
+        }
+        
+        let unreadCount = 0;
+        list.innerHTML = data.map(n => {
+          if (!n.isRead) unreadCount++;
+          return `
+          <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; border-left: 3px solid ${n.isRead ? 'var(--border)' : 'var(--accent-gold)'}; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <p style="margin:0 0 5px 0; color:var(--text);">${n.message}</p>
+              <div style="font-size:11px; color:var(--muted);">${new Date(n.createdAt).toLocaleString()}</div>
+            </div>
+            ${!n.isRead ? `<button class="save-btn" onclick="markNotifRead('${n._id}')" style="background:transparent; border:1px solid var(--accent); color:var(--accent); font-size:12px; padding:4px 8px;">Mark Read</button>` : ''}
+          </div>
+        `}).join('');
+        
+        if (unreadCount > 0) {
+          badge.style.display = 'inline-block';
+          badge.textContent = unreadCount;
+        } else {
+          badge.style.display = 'none';
+        }
+      } catch (err) {
+        console.error("Notif Error:", err);
+      }
+    }
+    
+    async function markNotifRead(id) {
+      const ownerToken = localStorage.getItem('ownerToken');
+      try {
+        await fetch('/api/owner/notifications/' + id + '/read', {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + ownerToken }
+        });
+        loadNotifications();
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    // ========== SETTINGS LOGIC ==========
+    document.getElementById('ownerSettingsForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('settings-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      
+      const ownerToken = localStorage.getItem('ownerToken');
+      const decoded = JSON.parse(atob(ownerToken.split('.')[1]));
+      
+      const payload = {
+        owner: decoded.username,
+        name: document.getElementById('settings-name').value,
+        currentPassword: document.getElementById('settings-current-password').value,
+        newPassword: document.getElementById('settings-new-password').value
+      };
+      
+      try {
+        const res = await fetch('/api/owner/profile', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + ownerToken },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert('Profile updated successfully!');
+          document.getElementById('settings-current-password').value = '';
+          document.getElementById('settings-new-password').value = '';
+        } else {
+          alert(data.error || 'Failed to update profile');
+        }
+      } catch(err) {
+        alert('Server error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+      }
+    });
+  </script>
+  <!-- UPGRADE MODAL HTML -->
+  <div id="upgrade-modal" class="modal-backdrop" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);z-index:9999;display:none;justify-content:center;align-items:center;">
+    <div style="background:var(--bg-panel); border:1px solid var(--border); border-radius:12px; padding:30px; width:100%; max-width:600px; color:#fff; max-height: 90vh; overflow-y: auto;">
+      <h2 style="margin-top:0;">Upgrade Property Membership</h2>
+      
+      <div id="upgrade-step-1">
+          <p style="color:var(--text-muted); margin-bottom: 20px;">Purchase a featured membership to boost your property's visibility, gain a premium badge, and have guaranteed customer delivery tracked automatically in your dashboard!</p>
+          <div style="display:flex; gap:15px; text-align:center;">
+              <div style="flex:1; border:1px solid #c0c0c0; border-radius:12px; padding:20px; cursor:pointer;" onclick="selectPackage('silver', packagePrices.silver)">
+                  <h3 style="color:#c0c0c0; margin:0;"><i class="fas fa-crown"></i> Silver</h3>
+                  <p>Guaranteed 5 customers</p>
+                  <strong id="price-silver-display" style="font-size:1.5rem;">$...</strong>
+              </div>
+              <div style="flex:1; border:1px solid #ffd700; background:rgba(255,215,0,0.05); border-radius:12px; padding:20px; cursor:pointer;" onclick="selectPackage('gold', packagePrices.gold)">
+                  <h3 style="color:#ffd700; margin:0;"><i class="fas fa-crown"></i> Gold</h3>
+                  <p>Guaranteed 10 customers</p>
+                  <strong id="price-gold-display" style="font-size:1.5rem;">$...</strong>
+              </div>
+              <div style="flex:1; border:1px solid #ff7e67; border-radius:12px; padding:20px; cursor:pointer;" onclick="selectPackage('premium', packagePrices.premium)">
+                  <h3 style="color:#ff7e67; margin:0;"><i class="fas fa-crown"></i> Premium</h3>
+                  <p>Guaranteed 15 customers</p>
+                  <strong id="price-premium-display" style="font-size:1.5rem;">$...</strong>
+              </div>
+          </div>
+      </div>
+      
+      <div id="upgrade-step-2" style="display:none;">
+          <div id="stripe-payment-element" style="margin-bottom: 20px; background:#fff; border-radius:8px; padding:10px;"></div>
+          <p id="upgrade-status" style="color:var(--ok); text-align:center;"></p>
+          <button id="checkout-btn" class="save-btn" style="width:100%; padding: 12px; font-size:16px; background:linear-gradient(135deg, #d4af37, #f3e5ab); color:#000; font-weight:bold; display:none;">Confirm Purchase</button>
+      </div>
+
+      <button onclick="closeUpgradeModal()" class="save-btn" style="margin-top:20px; width:100%; padding:10px; background:transparent; border:1px solid var(--text-muted); color:var(--text-muted);">Cancel</button>
+    </div>
+  </div>
+</body>
+</html>

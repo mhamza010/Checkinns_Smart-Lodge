@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Your Stay - Pearl Continental</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* --- Reset --- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: #333;
+      line-height: 1.6;
+      min-height: 100vh;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    /* --- Header --- */
+    .booking-header {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .booking-header h1 {
+      font-size: 2.5rem;
+      color: #667eea;
+      margin-bottom: 10px;
+    }
+
+    .hotel-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .hotel-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 15px;
+      object-fit: cover;
+    }
+
+    .hotel-details h3 {
+      margin-bottom: 5px;
+      color: #333;
+    }
+
+    .hotel-details p {
+      color: #666;
+    }
+
+    /* --- Layout --- */
+    .booking-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+    }
+
+    .booking-form-section,
+    .billing-section {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .billing-section {
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      margin-bottom: 25px;
+      color: #333;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    /* --- Forms --- */
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* --- Room Selection --- */
+    .room-selection {
+      margin-bottom: 30px;
+    }
+
+    .room-option {
+      border: 2px solid #e0e0e0;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 15px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .room-option:hover,
+    .room-option.selected {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+    }
+
+    .room-price {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .room-description {
+      color: #666;
+      margin: 10px 0;
+    }
+
+    /* --- Amenities --- */
+    .amenities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .amenity-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .amenity-item:hover,
+    .amenity-item.selected {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+    }
+
+    .amenity-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .amenity-icon {
+      font-size: 1.2rem;
+      color: #667eea;
+    }
+
+    .amenity-price {
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .amenity-free {
+      color: #28a745;
+    }
+
+    /* --- Billing --- */
+    .billing-summary {
+      background: #f8f9ff;
+      padding: 25px;
+      border-radius: 15px;
+      margin-top: 30px;
+    }
+
+    .billing-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 15px;
+      padding: 10px 0;
+      border-bottom: 1px solid #e0e0e0;
+    }
+
+    .billing-item:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      font-size: 1.1rem;
+      color: #667eea;
+    }
+
+    .total-amount {
+      font-size: 1.8rem;
+      font-weight: bold;
+      color: #667eea;
+      text-align: center;
+      margin-top: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #667eea;
+    }
+
+    /* --- Buttons --- */
+    .book-button {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 25px;
+    }
+
+    .book-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .back-button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      background: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 25px;
+      cursor: pointer;
+      font-size: 1rem;
+      color: #667eea;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+    }
+
+    .back-button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    /* --- Reviews --- */
+    .reviews-section {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      margin-top: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .review-item {
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+
+    .review-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .stars {
+      color: #f5b301;
+      margin-bottom: 5px;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .review-author {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .review-date {
+      color: #888;
+      font-size: 0.9em;
+    }
+
+    .review-form {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .star-select {
+      font-size: 1.5rem;
+      color: #ccc;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .star-select.active,
+    .star-select:hover {
+      color: #f5b301;
+    }
+
+    /* --- Responsive --- */
+    @media (max-width: 768px) {
+      .booking-content {
+        grid-template-columns: 1fr;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .amenities-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .booking-header h1 {
+        font-size: 2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Back Button -->
+  <button class="back-button" onclick="goBack()">
+    <i class="fas fa-arrow-left"></i> Back to Hotel
+  </button>
+
+  <div class="container">
+    <div class="booking-header">
+      <h1>Book Your Stay</h1>
+      <div class="hotel-info">
+        <img src="" alt="Hotel Image" class="hotel-image">
+        <div class="hotel-details">
+          <h3></h3>
+          <p></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="booking-content">
+      <!-- Left Side -->
+      <div class="booking-form-section">
+        <h2 class="section-title">Room Selection</h2>
+        <div class="room-selection"></div>
+
+        <h2 class="section-title">Additional Amenities</h2>
+        <div class="amenities-section">
+          <div class="amenities-grid"></div>
+        </div>
+
+        <h2 class="section-title">Booking Details</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Check-in Date</label>
+            <input type="date" id="checkinDate" required>
+          </div>
+          <div class="form-group">
+            <label>Check-out Date</label>
+            <input type="date" id="checkoutDate" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label>Number of Guests</label>
+          <select id="guestCount" required>
+            <option value="">Select Guests</option>
+            <option value="1">1 Guest</option>
+            <option value="2">2 Guests</option>
+            <option value="3">3 Guests</option>
+            <option value="4">4 Guests</option>
+            <option value="5">5+ Guests</option>
+          </select>
+        </div>
+
+        <h2 class="section-title">Guest Information</h2>
+        <div class="form-row">
+          <div class="form-group">
+            <label>First Name</label>
+            <input type="text" id="firstName" required>
+          </div>
+          <div class="form-group">
+            <label>Last Name</label>
+            <input type="text" id="lastName" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Email Address</label>
+            <input type="email" id="emailAddress" required>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="phoneNumber" required>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Special Requests</label>
+          <textarea id="specialRequests" rows="4"></textarea>
+        </div>
+      </div>
+
+      <!-- Right Side -->
+      <div class="billing-section">
+        <h2 class="section-title">Booking Summary</h2>
+        <div class="billing-summary"></div>
+        <div class="total-amount" id="totalAmount">Total: $0</div>
+        <div id="availability-status" style="text-align:center; font-weight:bold; margin-top:10px; font-size:1.1rem;">
+        </div>
+        <button class="book-button">
+          <i class="fas fa-credit-card"></i> Proceed to Book
+        </button>
+      </div>
+    </div>
+
+    <!-- Reviews Section -->
+    <div class="reviews-section">
+      <h2 class="section-title">Customer Reviews <span id="rating-avg"
+          style="float: right; font-size: 1.2rem; font-weight: normal;"></span></h2>
+      <div id="reviews-list">
+        <p>Loading reviews...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Require login: if no user token, redirect to login with return URL
+    (function requireUserLogin() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        const redirectUrl = 'auth.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.replace(redirectUrl);
+      }
+    })();
+
+    // --- Currency helpers (persist across pages) ---
+    function getCurrencySettings() {
+      const code = localStorage.getItem('currency_code') || 'USD';
+      const rates = { USD: 1, KWD: 0.31, SAR: 3.75, PKR: 278, QAR: 3.64 };
+      const symbols = { USD: '$', KWD: 'KD ', SAR: 'SAR ', PKR: 'Rs ', QAR: 'QAR ' };
+      return { code, rate: rates[code] || 1, symbol: symbols[code] || '$' };
+    }
+    function formatMoneyUSDToCurrent(amountUSD) {
+      const { rate, symbol } = getCurrencySettings();
+      const val = Number(amountUSD || 0) * rate;
+      return symbol + (Math.round(val * 100) / 100).toFixed(2);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+
+    let selectedRoom = null;
+    let selectedAmenities = [];
+    let hotel = null;
+
+    async function loadHotel() {
+      const res = await fetch(`/api/hotels/${id}`);
+      hotel = await res.json();
+
+      // Hotel Info
+      document.querySelector(".hotel-image").src = hotel.mainImage || (hotel.images[0] || "");
+      document.querySelector(".hotel-details h3").innerText = hotel.name;
+      document.querySelector(".hotel-details p").innerText = hotel.location;
+
+      // Rooms
+      const roomContainer = document.querySelector(".room-selection");
+      roomContainer.innerHTML = "";
+      hotel.rooms.forEach(room => {
+        const div = document.createElement("div");
+        div.className = "room-option";
+        div.dataset.price = room.price;
+        div.dataset.name = room.name;
+        div.innerHTML = `
+        <h3>${room.name}</h3>
+        <div class="room-price">${formatMoneyUSDToCurrent(room.price)} / night</div>
+        <div class="room-description">${room.description || ""}</div>
+      `;
+        div.onclick = () => {
+          selectedRoom = room;
+          document.querySelectorAll(".room-option").forEach(el => el.classList.remove("selected"));
+          div.classList.add("selected");
+          updateBilling();
+        };
+        roomContainer.appendChild(div);
+      });
+
+      // Amenities
+      const amenContainer = document.querySelector(".amenities-grid");
+      amenContainer.innerHTML = "";
+      hotel.amenities.forEach(a => {
+        const div = document.createElement("div");
+        div.className = "amenity-item";
+        div.dataset.price = a.price || 0;
+        div.dataset.name = a.name || a;
+        div.innerHTML = `
+        <div class="amenity-info">
+          <i class="fas fa-check amenity-icon"></i>
+          <span class="amenity-name">${a.name || a}</span>
+        </div>
+        <span class="amenity-price ${a.price ? '' : 'amenity-free'}">
+          ${a.price ? formatMoneyUSDToCurrent(a.price) : "Free"}
+        </span>
+      `;
+        div.onclick = () => {
+          if (selectedAmenities.find(am => am.name === (a.name || a))) {
+            selectedAmenities = selectedAmenities.filter(am => am.name !== (a.name || a));
+            div.classList.remove("selected");
+          } else {
+            selectedAmenities.push({ name: a.name || a, price: a.price || 0 });
+            div.classList.add("selected");
+          }
+          updateBilling();
+        };
+        amenContainer.appendChild(div);
+      });
+
+      // Load reviews after hotel details load
+      loadReviews();
+    }
+
+    function getNights() {
+      const checkIn = document.getElementById("checkinDate").value;
+      const checkOut = document.getElementById("checkoutDate").value;
+      if (!checkIn || !checkOut) return 1;
+      const inDate = new Date(checkIn);
+      const outDate = new Date(checkOut);
+      const diff = Math.ceil((outDate - inDate) / (1000 * 60 * 60 * 24));
+      return diff > 0 ? diff : 1;
+    }
+
+    function updateBilling() {
+      const billingBox = document.querySelector(".billing-summary");
+      billingBox.innerHTML = "";
+
+      let total = 0;
+      const nights = getNights();
+
+      if (selectedRoom) {
+        const roomCost = selectedRoom.price * nights;
+        total += roomCost;
+        billingBox.innerHTML += `<div class="billing-item"><span>${selectedRoom.name} (${nights} nights)</span><span>${formatMoneyUSDToCurrent(roomCost)}</span></div>`;
+      }
+
+      selectedAmenities.forEach(a => {
+        const amenityCost = (a.price || 0) * nights;
+        total += amenityCost;
+        billingBox.innerHTML += `<div class="billing-item"><span>${a.name} (${nights} nights)</span><span>${a.price ? formatMoneyUSDToCurrent(amenityCost) : "Free"}</span></div>`;
+      });
+
+      document.getElementById("totalAmount").innerText = "Total: " + formatMoneyUSDToCurrent(total);
+
+      // --- Room Availability Check ---
+      const checkInInput = document.getElementById("checkinDate").value;
+      const checkOutInput = document.getElementById("checkoutDate").value;
+      const availEl = document.getElementById("availability-status");
+      const bookBtn = document.querySelector(".book-button");
+
+      if (selectedRoom && checkInInput && checkOutInput) {
+        const inDate = new Date(checkInInput);
+        const outDate = new Date(checkOutInput);
+        if (outDate > inDate && hotel && hotel._id) {
+          availEl.innerText = "Checking availability...";
+          availEl.style.color = "#666";
+          bookBtn.disabled = true;
+
+          fetch("/api/bookings/check-availability", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              hotel: hotel._id,
+              roomName: selectedRoom.name,
+              checkIn: checkInInput,
+              checkOut: checkOutInput
+            })
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.available) {
+                availEl.innerText = `Available (${data.roomsAvailable} Open)`;
+                availEl.style.color = "green";
+                bookBtn.disabled = false;
+              } else {
+                availEl.innerText = "Occupied / Fully Booked";
+                availEl.style.color = "red";
+                bookBtn.disabled = true;
+              }
+              if (data.error) {
+                availEl.innerText = data.error;
+                availEl.style.color = "red";
+                bookBtn.disabled = true;
+              }
+            })
+            .catch(err => {
+              availEl.innerText = "Error connecting to servers";
+              availEl.style.color = "red";
+              bookBtn.disabled = true;
+            });
+        } else {
+          availEl.innerText = "Please select valid dates";
+          availEl.style.color = "orange";
+          bookBtn.disabled = true;
+        }
+      } else if (!selectedRoom) {
+        availEl.innerText = "Please select a room";
+        availEl.style.color = "#666";
+        bookBtn.disabled = true;
+      }
+    }
+
+    document.querySelectorAll("#checkinDate, #checkoutDate").forEach(input => {
+      input.addEventListener("change", updateBilling);
+    });
+
+    // Apply date min constraints and link checkout min to checkin
+    (function initDateConstraints() {
+      const checkinDate = document.getElementById('checkinDate');
+      const checkoutDate = document.getElementById('checkoutDate');
+      const today = new Date();
+      const todayStr = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString().split('T')[0];
+      checkinDate.min = todayStr;
+      checkinDate.addEventListener('change', () => {
+        if (!checkinDate.value) return;
+        const inD = new Date(checkinDate.value);
+        const minOut = new Date(inD.getTime() + 24 * 60 * 60 * 1000);
+        const minOutStr = minOut.toISOString().split('T')[0];
+        checkoutDate.min = minOutStr;
+        if (checkoutDate.value && checkoutDate.value < minOutStr) {
+          checkoutDate.value = minOutStr;
+        }
+        updateBilling();
+      });
+      checkoutDate.addEventListener('change', updateBilling);
+    })();
+
+    // ✅ Final fixed booking flow
+    document.querySelector(".book-button").onclick = async () => {
+      const checkIn = document.getElementById("checkinDate").value;
+      const checkOut = document.getElementById("checkoutDate").value;
+      const firstName = document.getElementById("firstName").value;
+      const lastName = document.getElementById("lastName").value;
+      const email = document.getElementById("emailAddress").value;
+      const guests = document.getElementById("guestCount").value;
+
+      if (!selectedRoom) {
+        alert("Please select a room!");
+        return;
+      }
+
+      // Client-side validations
+      if (!checkIn || !checkOut) {
+        alert('Please select check-in and check-out dates');
+        return;
+      }
+      const inD = new Date(checkIn); const outD = new Date(checkOut);
+      const today = new Date(); today.setHours(0, 0, 0, 0);
+      const inDM = new Date(inD); inDM.setHours(0, 0, 0, 0);
+      const outDM = new Date(outD); outDM.setHours(0, 0, 0, 0);
+      if (inDM < today) { alert('Check-in cannot be in the past'); return; }
+      if (outDM <= inDM) { alert('Check-out must be after check-in'); return; }
+      if (!guests) { alert('Please select number of guests'); return; }
+      const phoneNumber = document.getElementById("phoneNumber").value;
+
+      const nameRegex = /^[A-Za-z\s\-]+$/;
+      if (!nameRegex.test(firstName)) { alert('First name can only contain letters.'); return; }
+      if (!nameRegex.test(lastName)) { alert('Last name can only contain letters.'); return; }
+      const phoneRegex = /^[0-9\s()+-]+$/;
+      if (!phoneRegex.test(phoneNumber)) { alert('Phone number cannot contain letters.'); return; }
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) { alert('Please enter a valid email address.'); return; }
+
+      const bookButton = document.querySelector(".book-button");
+      const originalText = bookButton.innerHTML;
+      bookButton.disabled = true;
+      bookButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing... Please Wait';
+
+      let actualUsername = firstName + " " + lastName;
+      const token = localStorage.getItem('token');
+      if (token) {
+        try {
+          const decoded = JSON.parse(atob(token.split('.')[1]));
+          if (decoded && decoded.username) {
+            actualUsername = decoded.username;
+          }
+        } catch (e) { }
+      }
+
+      try {
+        const res = await fetch("/api/bookings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: "hotel",
+            username: actualUsername,
+            hotel: hotel._id,
+            room: selectedRoom,
+            amenities: selectedAmenities,
+            checkIn,
+            checkOut,
+          }),
+        });
+
+        const booking = await res.json();
+
+        if (res.ok) {
+          bookButton.innerHTML = '<i class="fas fa-check"></i> Redirecting...';
+          // ✅ Redirect to payment page first
+          window.location.href = `/payment.html?bookingId=${booking._id}`;
+        } else {
+          bookButton.disabled = false;
+          bookButton.innerHTML = originalText;
+          alert(booking.error || "Booking failed. Try again.");
+        }
+      } catch (err) {
+        bookButton.disabled = false;
+        bookButton.innerHTML = originalText;
+        alert("Booking request failed due to a network error. Try again.");
+      }
+    };
+
+    function goBack() { window.history.back(); }
+
+    // --- Reviews Logic ---
+    let selectedRating = 0;
+    document.querySelectorAll('.star-select').forEach(star => {
+      star.addEventListener('click', (e) => {
+        selectedRating = parseInt(e.target.getAttribute('data-val'));
+        document.querySelectorAll('.star-select').forEach(s => {
+          if (parseInt(s.getAttribute('data-val')) <= selectedRating) {
+            s.classList.add('active');
+          } else {
+            s.classList.remove('active');
+          }
+        });
+      });
+    });
+
+    async function loadReviews() {
+      try {
+        const res = await fetch(`/api/reviews/${id}`);
+        const reviews = await res.json();
+        const list = document.getElementById('reviews-list');
+
+        // Update average rating text
+        let avgText = "No reviews yet";
+        if (hotel && hotel.rating && hotel.rating > 0) {
+          avgText = `<i class="fas fa-star" style="color:#f5b301;"></i> ${hotel.rating} <span style="font-size: 1rem; color: #888;">(${hotel.numberOfReviews || reviews.length} reviews)</span>`;
+        }
+        document.getElementById('rating-avg').innerHTML = avgText;
+
+        if (reviews.length === 0) {
+          list.innerHTML = "<p>No reviews yet. Be the first to share your experience!</p>";
+        } else {
+          list.innerHTML = reviews.map(r => `
+            <div class="review-item">
+              <div class="review-header">
+                <span class="review-author">${r.user?.name || r.user?.username || 'Anonymous'} <i class="fas fa-check-circle" style="color: #28a745; margin-left: 5px;" title="Verified Booking"></i> <span style="font-size: 0.85em; color: #28a745; font-weight: 500;">Verified User</span></span>
+                <span class="review-date">${new Date(r.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+              </div>
+              <div class="stars">${'<i class="fas fa-star"></i>'.repeat(r.rating)}${'<i class="far fa-star"></i>'.repeat(5 - r.rating)}</div>
+              <p style="color: #444; margin-top: 10px;">${r.comment}</p>
+            </div>
+          `).join('');
+        }
+      } catch (e) {
+        console.error("Error loading reviews:", e);
+        document.getElementById('reviews-list').innerHTML = "<p>Error loading reviews.</p>";
+      }
+    }
+
+    loadHotel();
+  </script>
+
+</body>
+
+</html>

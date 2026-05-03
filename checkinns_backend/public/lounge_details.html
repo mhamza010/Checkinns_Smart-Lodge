@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title id="lounge-title">Lounge Details</title>
+  <link rel="stylesheet" href="checkinns3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%);
+      color: #333;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    /* HERO */
+    .lounge-hero {
+      height: 320px;
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 30px;
+      background-size: cover;
+      background-position: center;
+    }
+    .lounge-hero-overlay {
+      background: rgba(0, 0, 0, 0.45);
+      color: white;
+      padding: 30px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .lounge-hero h1 {
+      font-size: 2.2rem;
+      margin: 0;
+    }
+    .tagline {
+      font-style: italic;
+      font-size: 1rem;
+      margin-top: 8px;
+    }
+    .lounge-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      margin-top: 12px;
+    }
+    .lounge-stats .stat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.95rem;
+    }
+
+    /* Gallery */
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 30px;
+    }
+    .gallery img {
+      width: 160px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 12px;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
+      transition: transform 0.3s ease;
+    }
+    .gallery img:hover {
+      transform: scale(1.05);
+    }
+
+    /* About */
+    .about-section {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+    }
+    .about-section h2 {
+      color: #c0392b;
+      margin-bottom: 15px;
+    }
+    .elite-note {
+      margin-top: 10px;
+      font-style: italic;
+      color: #555;
+    }
+
+    /* Experiences */
+    .signature-experiences-section {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+    }
+    .experiences-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 15px;
+    }
+    .experience-card {
+      background: #f9f9f9;
+      border-radius: 12px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .experience-card .icon {
+      font-size: 2rem;
+      color: #e67e22;
+      margin-bottom: 8px;
+    }
+    .experience-card .exp-name {
+      font-weight: 600;
+      margin-bottom: 5px;
+    }
+    .experience-card .exp-desc {
+      font-size: 0.9rem;
+      color: #555;
+    }
+
+    /* Amenities */
+    .elite-amenities-section {
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      margin-bottom: 30px;
+      box-shadow: 0 6px 15px rgba(0,0,0,0.05);
+    }
+    .amenities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+    }
+    .amenity-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .amenity-item i {
+      color: #27ae60;
+    }
+
+    /* Reserve Button */
+    .reserve-access-section {
+      text-align: center;
+      margin: 40px 0;
+    }
+    .reserve-access-btn {
+      padding: 16px 28px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #c0392b 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .reserve-access-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(192, 57, 43, 0.25);
+    }
+
+    @media (max-width: 768px) {
+      .lounge-hero {
+        height: 240px;
+      }
+      .lounge-hero h1 {
+        font-size: 1.6rem;
+      }
+      .gallery img {
+        width: 120px;
+        height: 90px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- HERO -->
+  <div class="lounge-hero" id="lounge-hero">
+    <div class="lounge-hero-overlay">
+      <h1 id="lounge-name">Lounge Name</h1>
+      <div class="tagline" id="lounge-tagline">Lounge tagline here...</div>
+      <div class="lounge-stats" id="lounge-stats"></div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="container" id="lounge-container">
+    <!-- Gallery -->
+    <div class="gallery" id="lounge-gallery"></div>
+
+    <!-- About -->
+    <div class="about-section">
+      <h2>About <span id="lounge-about-name">Lounge</span></h2>
+      <p id="lounge-description">Dynamic description here...</p>
+      <div class="elite-note" id="lounge-note"></div>
+    </div>
+
+    <!-- Signature Experiences -->
+    <div class="signature-experiences-section">
+      <h2>Signature Experiences</h2>
+      <div class="experiences-grid" id="lounge-experiences"></div>
+    </div>
+
+    <!-- Amenities -->
+    <div class="elite-amenities-section">
+      <h2>Luxury Amenities</h2>
+      <div class="amenities-grid" id="lounge-amenities"></div>
+    </div>
+
+    <!-- Booking + Favorites -->
+    <div class="reserve-access-section">
+      <a id="reserve-link" href="#">
+        <button class="reserve-access-btn">
+          <i class="fas fa-heart"></i> Reserve Access
+        </button>
+      </a>
+      <br><br>
+      <button id="addFavoriteBtn">⭐ Add to Favorites</button>
+    </div>
+  </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const loungeId = params.get("id");
+
+  if (!loungeId) {
+    document.getElementById("lounge-container").innerHTML = "<h2>No lounge selected</h2>";
+    return;
+  }
+
+  try {
+    const res = await fetch(`http://localhost:5000/api/lounges/${loungeId}`);
+    if (!res.ok) throw new Error("Network error");
+
+    const lounge = await res.json();
+
+    // Hero
+    document.title = (lounge.name || "Lounge") + " – Luxury Lounge";
+    document.getElementById("lounge-name").textContent = lounge.name || "Unnamed Lounge";
+    document.getElementById("lounge-tagline").textContent = lounge.tagline || "";
+    document.getElementById("lounge-hero").style.background = 
+      `url('${lounge.mainImage || lounge.images?.[0] || "default.jpg"}') center/cover no-repeat`;
+
+    // Stats
+    const statsEl = document.getElementById("lounge-stats");
+    statsEl.innerHTML = (lounge.stats?.length)
+      ? lounge.stats.map(stat => `<div class="stat"><i class="${stat.icon}"></i> ${stat.text}</div>`).join("")
+      : "<p>No stats available.</p>";
+
+    // Gallery
+    const galleryEl = document.getElementById("lounge-gallery");
+    galleryEl.innerHTML = (lounge.images?.length)
+      ? lounge.images.map(img => `<img src="${img}" alt="${lounge.name}" onerror="this.src='default.jpg'">`).join("")
+      : "<p>No gallery images.</p>";
+
+    // About
+    document.getElementById("lounge-about-name").textContent = lounge.name || "Lounge";
+    document.getElementById("lounge-description").textContent = lounge.description || "No description available.";
+    document.getElementById("lounge-note").textContent = lounge.note || "";
+
+    // Experiences
+    const expEl = document.getElementById("lounge-experiences");
+    expEl.innerHTML = (lounge.experiences?.length)
+      ? lounge.experiences.map(exp => `
+        <div class="experience-card">
+          <div class="icon"><i class="${exp.icon}"></i></div>
+          <div class="exp-name">${exp.name}</div>
+          <div class="exp-desc">${exp.desc}</div>
+        </div>`).join("")
+      : "<p>No signature experiences available.</p>";
+
+    // Amenities
+    const amenityEl = document.getElementById("lounge-amenities");
+    amenityEl.innerHTML = (lounge.amenities?.length)
+      ? lounge.amenities.map(am => `<div class="amenity-item"><i class="${am.icon}"></i> ${am.text}</div>`).join("")
+      : "<p>No amenities listed.</p>";
+
+    // Booking link
+    document.getElementById("reserve-link").href = `lounge_booking.html?id=${lounge._id}`;
+
+    // Favorites button
+    document.getElementById("addFavoriteBtn").addEventListener("click", async () => {
+      const token = localStorage.getItem("token");
+
+      // Guest mode: save locally
+      if (!token) {
+        try {
+          const store = JSON.parse(localStorage.getItem("guestFavorites") || "{}");
+          store.lounges = Array.isArray(store.lounges) ? store.lounges : [];
+          if (!store.lounges.find((l) => l.id === lounge._id)) {
+            store.lounges.push({ id: lounge._id, name: lounge.name });
+            localStorage.setItem("guestFavorites", JSON.stringify(store));
+          }
+          alert("Added to favorites ✅");
+        } catch (e) {
+          alert("Could not save favorite locally ❌");
+        }
+        return;
+      }
+
+      // Logged in: call API
+      try {
+        const favRes = await fetch("http://localhost:5000/api/users/favorites", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+          },
+          body: JSON.stringify({ type: "lounge", id: lounge._id })
+        });
+
+        const favData = await favRes.json();
+
+        if (favRes.ok) {
+          alert("Added to favorites ✅");
+        } else if (favRes.status === 401) {
+          // token invalid, remove
+          localStorage.removeItem("token");
+          alert(favData.msg || "Session expired. Please log in again if you want to sync favorites.");
+        } else {
+          alert(favData.msg || "Failed to add favorite ❌");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error adding favorite");
+      }
+    });
+
+  } catch (err) {
+    console.error("Error loading lounge:", err);
+    document.getElementById("lounge-container").innerHTML = "<h2>Failed to load lounge details</h2>";
+  }
+});
+</script>
+
+
+</body>
+</html>

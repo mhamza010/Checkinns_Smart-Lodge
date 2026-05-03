@@ -1,0 +1,17 @@
+{
+    "version": 2,
+    "rewrites": [
+        {
+            "source": "/api/(.*)",
+            "destination": "/api/index.js"
+        },
+        {
+            "source": "/",
+            "destination": "/checkinns3.html"
+        },
+        {
+            "source": "/favicon.ico",
+            "destination": "/images/Logo%20Checkinns.png"
+        }
+    ]
+}

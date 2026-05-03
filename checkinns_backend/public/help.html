@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Help &amp; FAQ - CheckInns</title>
+  <link rel="stylesheet" href="checkinns3.css">
+  <style>
+    body { background: linear-gradient(135deg, #0f172a, #1e293b); color: #eee; font-family: "Poppins", "Segoe UI", sans-serif; margin:0; }
+    main { max-width: 900px; margin: 3rem auto; padding: 0 1.5rem; }
+    h1 { font-size: 2.2rem; margin-bottom: 1.8rem; text-align: center; color: #facc15; }
+    .faq-item { margin-bottom: 1.6rem; }
+    .faq-question { font-weight: 600; cursor: pointer; background: #1e293b; color: #facc15; padding: 12px 16px; border-radius: 8px; }
+    .faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; background: #111; padding: 0 16px; color: #ddd; }
+    .faq-answer.open { padding: 12px 16px; max-height: 500px; }
+    nav { background: #0b0d22; padding: 10px 20px; font-size: 0.95rem; }
+    nav a { color: #cfd2ff; text-decoration: none; margin-right: 1rem; }
+    nav a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="checkinns3.html">Home</a>
+  </nav>
+  <main>
+    <h1>Help &amp; Frequently Asked Questions</h1>
+    <section class="faq">
+      <div class="faq-item">
+        <div class="faq-question">How do I book a room?</div>
+        <div class="faq-answer">To book a room, select your hotel and follow the booking instructions on the hotel's detail page.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">What payment methods are accepted?</div>
+        <div class="faq-answer">We accept major credit/debit cards, PayPal, and select local payment options.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">How can I cancel my booking?</div>
+        <div class="faq-answer">You can cancel your booking from your account dashboard or by contacting support at help@checkinns.com.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">What is the check-in/check-out time?</div>
+        <div class="faq-answer">Check-in is generally from 2:00 PM and check-out by 12:00 PM. Specific times may vary per property.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-question">How do I contact support?</div>
+        <div class="faq-answer">You can reach us at <a href="tel:080099009292">0800 990 09292</a> or email support@checkinns.com.</div>
+      </div>
+    </section>
+  </main>
+  <script>
+    document.querySelectorAll('.faq-question').forEach(q=>{
+      q.addEventListener('click',()=>{
+        const ans = q.nextElementSibling;
+        ans.classList.toggle('open');
+      });
+    });
+  </script>
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section about">
+        <h4>About CheckInns</h4>
+        <p>CheckInns provides seamless booking for hotels, restaurants and lounges worldwide. Our mission is to offer privacy, speed and security to all travellers.</p>
+      </div>
+      <div class="footer-section links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="checkinns3.html">Home</a></li>
+          <li><a href="help.html">Help &amp; FAQ</a></li>
+          <li><a href="contact.html">Contact Us</a></li>
+        </ul>
+      </div>
+      <div class="footer-section contact">
+        <h4>Contact</h4>
+        <p>Phone: <a href="tel:080099009292">0800&nbsp;990&nbsp;09292</a></p>
+        <p>Email: support@checkinns.com</p>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 CheckInns. All Rights Reserved.</div>
+  </footer>
+</body>
+</html>

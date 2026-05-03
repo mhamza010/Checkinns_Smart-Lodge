@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Redirecting…</title>
+  <meta http-equiv="refresh" content="0;url=auth.html">
+</head>
+<body>
+  <script>
+    (function(){
+      const q = window.location.search || '';
+      const url = 'auth.html' + q;
+      window.location.replace(url);
+    })();
+  </script>
+  <noscript>
+    If you are not redirected automatically, <a href="auth.html">click here</a>.
+  </noscript>
+</body>
+</html>
+

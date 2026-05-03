@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Owner Sign Up • Check-Inns</title>
+  <link rel="stylesheet" href="checkinns3.css">
+</head>
+
+<body>
+  <div class="owner-auth-container">
+    <img src="images/logo.png" alt="Check-Inns" class="logo">
+    <h1>Create Owner Account</h1>
+    <form id="owner-signup-form">
+      <input type="text" id="owner-signup-name" placeholder="Business/Owner Name" required>
+      <input type="email" id="owner-signup-email" placeholder="Business Email" required>
+      <input type="password" id="owner-signup-password" placeholder="Password" required>
+      <button type="submit">Create Owner Account</button>
+    </form>
+
+    <form id="owner-otp-form" style="display:none">
+      <p style="text-align:center;">We sent a 6-digit verification code to your email.</p>
+      <input type="text" id="owner-otp-code" placeholder="123456" required maxlength="6" style="text-align:center; font-size:1.2rem; letter-spacing:4px; margin-bottom:10px;">
+      <div style="display:flex; justify-content:space-between; margin-bottom:15px; font-size:0.9rem;">
+        <span id="ownerTimerText">01:00</span>
+        <button type="button" id="ownerBtnResend" style="background:none; border:none; color:#1a73e8; cursor:pointer;" disabled>Resend Code</button>
+      </div>
+      <button type="submit">Verify & Create Account</button>
+    </form>
+    <a href="owner_login.html">Already have an owner account? Sign in</a>
+  </div>
+
+  <script>
+    const form = document.getElementById('owner-signup-form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const name = document.getElementById('owner-signup-name').value.trim();
+      const email = document.getElementById('owner-signup-email').value.trim();
+      const password = document.getElementById('owner-signup-password').value.trim();
+
+      if (!name || !email || !password) {
+        alert('Please fill all fields');
+        return;
+      }
+      if (password.length < 8) {
+        alert('Password must be at least 8 characters long.');
+        return;
+      }
+
+      const nameParts = name.split(/\s+/);
+      if (nameParts.length < 2) {
+        alert('Please enter both your first and last name.');
+        return;
+      }
+
+      const nameRegex = /^[A-Za-z\s\-]{3,}$/;
+      if (!nameRegex.test(name)) { alert('Business/Owner name must contain only letters and be at least 3 characters long.'); return; }
+
+      const emailRegex = /^[a-zA-Z][a-zA-Z0-9._-]*@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!emailRegex.test(email)) { alert('Please enter a valid email address (must end with a valid domain like .com).'); return; }
+
+      try {
+        const res = await fetch('/api/owner/signup', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name, email, password })
+        });
+        if (!res.ok) {
+          const errData = await res.json().catch(() => null);
+          throw new Error((errData && errData.msg) ? errData.msg : 'Signup failed');
+        }
+        
+        pendingOwner = { name, email, password };
+        document.getElementById('owner-signup-form').style.display = 'none';
+        document.getElementById('owner-otp-form').style.display = 'block';
+        startOwnerTimer();
+      } catch (err) {
+        console.error('Owner signup error:', err);
+        alert('Owner signup failed: ' + err.message);
+      }
+    });
+
+    let pendingOwner = null;
+    let ownerTimer = null;
+
+    const otpForm = document.getElementById('owner-otp-form');
+    const btnResend = document.getElementById('ownerBtnResend');
+    const timerText = document.getElementById('ownerTimerText');
+
+    function startOwnerTimer() {
+        let timeLeft = 60;
+        btnResend.disabled = true;
+        btnResend.style.color = 'gray';
+        timerText.textContent = `01:00`;
+        clearInterval(ownerTimer);
+        ownerTimer = setInterval(() => {
+            timeLeft--;
+            const secs = timeLeft < 10 ? '0'+timeLeft : timeLeft;
+            timerText.textContent = `00:${secs}`;
+            if (timeLeft <= 0) {
+                clearInterval(ownerTimer);
+                btnResend.disabled = false;
+                btnResend.style.color = '#1a73e8';
+                timerText.textContent = `00:00`;
+            }
+        }, 1000);
+    }
+
+    btnResend.addEventListener('click', async () => {
+        if (!pendingOwner) return;
+        try {
+            const res = await fetch('/api/owner/resend-otp', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email: pendingOwner.email }) });
+            if (!res.ok) throw new Error('Failed to resend');
+            alert('Code resent!');
+            startOwnerTimer();
+        } catch(e) { alert(e.message); }
+    });
+
+    otpForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const otp = document.getElementById('owner-otp-code').value.trim();
+        if (!otp || otp.length < 6) return alert('Enter 6-digit code');
+        try {
+            const res = await fetch('/api/owner/verify-signup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...pendingOwner, otp }) });
+            if (!res.ok) {
+                const errData = await res.json().catch(() => null);
+                throw new Error((errData && errData.msg) ? errData.msg : 'Verification failed');
+            }
+            const data = await res.json();
+            localStorage.setItem('ownerToken', data.token);
+            localStorage.setItem('ownerName', data.owner?.name || '');
+            const redirect = new URLSearchParams(window.location.search).get('redirect') || 'owner_dashboard.html';
+            window.location.href = redirect;
+        } catch (err) {
+            alert('Verification failed: ' + err.message);
+        }
+    });
+  </script>
+</body>
+
+</html>

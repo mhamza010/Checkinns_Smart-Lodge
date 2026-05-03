@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Booking Confirmation</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #1f1c2c, #928DAB);
+      color: #fff;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 960px;
+      margin: 60px auto;
+      background: #fff;
+      color: #333;
+      border-radius: 24px;
+      padding: 40px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 10px;
+    }
+    .brand img {
+      width: 56px;
+      height: 56px;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+    }
+    .brand h1 {
+      font-size: 2rem;
+      margin: 0;
+      color: #4A3AFF;
+      letter-spacing: 0.3px;
+    }
+    .sub {
+      color: #555;
+      margin-bottom: 24px;
+    }
+
+    .ribbon {
+      background: linear-gradient(135deg, #4A3AFF, #6a5acd);
+      color: #fff;
+      border-radius: 16px;
+      padding: 18px 22px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 600;
+      box-shadow: 0 10px 25px rgba(74,58,255,0.25);
+    }
+    .ribbon i { font-size: 1.25rem; }
+
+    .grid {
+      margin-top: 28px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .card {
+      background: #f8f9ff;
+      border-radius: 18px;
+      padding: 22px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.08);
+    }
+    .card h3 {
+      margin: 0 0 14px 0;
+      color: #4A3AFF;
+      font-size: 1.15rem;
+    }
+    .detail-item { margin: 10px 0; font-size: 0.98rem; }
+    .detail-item strong { color: #333; }
+
+    .totals {
+      margin-top: 6px;
+      background: #fff;
+      border: 1px solid #e9eafd;
+      border-radius: 14px;
+      padding: 14px 16px;
+    }
+    .row {
+      display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dashed #e3e4fb;
+    }
+    .row:last-child { border-bottom: 0; }
+    .grand {
+      margin-top: 14px;
+      padding-top: 14px;
+      border-top: 2px solid #4A3AFF;
+      display: flex; justify-content: space-between; font-weight: 700; color: #4A3AFF;
+      font-size: 1.1rem;
+    }
+
+    .actions {
+      margin-top: 28px;
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .btn {
+      padding: 14px 22px;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #4A3AFF, #6a5acd);
+      color: #fff;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+      border: none;
+      transition: transform .15s ease, box-shadow .15s ease;
+    }
+    .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(74,58,255,0.28); }
+    .btn-outline {
+      background: #fff;
+      color: #4A3AFF;
+      border: 2px solid #4A3AFF;
+    }
+
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header with Logo -->
+    <div class="brand">
+      <img src="/images/Logo Checkinns.png" alt="CheckInns Logo" id="brandLogo">
+      <h1>CheckInns — Booking Confirmed</h1>
+    </div>
+    <div class="sub" id="subText">Your booking is confirmed. A confirmation has been sent to your email.</div>
+
+    <div class="ribbon">
+      <i class="fas fa-badge-check"></i>
+      <span><strong>Success:</strong> We’ve reserved your room and prepared your invoice.</span>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Reservation Details</h3>
+        <div class="detail-item"><strong>Type:</strong> <span id="type">—</span></div>
+        <div class="detail-item" id="guestRow" style="display:none;"><strong>Guest:</strong> <span id="guestName">—</span></div>
+        <div class="detail-item" id="hotelRow" style="display:none;"><strong>Hotel:</strong> <span id="hotelName">—</span></div>
+        <div class="detail-item" id="roomRow" style="display:none;"><strong>Room:</strong> <span id="roomInfo">—</span></div>
+        <div class="detail-item" id="datesRow" style="display:none;"><strong>Dates:</strong> <span id="stayDates">—</span></div>
+        <div class="detail-item" id="nightsRow" style="display:none;"><strong>Nights:</strong> <span id="nights">—</span></div>
+        <div class="detail-item" id="amenitiesRow" style="display:none;"><strong>Amenities:</strong> <span id="amenities">—</span></div>
+        <div class="detail-item" id="restaurantRow" style="display:none;"><strong>Restaurant:</strong> <span id="restaurantName">—</span></div>
+        <div class="detail-item" id="resWhenRow" style="display:none;"><strong>When:</strong> <span id="resWhen">—</span></div>
+        <div class="detail-item" id="resGuestsRow" style="display:none;"><strong>Guests:</strong> <span id="resGuests">—</span></div>
+        <div class="detail-item" id="resTableRow" style="display:none;"><strong>Table Pref:</strong> <span id="resTable">—</span></div>
+        <div class="detail-item" id="loungeRow" style="display:none;"><strong>Lounge:</strong> <span id="loungeName">—</span></div>
+        <div class="detail-item" id="loungeWhenRow" style="display:none;"><strong>When:</strong> <span id="loungeWhen">—</span></div>
+        <div class="detail-item" id="loungeGuestsRow" style="display:none;"><strong>Guests:</strong> <span id="loungeGuests">—</span></div>
+        <div class="detail-item" id="vipRow" style="display:none;"><strong>VIP List:</strong> <span id="vipList">—</span></div>
+        <div class="detail-item"><strong>Booking ID:</strong> <span id="bookingId">—</span></div>
+      </div>
+
+      <div class="card">
+        <h3>Billing Summary</h3>
+        <div class="totals" id="billingHotel" style="display:none;">
+          <div class="row"><span>Room Rate</span><span id="roomRate">$0</span></div>
+          <div class="row"><span>Room Total</span><span id="roomTotal">$0</span></div>
+          <div class="row"><span>Amenities</span><span id="amenitiesTotal">$0</span></div>
+          <div class="row"><span>Tax (15%)</span><span id="taxAmount">$0</span></div>
+          <div class="grand"><span>Total</span><span id="totalAmount">$0</span></div>
+        </div>
+        <div class="totals" id="billingLounge" style="display:none;">
+          <div class="row"><span>Guest Cost</span><span id="guestCost">$0</span></div>
+          <div class="row"><span>VIP Cost</span><span id="vipCost">$0</span></div>
+          <div class="row"><span>Tax</span><span id="taxAmountL">$0</span></div>
+          <div class="grand"><span>Total</span><span id="totalAmountL">$0</span></div>
+        </div>
+        <div class="totals" id="billingRestaurant" style="display:none;">
+          <div class="row"><span>Subtotal</span><span id="subR">$0</span></div>
+          <div class="row"><span>Tax</span><span id="taxR">$0</span></div>
+          <div class="grand"><span>Total</span><span id="totalR">$0</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button class="btn" onclick="downloadPDF()"><i class="fas fa-file-download"></i> Download Invoice (PDF)</button>
+      <a class="btn btn-outline" href="/" role="button"><i class="fas fa-home"></i> Back to Home</a>
+      <a class="btn btn-outline" href="/hotels.html" role="button"><i class="fas fa-bed"></i> Explore Hotels</a>
+      <a class="btn btn-outline" href="/restaurants.html" role="button"><i class="fas fa-utensils"></i> Explore Restaurants</a>
+      <a class="btn btn-outline" href="/lounges.html" role="button"><i class="fas fa-crown"></i> Explore Lounges</a>
+    </div>
+  </div>
+
+  <script>
+    // --- Currency helpers ---
+    function getCurrencySettings(){
+      const code = localStorage.getItem('currency_code') || 'USD';
+      const rates = { USD: 1, KWD: 0.31, SAR: 3.75, PKR: 278, QAR: 3.64 };
+      const symbols = { USD: '$', KWD: 'KD ', SAR: 'SAR ', PKR: 'Rs ', QAR: 'QAR ' };
+      return { code, rate: rates[code] || 1, symbol: symbols[code] || '$' };
+    }
+    function formatMoneyUSDToCurrent(amountUSD){
+      const { rate, symbol } = getCurrencySettings();
+      const val = Number(amountUSD || 0) * rate;
+      return symbol + (Math.round(val * 100) / 100).toFixed(2);
+    }
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    let booking;
+    let logoDataUrl = null; // base64 for logo
+
+    // Convert /images/Logo Checkinns.png to DataURL for PDF
+    async function loadLogoAsDataURL(path) {
+      try {
+        const res = await fetch(path);
+        const blob = await res.blob();
+        return await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) {
+        console.warn("Logo load failed, PDF will use text header.", e);
+        return null;
+      }
+    }
+
+    // Load booking + logo, then render page
+    (async function init() {
+      // Load logo first (same-origin)
+      logoDataUrl = await loadLogoAsDataURL("/images/Logo Checkinns.png");
+
+      const res = await fetch(`/api/bookings/${id}`);
+      booking = await res.json();
+
+      // Fill UI
+      // Fill common
+      document.getElementById("bookingId").textContent = booking._id;
+      
+      alert("A booking email is sent to you. Please wait for the owner to approve your request.");
+
+      // Detect type by populated refs
+      const isHotel = !!booking.hotel;
+      const isRestaurant = !!booking.restaurant;
+      const isLounge = !!booking.lounge;
+      const type = isHotel ? "Hotel" : isRestaurant ? "Restaurant" : isLounge ? "Lounge" : "Booking";
+      document.getElementById("type").textContent = type;
+
+      if (isHotel) {
+        document.getElementById("subText").textContent = "Your stay is secured. See your invoice below.";
+        document.getElementById("guestRow").style.display = '';
+        document.getElementById("hotelRow").style.display = '';
+        document.getElementById("roomRow").style.display = '';
+        document.getElementById("datesRow").style.display = '';
+        document.getElementById("nightsRow").style.display = '';
+        document.getElementById("amenitiesRow").style.display = '';
+        document.getElementById("billingHotel").style.display = '';
+        document.getElementById("guestName").textContent = booking.username || "Guest User";
+        document.getElementById("hotelName").textContent = booking.hotel?.name || "—";
+        document.getElementById("roomInfo").textContent = `${booking.room?.name || ""} — ${formatMoneyUSDToCurrent(booking.room?.price || 0)}/night`;
+        document.getElementById("stayDates").textContent = `${new Date(booking.checkIn).toDateString()} → ${new Date(booking.checkOut).toDateString()}`;
+        document.getElementById("nights").textContent = booking.nights;
+        document.getElementById("amenities").textContent = booking.amenities && booking.amenities.length
+          ? booking.amenities.map(a => `${a.name}${a.price > 0 ? ` (${formatMoneyUSDToCurrent(a.price)}/night)` : " (Included)"}`).join(", ")
+          : "None";
+        document.getElementById("roomRate").textContent = `${formatMoneyUSDToCurrent(booking.room?.price || 0)}`;
+        document.getElementById("roomTotal").textContent = `${formatMoneyUSDToCurrent(Number(booking.roomTotal || 0))}`;
+        document.getElementById("amenitiesTotal").textContent = `${formatMoneyUSDToCurrent(Number(booking.amenitiesTotal || 0))}`;
+        document.getElementById("taxAmount").textContent = `${formatMoneyUSDToCurrent(Number(booking.tax || 0))}`;
+        document.getElementById("totalAmount").textContent = `${formatMoneyUSDToCurrent(Number(booking.totalPrice || 0))}`;
+      } else if (isRestaurant) {
+        document.getElementById("subText").textContent = "Your table is reserved. We look forward to hosting you.";
+        document.getElementById("restaurantRow").style.display = '';
+        document.getElementById("resWhenRow").style.display = '';
+        document.getElementById("resGuestsRow").style.display = '';
+        document.getElementById("resTableRow").style.display = '';
+        document.getElementById("billingRestaurant").style.display = '';
+        document.getElementById("restaurantName").textContent = booking.restaurant?.name || "—";
+        document.getElementById("resWhen").textContent = `${new Date(booking.date).toDateString()} at ${booking.time || ''}`;
+        document.getElementById("resGuests").textContent = booking.guests;
+        document.getElementById("resTable").textContent = booking.tablePref || "No preference";
+        document.getElementById("subR").textContent = `${formatMoneyUSDToCurrent(Number(booking.subtotal || 0))}`;
+        document.getElementById("taxR").textContent = `${formatMoneyUSDToCurrent(Number(booking.tax || 0))}`;
+        document.getElementById("totalR").textContent = `${formatMoneyUSDToCurrent(Number(booking.totalPrice || 0))}`;
+      } else if (isLounge) {
+        document.getElementById("subText").textContent = "Your lounge access request is confirmed.";
+        document.getElementById("loungeRow").style.display = '';
+        document.getElementById("loungeWhenRow").style.display = '';
+        document.getElementById("loungeGuestsRow").style.display = '';
+        document.getElementById("vipRow").style.display = '';
+        document.getElementById("billingLounge").style.display = '';
+        document.getElementById("loungeName").textContent = booking.lounge?.name || "—";
+        document.getElementById("loungeWhen").textContent = `${new Date(booking.date).toDateString()} at ${booking.time || ''}`;
+        document.getElementById("loungeGuests").textContent = booking.guests;
+        document.getElementById("vipList").textContent = booking.vipList || "—";
+        document.getElementById("guestCost").textContent = `${formatMoneyUSDToCurrent(Number(booking.guestCost || 0))}`;
+        document.getElementById("vipCost").textContent = `${formatMoneyUSDToCurrent(Number(booking.vipCost || 0))}`;
+        document.getElementById("taxAmountL").textContent = `${formatMoneyUSDToCurrent(Number(booking.tax || 0))}`;
+        document.getElementById("totalAmountL").textContent = `${formatMoneyUSDToCurrent(Number(booking.totalPrice || 0))}`;
+      }
+    })();
+
+    // Create a polished invoice PDF
+    function downloadPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF({ unit: "pt", format: "a4" });
+
+      const left = 48;
+      let y = 60;
+
+      // Header with logo
+      if (logoDataUrl) {
+        try {
+          doc.addImage(logoDataUrl, "PNG", left, y, 56, 56);
+        } catch {}
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(20);
+        doc.text("Check-Inns", left + 70, y + 25);
+        
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text("Luxury Booking Invoice", left + 70, y + 45);
+        y += 30; // Push content down further to clear logo
+      } else {
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(22);
+        doc.text("Check-Inns", left, y);
+        
+        doc.setFontSize(12);
+        doc.setFont("helvetica", "normal");
+        doc.text("Luxury Booking Invoice", left, y + 20);
+      }
+
+      // Divider
+      y += 45;
+      doc.setDrawColor(74, 58, 255);
+      doc.setLineWidth(1.2);
+      doc.line(left, y, 547, y);
+      y += 24;
+
+      // Booking meta
+      doc.setFont("helvetica", "bold");
+      doc.text("Reservation Details", left, y);
+      y += 18;
+      doc.setFont("helvetica", "normal");
+      doc.text(`Guest: ${booking.username || "Guest User"}`, left, y); y += 16;
+      doc.text(`Hotel: ${booking.hotel?.name || ""}`, left, y); y += 16;
+      doc.text(`Room: ${booking.room?.name || ""} — $${booking.room?.price || 0}/night`, left, y); y += 16;
+      doc.text(`Dates: ${new Date(booking.checkIn).toDateString()} → ${new Date(booking.checkOut).toDateString()}`, left, y); y += 16;
+      doc.text(`Nights: ${booking.nights}`, left, y); y += 24;
+
+      // Amenities list
+      doc.setFont("helvetica", "bold");
+      doc.text("Amenities", left, y);
+      y += 16;
+      doc.setFont("helvetica", "normal");
+
+      if (booking.amenities && booking.amenities.length) {
+        booking.amenities.forEach((a) => {
+          const line = `• ${a.name} ${a.price > 0 ? `— $${a.price}/night` : "— Included"}`;
+          doc.text(line, left + 12, y);
+          y += 16;
+        });
+      } else {
+        doc.text("• None", left + 12, y);
+        y += 16;
+      }
+
+      // Billing block
+      y += 12;
+      doc.setDrawColor(230, 231, 255);
+      doc.setFillColor(248, 249, 255);
+      doc.roundedRect(left, y, 499, 116, 8, 8, "F");
+      let by = y + 24;
+
+      const row = (label, value) => {
+        doc.setFont("helvetica", "normal");
+        doc.text(label, left + 16, by);
+        doc.setFont("helvetica", "bold");
+        const textWidth = doc.getTextWidth(value);
+        doc.text(value, left + 499 - 16 - textWidth, by);
+        by += 18;
+      };
+
+      row("Room Total", `$${Number(booking.roomTotal || 0).toFixed(2)}`);
+      row("Amenities", `$${Number(booking.amenitiesTotal || 0).toFixed(2)}`);
+      row("Tax (15%)", `$${Number(booking.tax || 0).toFixed(2)}`);
+
+      doc.setDrawColor(74, 58, 255);
+      doc.line(left + 16, by + 4, left + 499 - 16, by + 4);
+      by += 24;
+
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(14);
+      const totalStr = `$${Number(booking.totalPrice || 0).toFixed(2)}`;
+      doc.text("Grand Total", left + 16, by);
+      const tw = doc.getTextWidth(totalStr);
+      doc.text(totalStr, left + 499 - 16 - tw, by);
+
+      // Footer
+      doc.setFontSize(10);
+      doc.setFont("helvetica", "normal");
+      doc.text("Thank you for choosing CheckInns. We wish you a wonderful stay.", left, 780);
+
+      // Save
+      doc.save(`CheckInns_Invoice_${booking._id}.pdf`);
+    }
+  </script>
+</body>
+</html>

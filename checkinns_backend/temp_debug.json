@@ -1,0 +1,68 @@
+{
+  "hw": [
+    {
+      "_id": "699717347a464af5ffc620e9",
+      "username": "fatima_mansouri",
+      "hotel": "699717327a464af5ffc62089",
+      "room": {
+        "name": "Riverside Suite",
+        "price": 280
+      },
+      "checkIn": "2024-03-20T00:00:00.000Z",
+      "checkOut": "2024-03-27T00:00:00.000Z",
+      "nights": 7,
+      "roomTotal": 1960,
+      "amenitiesTotal": 0,
+      "tax": 294,
+      "totalPrice": 2254,
+      "paymentStatus": "succeeded",
+      "amenities": [],
+      "__v": 0,
+      "createdAt": "2026-02-19T13:59:16.326Z",
+      "updatedAt": "2026-02-19T13:59:16.326Z"
+    }
+  ],
+  "rb": [
+    {
+      "_id": "69972753a3705603bd491320",
+      "restaurant": "699717327a464af5ffc620d1",
+      "firstName": "muhammad",
+      "lastName": "hamza",
+      "email": "muhann@gmai.com",
+      "phone": "345678",
+      "date": "2026-02-19T00:00:00.000Z",
+      "time": "19:00",
+      "guests": 4,
+      "tablePref": "Window",
+      "specialRequests": "",
+      "subtotal": 0,
+      "tax": 0,
+      "totalPrice": 0,
+      "createdAt": "2026-02-19T15:08:03.132Z",
+      "updatedAt": "2026-02-19T15:08:03.132Z",
+      "__v": 0
+    }
+  ],
+  "lb": [
+    {
+      "_id": "699727a1a3705603bd4913bd",
+      "lounge": "699717337a464af5ffc620d8",
+      "firstName": "muhammad",
+      "lastName": "hamza",
+      "email": "muhann@gmai.com",
+      "phone": "345678",
+      "date": "2026-02-19T00:00:00.000Z",
+      "time": "18:00",
+      "guests": 3,
+      "vipList": "hamza, ahmad,ameer",
+      "requests": "special water",
+      "guestCost": 300,
+      "vipCost": 600,
+      "tax": 135,
+      "totalPrice": 1035,
+      "createdAt": "2026-02-19T15:09:21.535Z",
+      "updatedAt": "2026-02-19T15:09:21.535Z",
+      "__v": 0
+    }
+  ]
+}

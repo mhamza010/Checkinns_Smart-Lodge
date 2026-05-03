@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Request Elite Access – Imperial Sky Lounge</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    /* ====== BASE ====== */
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1e1e1f 0%, #2a2a2d 100%);
+      color: #fff;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    /* ====== HEADER ====== */
+    .booking-header {
+      background: linear-gradient(135deg, #1f1f21 0%, #ffd70022 100%);
+      padding: 38px 30px;
+      border-radius: 24px;
+      text-align: center;
+      margin-bottom: 40px;
+      box-shadow: 0 12px 35px rgba(229, 192, 123, 0.15);
+      color: #ffd700;
+    }
+
+    .booking-header .crest {
+      font-size: 3rem;
+      color: #fff;
+      margin-bottom: 12px;
+    }
+
+    .booking-header h1 {
+      font-size: 2.4rem;
+      margin-bottom: 12px;
+      font-weight: 800;
+      letter-spacing: 1.5px;
+    }
+
+    .elite-badge {
+      display: inline-block;
+      background: linear-gradient(90deg, #ffd700, #fffbe6);
+      color: #232526;
+      font-weight: 700;
+      border-radius: 20px;
+      padding: 8px 20px;
+      font-size: 1.1rem;
+      margin-top: 10px;
+      box-shadow: 0 4px 10px rgba(229, 192, 123, 0.25);
+    }
+
+    .lounge-info {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 18px;
+      margin-top: 18px;
+    }
+
+    .lounge-image {
+      width: 100px;
+      height: 100px;
+      border-radius: 20px;
+      object-fit: cover;
+      border: 2px solid #ffd700;
+    }
+
+    .lounge-details h3 {
+      font-size: 1.4rem;
+      margin: 0 0 6px;
+      color: #fffbe6;
+    }
+
+    .lounge-details p {
+      margin: 0;
+      color: #ffd700;
+      font-size: 1rem;
+    }
+
+    /* ====== CONTENT ====== */
+    .booking-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 36px;
+    }
+
+    .booking-form-section {
+      background: #1f1f21;
+      padding: 36px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(229, 192, 123, 0.08);
+    }
+
+    .summary-section {
+      background: #2a2a2d;
+      padding: 28px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(229, 192, 123, 0.08);
+      position: sticky;
+      top: 20px;
+      color: #ffd700;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      margin-bottom: 22px;
+      color: #ffd700;
+      border-bottom: 2px solid #ffd700;
+      padding-bottom: 8px;
+    }
+
+    /* ====== FORM ====== */
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 700;
+      color: #ffd700;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 14px;
+      border: 2px solid #444;
+      border-radius: 10px;
+      font-size: 1rem;
+      background: #2a2a2d;
+      color: #fff;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #ffd700;
+      background: #fff;
+      color: #232526;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    /* ====== BUTTON ====== */
+    .reserve-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #ffd700, #fffbe6);
+      color: #232526;
+      border: none;
+      border-radius: 14px;
+      font-size: 1.2rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 18px;
+      box-shadow: 0 6px 20px rgba(229, 192, 123, 0.25);
+    }
+
+    .reserve-btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 32px rgba(229, 192, 123, 0.35);
+    }
+
+    /* ====== SUMMARY ====== */
+    .summary-list {
+      margin-bottom: 18px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #555;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      color: #fff;
+    }
+
+    .total-guests {
+      font-size: 1rem;
+      margin-top: 10px;
+      font-style: italic;
+    }
+
+    /* ====== REVIEWS ====== */
+    .reviews-section {
+      background: #1f1f21;
+      padding: 36px;
+      border-radius: 20px;
+      margin-top: 36px;
+      box-shadow: 0 10px 30px rgba(229, 192, 123, 0.08);
+      grid-column: 1 / -1;
+    }
+
+    .review-item {
+      border-bottom: 1px solid #444;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+
+    .review-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .stars {
+      color: #ffd700;
+      margin-bottom: 5px;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .review-author {
+      font-weight: bold;
+      color: #ffd700;
+    }
+
+    .review-date {
+      color: #888;
+      font-size: 0.9em;
+    }
+
+    .review-form {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #444;
+    }
+
+    .star-select {
+      font-size: 1.5rem;
+      color: #555;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .star-select.active,
+    .star-select:hover {
+      color: #ffd700;
+    }
+
+    /* ====== RESPONSIVE ====== */
+    @media (max-width: 900px) {
+      .booking-content {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <!-- HEADER -->
+    <div class="booking-header">
+      <div class="crest"><i class="fas fa-crown"></i></div>
+      <h1>Request Elite Access</h1>
+      <div class="elite-badge">By Invitation Only</div>
+      <div class="lounge-info">
+        <img id="loungeImage" src="/images/logo.png" alt="Imperial Sky Lounge" class="lounge-image"
+          onerror="this.onerror=null;this.src='/images/logo.png'">
+        <div class="lounge-details">
+          <h3 id="loungeName">Imperial Sky Lounge</h3>
+          <p>Private, Ultra-Luxury, Discreet</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="booking-content">
+      <!-- FORM -->
+      <div class="booking-form-section">
+        <h2 class="section-title">Reservation Details</h2>
+        <form id="reservationForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label>Date</label>
+              <input type="date" id="resDate" required>
+            </div>
+            <div class="form-group">
+              <label>Time</label>
+              <select id="resTime" required>
+                <option value="">Select Time</option>
+                <option value="12:00">12:00 PM</option>
+                <option value="13:00">1:00 PM</option>
+                <option value="18:00">6:00 PM</option>
+                <option value="19:00">7:00 PM</option>
+                <option value="20:00">8:00 PM</option>
+                <option value="21:00">9:00 PM</option>
+                <option value="22:00">10:00 PM</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Number of Guests</label>
+            <select id="guestCount" required>
+              <option value="">Select Guests</option>
+              <option value="1">1 Guest</option>
+              <option value="2">2 Guests</option>
+              <option value="3">3 Guests</option>
+              <option value="4">4 Guests</option>
+              <option value="5">5 Guests</option>
+              <option value="6">6 Guests</option>
+              <option value="7">7 Guests</option>
+              <option value="8">8+ Guests</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>VIP Guest List</label>
+            <textarea id="vipList" rows="2" placeholder="Full names of all guests, comma separated" required></textarea>
+          </div>
+          <div class="form-group">
+            <label>Special Requests</label>
+            <textarea id="specialRequests" rows="3" placeholder="Concierge, security, or special needs"></textarea>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>First Name</label>
+              <input type="text" id="firstName" placeholder="Enter your first name" required>
+            </div>
+            <div class="form-group">
+              <label>Last Name</label>
+              <input type="text" id="lastName" placeholder="Enter your last name" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="emailAddress" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="tel" id="phoneNumber" placeholder="Enter your phone number" required>
+            </div>
+          </div>
+          <button type="submit" class="reserve-btn"><i class="fas fa-crown"></i> Request Elite Access</button>
+        </form>
+      </div>
+
+      <!-- SUMMARY -->
+      <div class="summary-section">
+        <h2 class="section-title">Reservation Summary</h2>
+        <div class="summary-list">
+          <div class="summary-item"><span>Date:</span> <span id="summaryDate">-</span></div>
+          <div class="summary-item"><span>Time:</span> <span id="summaryTime">-</span></div>
+          <div class="summary-item"><span>Guests:</span> <span id="summaryGuests">-</span></div>
+          <div class="summary-item"><span>VIP List:</span> <span id="summaryVIP">-</span></div>
+        </div>
+        <div class="total-guests">Your request will be reviewed by our Elite Concierge.</div>
+      </div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="reviews-section">
+      <h2 class="section-title">Exclusive Reviews <span id="rating-avg"
+          style="float: right; font-size: 1.2rem; font-weight: normal; border: none;"></span></h2>
+      <div id="reviews-list">
+        <p>Loading reviews...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Require login: if no user token, redirect to login with return URL
+    (function requireUserLogin() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        const redirectUrl = 'auth.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.replace(redirectUrl);
+      }
+    })();
+    const API_BASE = "http://localhost:5000";
+    const params = new URLSearchParams(window.location.search);
+    const loungeId = params.get("id");
+
+    document.addEventListener("DOMContentLoaded", () => {
+      const resDateEl = document.getElementById("resDate");
+      if (resDateEl) resDateEl.min = new Date().toISOString().split("T")[0];
+
+      if (!loungeId) {
+        console.warn("No lounge id provided in URL.");
+        return;
+      }
+
+      loadLoungeAndInit();
+    });
+
+    async function loadLoungeAndInit() {
+      try {
+        const res = await fetch(`${API_BASE}/api/lounges/${loungeId}`);
+        if (!res.ok) {
+          console.error("Failed to fetch lounge:", res.status, res.statusText);
+          return;
+        }
+        const lounge = await res.json();
+
+        // header UI
+        const loungeImage = document.getElementById("loungeImage");
+        if (loungeImage) {
+          const img = lounge.mainImage || (lounge.images?.[0]) || "/images/logo.png";
+          loungeImage.src = encodeURI(img);
+        }
+
+        const loungeNameEl = document.getElementById("loungeName");
+        if (loungeNameEl) loungeNameEl.textContent = lounge.name || "";
+
+        const loungeLocationEl = document.getElementById("loungeLocation");
+        if (loungeLocationEl) loungeLocationEl.textContent = lounge.location || "";
+
+        const loungeDescriptionEl = document.getElementById("loungeDescription");
+        if (loungeDescriptionEl) loungeDescriptionEl.textContent = lounge.description || "";
+
+        const loungeFeaturesEl = document.getElementById("loungeFeatures");
+        if (loungeFeaturesEl) loungeFeaturesEl.textContent = (lounge.features && lounge.features.length) ? lounge.features.join(", ") : "";
+
+        // pricing (DB field or fallback)
+        const pricePerGuest = Number(lounge.pricePerGuest || lounge.pricePerPerson || lounge.price || 50);
+        const vipMultiplier = 2; // VIP price = 2× normal (you can change)
+        const taxRate = 0.15; // 15% tax
+
+        // form elements
+        const guestCountEl = document.getElementById("guestCount");
+        const dateEl = document.getElementById("resDate");
+        const timeEl = document.getElementById("resTime");
+        const vipListEl = document.getElementById("vipList");
+        const specialRequestsEl = document.getElementById("specialRequests");
+
+        // summary display
+        const summaryDate = document.getElementById("summaryDate");
+        const summaryTime = document.getElementById("summaryTime");
+        const summaryGuests = document.getElementById("summaryGuests");
+        const summaryVIP = document.getElementById("summaryVIP");
+        const totalDisplay = document.querySelector(".total-guests");
+
+        function computeTotal(guests, vipGuests) {
+          const normalSubtotal = guests * pricePerGuest;
+          const vipSubtotal = vipGuests * pricePerGuest * vipMultiplier;
+
+          const subtotal = normalSubtotal + vipSubtotal;
+          const tax = subtotal * taxRate;
+          return { subtotal, tax, total: subtotal + tax, normalSubtotal, vipSubtotal };
+        }
+
+        function updateSummary() {
+          const guests = parseInt(guestCountEl?.value) || 0;
+          const date = dateEl?.value || "-";
+          const time = timeEl?.value || "-";
+
+          const vipList = (vipListEl?.value || "").trim();
+          const vipCount = vipList ? vipList.split(",").map(s => s.trim()).filter(Boolean).length : 0;
+
+          const { subtotal, tax, total } = computeTotal(guests, vipCount);
+
+          if (summaryDate) summaryDate.textContent = date;
+          if (summaryTime) summaryTime.textContent = time;
+          if (summaryGuests) summaryGuests.textContent = guests ? String(guests) : "-";
+          if (summaryVIP) summaryVIP.textContent = vipList ? vipList : "-";
+          if (totalDisplay) {
+            totalDisplay.innerHTML = `
+          Subtotal: $${subtotal.toFixed(2)} <br>
+          Tax (15%): $${tax.toFixed(2)} <br>
+          <b>Total: $${total.toFixed(2)}</b>
+        `;
+          }
+        }
+
+        // attach listeners
+        [guestCountEl, dateEl, timeEl, vipListEl, specialRequestsEl].forEach(el => {
+          if (!el) return;
+          el.addEventListener("input", updateSummary);
+          el.addEventListener("change", updateSummary);
+        });
+
+        // init summary
+        updateSummary();
+
+        // submit booking
+        const reservationForm = document.getElementById("reservationForm");
+        if (reservationForm) {
+          reservationForm.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const firstName = document.getElementById("firstName")?.value || "";
+            const lastName = document.getElementById("lastName")?.value || "";
+            const emailAddress = document.getElementById("emailAddress")?.value || "";
+            const phoneNumber = document.getElementById("phoneNumber")?.value || "";
+
+            const nameRegex = /^[A-Za-z\s\-]+$/;
+            if (firstName && !nameRegex.test(firstName)) { alert('First name can only contain letters.'); return; }
+            if (lastName && !nameRegex.test(lastName)) { alert('Last name can only contain letters.'); return; }
+            const phoneRegex = /^[0-9\s()+-]+$/;
+            if (phoneNumber && !phoneRegex.test(phoneNumber)) { alert('Phone number cannot contain letters.'); return; }
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (emailAddress && !emailRegex.test(emailAddress)) { alert('Please enter a valid email address.'); return; }
+
+            const guests = parseInt(guestCountEl?.value) || 0;
+            const vipList = (vipListEl?.value || "").trim();
+            const vipCount = vipList ? vipList.split(",").map(s => s.trim()).filter(Boolean).length : 0;
+
+            const { subtotal, tax, total } = computeTotal(guests, vipCount);
+
+            let actualUsername = "guest";
+            const token = localStorage.getItem('token');
+            if (token) {
+              try {
+                const decoded = JSON.parse(atob(token.split('.')[1]));
+                if (decoded && decoded.username) {
+                  actualUsername = decoded.username;
+                }
+              } catch (e) { }
+            }
+
+            const reservation = {
+              type: "lounge",
+              username: actualUsername,
+              lounge: loungeId,
+              date: dateEl?.value || "",
+              time: timeEl?.value || "",
+              guests,
+              vipList,
+              requests: specialRequestsEl?.value || "",
+              firstName: (document.getElementById("firstName")?.value) || "",
+              lastName: (document.getElementById("lastName")?.value) || "",
+              email: (document.getElementById("emailAddress")?.value) || "",
+              phone: (document.getElementById("phoneNumber")?.value) || "",
+              pricePerGuest,
+              vipMultiplier,
+              taxRate,
+              subtotal,
+              tax,
+              total
+            };
+
+            try {
+              const resp = await fetch(`${API_BASE}/api/bookings`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(reservation)
+              });
+
+              if (resp.ok) {
+                const booking = await resp.json();
+                window.location.href = `/confirmation.html?id=${booking._id}`;
+              } else {
+                const text = await resp.text().catch(() => "");
+                alert("❌ Failed to save lounge booking. " + (text || `code ${resp.status}`));
+              }
+            } catch (err) {
+              console.error("Booking error:", err);
+              alert("⚠️ Error connecting to server.");
+            }
+          });
+        }
+        window.currentLounge = lounge;
+        loadReviews();
+      } catch (err) {
+        console.error("❌ Error loading lounge or initializing booking:", err);
+      }
+    }
+
+    // --- Reviews Logic ---
+    let selectedRating = 0;
+
+    async function loadReviews() {
+      try {
+        const res = await fetch(`/api/reviews/${loungeId}`);
+        const reviews = await res.json();
+        const list = document.getElementById('reviews-list');
+
+        let avgText = "No reviews yet";
+        const lounge = window.currentLounge;
+        if (lounge && lounge.rating && lounge.rating > 0) {
+          avgText = `<i class="fas fa-star" style="color:#ffd700;"></i> ${lounge.rating} <span style="font-size: 1rem; color: #888;">(${lounge.numberOfReviews || reviews.length} reviews)</span>`;
+        }
+        document.getElementById('rating-avg').innerHTML = avgText;
+
+        if (reviews.length === 0) {
+          list.innerHTML = "<p>No reviews yet. Be the first to share your experience!</p>";
+        } else {
+          list.innerHTML = reviews.map(r => `
+        <div class="review-item">
+          <div class="review-header">
+            <span class="review-author">${r.user?.name || r.user?.username || 'Anonymous Elite'} <i class="fas fa-check-circle" style="color: #ffd700; margin-left: 5px;" title="Verified Booking"></i> <span style="font-size: 0.85em; color: #ffd700; font-weight: 500;">Verified User</span></span>
+            <span class="review-date">${new Date(r.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+          </div>
+          <div class="stars">${'<i class="fas fa-star"></i>'.repeat(r.rating)}${'<i class="far fa-star" style="color:#555"></i>'.repeat(5 - r.rating)}</div>
+          <p style="color: #ccc; margin-top: 10px;">${r.comment}</p>
+        </div>
+      `).join('');
+        }
+      } catch (e) {
+        console.error("Error loading reviews:", e);
+        document.getElementById('reviews-list').innerHTML = "<p>Error loading reviews.</p>";
+      }
+    }
+  </script>
+
+
+
+</body>
+
+</html>

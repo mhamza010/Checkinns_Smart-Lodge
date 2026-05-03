@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reserve Table - Azure Sky Restaurant</title>
+  <link rel="stylesheet" href="checkinns3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    body {
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    .booking-header {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      text-align: center;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(255, 107, 107, 0.10);
+    }
+
+    .booking-header h1 {
+      font-size: 2.3rem;
+      color: #ee5a24;
+      margin-bottom: 10px;
+    }
+
+    .restaurant-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 15px;
+    }
+
+    .restaurant-image {
+      width: 80px;
+      height: 80px;
+      border-radius: 15px;
+      object-fit: cover;
+    }
+
+    .restaurant-details h3 {
+      color: #333;
+      margin-bottom: 5px;
+    }
+
+    .restaurant-details p {
+      color: #666;
+    }
+
+    .booking-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+    }
+
+    .booking-form-section,
+    .summary-section {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(255, 107, 107, 0.10);
+    }
+
+    .summary-section {
+      position: sticky;
+      top: 20px;
+      height: fit-content;
+    }
+
+    .section-title {
+      font-size: 1.5rem;
+      margin-bottom: 20px;
+      color: #ee5a24;
+      border-bottom: 3px solid #ff6b6b;
+      padding-bottom: 10px;
+    }
+
+    .form-group {
+      margin-bottom: 22px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 13px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-size: 1rem;
+      transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: #ee5a24;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .reserve-btn {
+      width: 100%;
+      padding: 18px;
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 18px;
+    }
+
+    .reserve-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(255, 107, 107, 0.18);
+    }
+
+    .summary-list {
+      margin-bottom: 18px;
+    }
+
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding: 8px 0;
+      border-bottom: 1px solid #eee;
+    }
+
+    .summary-item:last-child {
+      border-bottom: none;
+      font-weight: bold;
+      color: #ee5a24;
+    }
+
+    .total-guests {
+      font-size: 1.1rem;
+      color: #259bfc;
+      font-weight: 600;
+    }
+
+    @media (max-width: 900px) {
+      .booking-content {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Login modal */
+    .login-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.6);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .login-content {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      width: 350px;
+      text-align: center;
+      position: relative;
+    }
+
+    .login-logo {
+      font-size: 2rem;
+      color: #ee5a24;
+      margin-bottom: 10px;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 12px;
+      margin: 10px 0;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+    }
+
+    .login-button {
+      background: #ee5a24;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 10px;
+      width: 100%;
+      font-weight: 600;
+      cursor: pointer;
+    }
+
+    .close-modal {
+      position: absolute;
+      right: 10px;
+      top: 10px;
+      border: none;
+      background: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    /* --- Reviews --- */
+    .reviews-section {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      margin-top: 30px;
+      box-shadow: 0 10px 30px rgba(255, 107, 107, 0.10);
+      grid-column: 1 / -1;
+    }
+
+    .review-item {
+      border-bottom: 1px solid #e0e0e0;
+      padding-bottom: 15px;
+      margin-bottom: 15px;
+    }
+
+    .review-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .stars {
+      color: #f5b301;
+      margin-bottom: 5px;
+    }
+
+    .review-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 5px;
+    }
+
+    .review-author {
+      font-weight: bold;
+      color: #333;
+    }
+
+    .review-date {
+      color: #888;
+      font-size: 0.9em;
+    }
+
+    .review-form {
+      margin-top: 30px;
+      padding-top: 20px;
+      border-top: 2px solid #e0e0e0;
+    }
+
+    .star-select {
+      font-size: 1.5rem;
+      color: #ccc;
+      cursor: pointer;
+      transition: color 0.2s;
+    }
+
+    .star-select.active,
+    .star-select:hover {
+      color: #f5b301;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="booking-header">
+      <h1>Reserve Your Table</h1>
+      <div class="restaurant-info">
+        <img id="restaurantImage" src="/images/logo.png" alt="Restaurant" class="restaurant-image"
+          onerror="this.onerror=null;this.src='/images/logo.png'">
+        <div class="restaurant-details">
+          <h3 id="restaurantName"></h3>
+          <p id="restaurantCuisine"></p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="booking-content">
+    <!-- FORM -->
+    <div class="booking-form-section">
+      <h2 class="section-title">Reservation Details</h2>
+      <form id="reservationForm">
+        <div class="form-row">
+          <div class="form-group"><label>Date</label><input type="date" id="resDate" required></div>
+          <div class="form-group">
+            <label>Time</label>
+            <select id="resTime" required>
+              <option value="">Select Time</option>
+              <option value="18:00">6:00 PM</option>
+              <option value="18:30">6:30 PM</option>
+              <option value="19:00">7:00 PM</option>
+              <option value="19:30">7:30 PM</option>
+              <option value="20:00">8:00 PM</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group"><label>Number of Guests</label>
+          <select id="guestCount" required>
+            <option value="">Select Guests</option>
+            <option value="2">2 Guests</option>
+            <option value="4">4 Guests</option>
+            <option value="6">6 Guests</option>
+            <option value="8">8+ Guests</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Table Preference</label>
+          <select id="tablePref">
+            <option value="">No Preference</option>
+            <option value="Window">Window</option>
+            <option value="Outdoor">Outdoor</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" id="firstName" required></div>
+          <div class="form-group"><label>Last Name</label><input type="text" id="lastName" required></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Email</label><input type="email" id="emailAddress" required></div>
+          <div class="form-group"><label>Phone</label><input type="tel" id="phoneNumber" required></div>
+        </div>
+        <div class="form-group"><label>Special Requests</label><textarea id="specialRequests" rows="3"></textarea></div>
+        <button type="submit" class="reserve-btn"><i class="fas fa-calendar-check"></i> Confirm Reservation</button>
+      </form>
+    </div>
+    <!-- SUMMARY -->
+    <div class="summary-section">
+      <h2 class="section-title">Reservation Summary</h2>
+      <div class="summary-list">
+        <div class="summary-item"><span>Date:</span> <span id="summaryDate">-</span></div>
+        <div class="summary-item"><span>Time:</span> <span id="summaryTime">-</span></div>
+        <div class="summary-item"><span>Guests:</span> <span id="summaryGuests">-</span></div>
+        <div class="summary-item"><span>Table:</span> <span id="summaryTable">-</span></div>
+      </div>
+      <div class="total-guests">We look forward to serving you!</div>
+    </div>
+  </div>
+
+  <!-- Reviews Section -->
+  <div class="reviews-section">
+    <h2 class="section-title">Customer Reviews <span id="rating-avg"
+        style="float: right; font-size: 1.2rem; font-weight: normal; color: #333; border: none;"></span></h2>
+    <div id="reviews-list">
+      <p>Loading reviews...</p>
+    </div>
+  </div>
+  </div>
+
+  <!-- LOGIN MODAL -->
+  <div class="login-modal" id="loginModal" style="display:none;">
+    <div class="login-content">
+      <button class="close-modal" onclick="closeLoginModal()">×</button>
+      <div class="login-logo"><i class="fas fa-utensils"></i></div>
+      <h2>Welcome Back</h2>
+      <p>Please login to confirm your reservation</p>
+      <form class="login-form" id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email Address" required>
+        <input type="password" id="loginPassword" placeholder="Password" required>
+        <button type="submit" class="login-button">Login</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Require login: if no user token, redirect to login with return URL
+    (function requireUserLogin() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        const redirectUrl = 'auth.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.replace(redirectUrl);
+      }
+    })();
+    const API_BASE = "http://localhost:5000";
+    const params = new URLSearchParams(window.location.search);
+    const restaurantId = params.get("id");
+
+    // ✅ Function to update summary panel
+    function updateSummary() {
+      document.getElementById("summaryDate").innerText = document.getElementById("resDate").value || "-";
+      document.getElementById("summaryTime").innerText = document.getElementById("resTime").value || "-";
+      document.getElementById("summaryGuests").innerText = document.getElementById("guestCount").value || "-";
+      document.getElementById("summaryTable").innerText = document.getElementById("tablePref").value || "No Preference";
+    }
+
+    // ✅ Function to load restaurant details
+    async function loadRestaurant() {
+      try {
+        const res = await fetch(`${API_BASE}/api/restaurants/${restaurantId}`);
+        if (!res.ok) throw new Error("Failed to fetch restaurant");
+        const restaurant = await res.json();
+
+        // Fields per models/Restaurant.js: mainImage, images[], cuisines[]
+        document.getElementById("restaurantName").innerText = restaurant.name || "";
+        document.getElementById("restaurantCuisine").innerText = Array.isArray(restaurant.cuisines) && restaurant.cuisines.length
+          ? restaurant.cuisines.join(", ")
+          : "";
+        const img = restaurant.mainImage || (restaurant.images && restaurant.images[0]) || "/images/logo.png";
+        document.getElementById("restaurantImage").src = encodeURI(img);
+
+        window.currentRestaurant = restaurant;
+        loadReviews();
+      } catch (err) {
+        console.error("❌ Error loading restaurant:", err);
+      }
+    }
+
+    // --- Reviews Logic ---
+    document.addEventListener("DOMContentLoaded", () => {
+      // Other loaded events...
+    });
+
+    async function loadReviews() {
+      try {
+        const res = await fetch(`/api/reviews/${restaurantId}`);
+        const reviews = await res.json();
+        const list = document.getElementById('reviews-list');
+
+        let avgText = "No reviews yet";
+        const rest = window.currentRestaurant;
+        if (rest && rest.rating && rest.rating > 0) {
+          avgText = `<i class="fas fa-star" style="color:#f5b301;"></i> ${rest.rating} <span style="font-size: 1rem; color: #888;">(${rest.numberOfReviews || reviews.length} reviews)</span>`;
+        }
+        document.getElementById('rating-avg').innerHTML = avgText;
+
+        if (reviews.length === 0) {
+          list.innerHTML = "<p>No reviews yet. Be the first to share your experience!</p>";
+        } else {
+          list.innerHTML = reviews.map(r => `
+        <div class="review-item">
+          <div class="review-header">
+            <span class="review-author">${r.user?.name || r.user?.username || 'Anonymous'} <i class="fas fa-check-circle" style="color: #28a745; margin-left: 5px;" title="Verified Booking"></i> <span style="font-size: 0.85em; color: #28a745; font-weight: 500;">Verified User</span></span>
+            <span class="review-date">${new Date(r.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</span>
+          </div>
+          <div class="stars">${'<i class="fas fa-star"></i>'.repeat(r.rating)}${'<i class="far fa-star"></i>'.repeat(5 - r.rating)}</div>
+          <p style="color: #444; margin-top: 10px;">${r.comment}</p>
+        </div>
+      `).join('');
+        }
+      } catch (e) {
+        console.error("Error loading reviews:", e);
+        document.getElementById('reviews-list').innerHTML = "<p>Error loading reviews.</p>";
+      }
+    }
+
+    // ✅ Set min date & summary updates
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("resDate").min = new Date().toISOString().split("T")[0];
+
+      ["resDate", "resTime", "guestCount", "tablePref"].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener("input", updateSummary);
+      });
+
+      loadRestaurant();
+
+      // ✅ Submit reservation
+      document.getElementById("reservationForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        const firstName = document.getElementById("firstName").value;
+        const lastName = document.getElementById("lastName").value;
+        const emailAddress = document.getElementById("emailAddress").value;
+        const phoneNumber = document.getElementById("phoneNumber").value;
+
+        const nameRegex = /^[A-Za-z\s\-]+$/;
+        if (!nameRegex.test(firstName)) { alert('First name can only contain letters.'); return; }
+        if (!nameRegex.test(lastName)) { alert('Last name can only contain letters.'); return; }
+        const phoneRegex = /^[0-9\s()+-]+$/;
+        if (!phoneRegex.test(phoneNumber)) { alert('Phone number cannot contain letters.'); return; }
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(emailAddress)) { alert('Please enter a valid email address.'); return; }
+
+        let actualUsername = "guest";
+        const token = localStorage.getItem('token');
+        if (token) {
+          try {
+            const decoded = JSON.parse(atob(token.split('.')[1]));
+            if (decoded && decoded.username) {
+              actualUsername = decoded.username;
+            }
+          } catch (e) { }
+        }
+
+        const bookingData = {
+          type: "restaurant",
+          username: actualUsername,
+          restaurant: restaurantId,
+          date: document.getElementById("resDate").value,
+          time: document.getElementById("resTime").value,
+          guests: document.getElementById("guestCount").value,
+          tablePref: document.getElementById("tablePref").value,
+          firstName: document.getElementById("firstName").value,
+          lastName: document.getElementById("lastName").value,
+          email: document.getElementById("emailAddress").value,
+          phone: document.getElementById("phoneNumber").value,
+          specialRequests: document.getElementById("specialRequests").value
+        };
+
+        console.log("📦 Sending booking data:", bookingData);
+
+        try {
+          const res = await fetch(`${API_BASE}/api/bookings`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(bookingData)
+          });
+
+          if (!res.ok) throw new Error("Failed to save booking");
+          const booking = await res.json();
+          // Redirect to shared confirmation page
+          window.location.href = `/confirmation.html?id=${booking._id}`;
+        } catch (err) {
+          alert("❌ Failed to save restaurant booking.");
+          console.error(err);
+        }
+      });
+    });
+  </script>
+
+
+
+</body>
+
+</html>

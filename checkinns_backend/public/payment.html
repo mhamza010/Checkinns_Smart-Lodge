@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Secure Payment — CheckInns</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    :root {
+      --brand: #4A3AFF;
+      --brand-2: #6a5acd;
+      --bg: linear-gradient(135deg, #1f1c2c, #928DAB);
+      --panel: #ffffff;
+      --muted: #666;
+      --success: #22c55e;
+      --error: #ef4444;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Poppins', system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      background: var(--bg);
+      color: #111;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 980px;
+      background: var(--panel);
+      border-radius: 24px;
+      padding: 28px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand img {
+      width: 44px;
+      height: 44px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .brand h1 {
+      margin: 0;
+      font-size: 1.4rem;
+      color: var(--brand);
+      letter-spacing: .3px;
+    }
+
+    .sub {
+      color: var(--muted);
+      margin-bottom: 22px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 24px;
+    }
+
+    @media (max-width: 880px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .card {
+      background: #f8f9ff;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+    }
+
+    .card h3 {
+      margin: 0 0 14px;
+      color: var(--brand);
+      font-size: 1.1rem;
+    }
+
+    .row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px dashed #e3e4fb;
+    }
+
+    .row:last-child {
+      border-bottom: 0;
+    }
+
+    .grand {
+      display: flex;
+      justify-content: space-between;
+      font-weight: 700;
+      color: var(--brand);
+      padding-top: 10px;
+      border-top: 2px solid var(--brand);
+      margin-top: 6px;
+    }
+
+    .form {
+      display: grid;
+      gap: 14px;
+    }
+
+    label {
+      font-weight: 600;
+      color: #333;
+      font-size: .95rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 12px 14px;
+      border-radius: 10px;
+      border: 2px solid #e6e7fb;
+      font-size: 1rem;
+      outline: none;
+      transition: .15s border-color ease;
+      background: #fff;
+    }
+
+    input:focus {
+      border-color: var(--brand);
+    }
+
+    #payment-element {
+      padding: 12px;
+      border: 2px solid #e6e7fb;
+      border-radius: 12px;
+      background: #fff;
+    }
+
+    .actions {
+      margin-top: 10px;
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      color: #fff;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      padding: 14px 22px;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease;
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 10px 22px rgba(74, 58, 255, 0.28);
+    }
+
+    .btn.secondary {
+      background: #fff;
+      color: var(--brand);
+      border: 2px solid var(--brand);
+    }
+
+    .status {
+      font-size: .95rem;
+      color: var(--muted);
+    }
+
+    /* Modal */
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, .5);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 50;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 460px;
+      background: #fff;
+      border-radius: 16px;
+      padding: 22px;
+      text-align: center;
+    }
+
+    .modal .icon {
+      font-size: 44px;
+      margin-bottom: 10px;
+    }
+
+    .modal.success .icon {
+      color: var(--success);
+    }
+
+    .modal.error .icon {
+      color: var(--error);
+    }
+
+    .modal h4 {
+      margin: 6px 0 8px;
+      font-size: 1.25rem;
+    }
+
+    .modal p {
+      color: #555;
+      margin: 0 0 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="brand">
+        <img src="/images/Logo Checkinns.png" alt="CheckInns" />
+        <h1>CheckInns — Secure Payment</h1>
+      </div>
+      <a class="btn secondary" href="/" role="button"><i class="fas fa-home"></i> Home</a>
+    </div>
+    <div class="sub">Review your booking details and complete your payment securely. Your data is encrypted and
+      processed by Stripe.</div>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Pay with Card</h3>
+        <form id="payment-form" class="form" aria-labelledby="payWithCardHeading">
+          <span id="payWithCardHeading" class="sr-only"
+            style="position:absolute;left:-10000px;top:auto;width:1px;height:1px;overflow:hidden;">Payment form</span>
+
+          <div id="payment-element">
+            <!-- Stripe Payment Element will be injected here -->
+            <div style="text-align: center; padding: 20px; color: var(--muted);">
+              <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 10px;"></i>
+              <p>Loading secure payment gateway...</p>
+            </div>
+          </div>
+
+          <div id="payment-message" style="display: none; color: var(--error); font-size: 0.9em; margin-top: 8px;">
+          </div>
+
+          <div
+            style="font-size:.85rem;color:#555;background:#f5f6ff;border:1px solid #d7d8fb;border-radius:10px;padding:12px; margin-top: 10px;">
+            <strong>Test Mode Enabled:</strong>
+            Use Stripe Sandbox card <code>4242 4242 4242 4242</code>, any future expiry, any CVC.
+          </div>
+          <div class="actions">
+            <button class="btn" id="submit"><i class="fas fa-lock"></i> Pay Now</button>
+            <span class="status" id="status"></span>
+          </div>
+        </form>
+      </div>
+      <div class="card">
+        <h3>Booking Summary</h3>
+        <div class="row"><span>Guest</span><span id="sumGuest">—</span></div>
+        <div class="row"><span>Hotel</span><span id="sumHotel">—</span></div>
+        <div class="row"><span>Room</span><span id="sumRoom">—</span></div>
+        <div class="row"><span>Nights</span><span id="sumNights">—</span></div>
+        <div class="row"><span>Amenities</span><span id="sumAmenities">—</span></div>
+        <div class="row"><span>Tax</span><span id="sumTax">$0</span></div>
+        <div class="grand"><span>Total</span><span id="sumTotal">$0</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Success Modal -->
+  <div class="modal-backdrop" id="modalSuccess">
+    <div class="modal success">
+      <div class="icon"><i class="fas fa-circle-check"></i></div>
+      <h4>Payment Successful</h4>
+      <p>Your payment has been processed. Redirecting to confirmation…</p>
+      <button class="btn" onclick="closeModal('modalSuccess')">OK</button>
+    </div>
+  </div>
+  <!-- Error Modal -->
+  <div class="modal-backdrop" id="modalError">
+    <div class="modal error">
+      <div class="icon"><i class="fas fa-circle-xmark"></i></div>
+      <h4>Payment Failed</h4>
+      <p id="errorText">There was an error processing your payment. Please try again.</p>
+      <button class="btn secondary" onclick="closeModal('modalError')">Close</button>
+    </div>
+  </div>
+
+  <script>
+    // Require login: if no user token, redirect to login with return URL
+    (function requireUserLogin() {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        const redirectUrl = 'auth.html?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
+        window.location.replace(redirectUrl);
+      }
+    })();
+
+    // --- Currency helpers ---
+    function getCurrencySettings() {
+      const code = localStorage.getItem('currency_code') || 'USD';
+      const rates = { USD: 1, KWD: 0.31, SAR: 3.75, PKR: 278, QAR: 3.64 };
+      const symbols = { USD: '$', KWD: 'KD ', SAR: 'SAR ', PKR: 'Rs ', QAR: 'QAR ' };
+      return { code, rate: rates[code] || 1, symbol: symbols[code] || '$' };
+    }
+    function formatMoneyUSDToCurrent(amountUSD) {
+      const { rate, symbol } = getCurrencySettings();
+      const val = Number(amountUSD || 0) * rate;
+      return symbol + (Math.round(val * 100) / 100).toFixed(2);
+    }
+    const params = new URLSearchParams(window.location.search);
+    const bookingId = params.get('bookingId');
+    let stripe, elements, clientSecret, paymentIntentId;
+    let cardNumberEl, cardExpiryEl, cardCvcEl;
+
+    function showMessage(messageText) {
+      const messageContainer = document.querySelector("#payment-message");
+      messageContainer.style.display = "block";
+      messageContainer.textContent = messageText;
+      setTimeout(function () {
+        messageContainer.style.display = "none";
+        messageContainer.textContent = "";
+      }, 5000);
+    }
+
+    function showModal(id) {
+      document.getElementById(id).style.display = 'flex';
+    }
+    function closeModal(id) {
+      document.getElementById(id).style.display = 'none';
+    }
+
+    async function loadBooking() {
+      const res = await fetch(`/api/bookings/${bookingId}`);
+      const b = await res.json();
+      // Fill summary
+      document.getElementById('sumGuest').textContent = b.username || 'Guest';
+      document.getElementById('sumHotel').textContent = b.hotel?.name || '—';
+      document.getElementById('sumRoom').textContent = `${b.room?.name || ''} (${formatMoneyUSDToCurrent(b.room?.price || 0)}/night)`;
+      document.getElementById('sumNights').textContent = b.nights || 1;
+      document.getElementById('sumAmenities').textContent = b.amenities?.length ? b.amenities.map(a => `${a.name}${a.price > 0 ? ` (${formatMoneyUSDToCurrent(a.price)}/night)` : ''}`).join(', ') : 'None';
+      document.getElementById('sumTax').textContent = `${formatMoneyUSDToCurrent(Number(b.tax || 0))}`;
+      document.getElementById('sumTotal').textContent = `${formatMoneyUSDToCurrent(Number(b.totalPrice || 0))}`;
+    }
+
+    async function setupStripe() {
+      // Get publishable key
+      const cfg = await (await fetch('/api/payments/config')).json();
+      if (!cfg.publishableKey) {
+        document.getElementById('status').textContent = 'Stripe not configured.';
+        document.getElementById('submit').disabled = true;
+        return;
+      }
+      stripe = Stripe(cfg.publishableKey);
+
+      // Create PaymentIntent
+      if (!bookingId) {
+        document.getElementById('status').textContent = 'Missing booking ID.';
+        return;
+      }
+
+      const intentRes = await fetch('/api/payments/create-intent', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ bookingId })
+      });
+
+      if (!intentRes.ok) {
+        document.getElementById('status').textContent = 'Failed to create payment intent. Backend error.';
+        return;
+      }
+
+      const intent = await intentRes.json();
+      clientSecret = intent.clientSecret;
+      paymentIntentId = intent.paymentIntentId;
+
+      // Mount Unified Payment Element
+      const appearance = {
+        theme: 'stripe',
+        variables: {
+          colorPrimary: '#4A3AFF',
+          colorBackground: '#ffffff',
+          colorText: '#111111',
+          colorDanger: '#ef4444',
+          fontFamily: 'Poppins, system-ui, sans-serif',
+          spacingUnit: '4px',
+          borderRadius: '10px'
+        },
+        rules: {
+          '.Input': {
+            border: '2px solid #e6e7fb',
+            boxShadow: 'none',
+          },
+          '.Input:focus': {
+            borderColor: '#4A3AFF',
+            boxShadow: '0 0 0 1px #4A3AFF'
+          },
+          '.Tab': {
+            border: '2px solid #e6e7fb',
+            boxShadow: 'none',
+          },
+          '.Tab--selected': {
+            borderColor: '#4A3AFF',
+            borderWidth: '2px'
+          }
+        }
+      };
+
+      elements = stripe.elements({ appearance, clientSecret });
+
+      const paymentElementOptions = {
+        layout: "tabs",
+      };
+
+      const paymentElement = elements.create("payment", paymentElementOptions);
+      document.getElementById('payment-element').innerHTML = ''; // clear loading state
+      paymentElement.mount("#payment-element");
+    }
+
+    async function init() {
+      if (bookingId) {
+        await loadBooking();
+      }
+      await setupStripe();
+
+      const form = document.getElementById('payment-form');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+
+        if (!stripe || !elements) return;
+
+        document.getElementById('status').textContent = 'Processing…';
+        document.getElementById('submit').disabled = true;
+
+        const { error, paymentIntent } = await stripe.confirmPayment({
+          elements,
+          confirmParams: {
+            return_url: window.location.origin + `/confirmation.html?id=${bookingId}`,
+          },
+          redirect: "if_required" // Attempt to handle without redirect
+        });
+
+        if (error) {
+          if (error.type === "card_error" || error.type === "validation_error") {
+            showMessage(error.message);
+          } else {
+            showMessage("An unexpected error occurred.");
+          }
+          document.getElementById('submit').disabled = false;
+          document.getElementById('status').textContent = '';
+          document.getElementById('errorText').textContent = error.message;
+          showModal('modalError');
+        } else if (paymentIntent && paymentIntent.status === 'succeeded') {
+          document.getElementById('status').textContent = '';
+
+          try {
+            await fetch('/api/payments/update-status', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ paymentIntentId: paymentIntent.id || paymentIntentId })
+            });
+          } catch (err) {
+            console.error(err);
+          }
+
+          showModal('modalSuccess');
+          setTimeout(() => {
+            window.location.href = `/confirmation.html?id=${bookingId}`;
+          }, 1500);
+        }
+      });
+    }
+
+    init();
+  </script>
+</body>
+
+</html>

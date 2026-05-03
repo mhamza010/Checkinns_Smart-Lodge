@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hotel Details</title>
+  <link rel="icon" href="/images/logo.png">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* ✅ Clean styles */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #bbbbd8 100%);
+      color: #333;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    /* Header */
+    .hotel-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 40px 20px;
+      border-radius: 20px;
+      text-align: center;
+      margin-bottom: 30px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    .hotel-header h1 {
+      font-size: 3rem;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .hotel-stats {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .stat {
+      text-align: center;
+    }
+
+    .stat-number {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #ffd700;
+    }
+
+    /* Buttons */
+    .action-buttons {
+      margin-top: 20px;
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .action-buttons button {
+      padding: 12px 24px;
+      font-size: 1.2rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .book-btn {
+      background: #ffd700;
+      color: #333;
+    }
+
+    .book-btn:hover {
+      background: #e6c200;
+    }
+
+    .fav-btn {
+      background: #ff4d4d;
+      color: white;
+    }
+
+    .fav-btn:hover {
+      background: #e63939;
+    }
+
+    /* Gallery */
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+      margin: 30px 0;
+    }
+
+    .gallery img {
+      width: 100%;
+      height: 250px;
+      object-fit: cover;
+      border-radius: 15px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease;
+    }
+
+    .gallery img:hover {
+      transform: scale(1.05);
+    }
+
+    /* Main content */
+    .main-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    .hotel-info,
+    .amenities-section {
+      background: white;
+      padding: 30px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+
+    .section-title {
+      font-size: 1.8rem;
+      margin-bottom: 20px;
+      color: #333;
+      border-bottom: 3px solid #667eea;
+      padding-bottom: 10px;
+    }
+
+    /* Rooms */
+    .room-option {
+      border: 2px solid #e0e0e0;
+      border-radius: 15px;
+      padding: 20px;
+      margin-bottom: 15px;
+      transition: all 0.3s ease;
+    }
+
+    .room-option:hover {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+    }
+
+    .room-price {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #667eea;
+      margin: 8px 0;
+    }
+
+    /* Amenities */
+    .amenities-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .amenity-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+    }
+
+    .amenity-item:hover {
+      border-color: #667eea;
+      background: linear-gradient(135deg, #f8f9ff 0%, #e8ecff 100%);
+    }
+
+    .amenity-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .amenity-icon {
+      font-size: 1.2rem;
+      color: #667eea;
+    }
+
+    .amenity-name {
+      font-weight: 500;
+    }
+
+    .amenity-price {
+      font-weight: bold;
+      color: #444;
+    }
+
+    @media (max-width: 768px) {
+      .main-content {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div id="hotel-container"></div>
+  </div>
+
+  <script>
+    // --- Currency helpers ---
+    function getCurrencySettings() {
+      const code = localStorage.getItem('currency_code') || 'USD';
+      const rates = { USD: 1, KWD: 0.31, SAR: 3.75, PKR: 278, QAR: 3.64 };
+      const symbols = { USD: '$', KWD: 'KD ', SAR: 'SAR ', PKR: 'Rs ', QAR: 'QAR ' };
+      return { code, rate: rates[code] || 1, symbol: symbols[code] || '$' };
+    }
+    function formatMoneyUSDToCurrent(amountUSD) {
+      const { rate, symbol } = getCurrencySettings();
+      const val = Number(amountUSD || 0) * rate;
+      return symbol + (Math.round(val * 100) / 100).toFixed(2);
+    }
+
+    async function loadHotel() {
+      const params = new URLSearchParams(window.location.search);
+      const id = params.get("id");
+
+      const res = await fetch(`/api/hotels/${id}`);
+      const hotel = await res.json();
+
+      document.title = hotel.name;
+
+      document.getElementById("hotel-container").innerHTML = `
+       <div class="hotel-header">
+          <h1>${hotel.name}</h1>
+          <p>${hotel.description}</p>
+          <div class="hotel-stats">
+            <div class="stat">
+              <div class="stat-number">${hotel.rating || "N/A"}</div>
+              <div>Guest Rating</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number">${formatMoneyUSDToCurrent(hotel.pricePerNight)}</div>
+              <div>Per Night</div>
+            </div>
+            <div class="stat">
+              <div class="stat-number">★</div>
+              <div>Luxury Class</div>
+            </div>
+          </div>
+
+          <!-- ✅ Action buttons and Availability -->
+          <div class="availability-check" style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">
+            <h3 style="margin-bottom: 10px; font-size: 1.2rem;">Check Availability to Book</h3>
+            <div style="display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; align-items: center;">
+              <input type="date" id="detailCheckIn" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; color: #333;" required>
+              <input type="date" id="detailCheckOut" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; color: #333;" required>
+              <select id="detailRoomSelection" style="padding: 10px; border-radius: 5px; border: 1px solid #ccc; color: #333;">
+                ${hotel.rooms.map(r => `<option value="${r.name}">${r.name}</option>`).join("")}
+              </select>
+            </div>
+            <div id="avail-message" style="margin-top: 15px; font-weight: bold; font-size: 1.1rem; height: 25px;"></div>
+            
+            <div class="action-buttons" style="margin-top: 15px;">
+              <button class="book-btn" onclick="handleBookCheck('${hotel._id}')">Book Now</button>
+              <button id="addFavoriteBtn" class="fav-btn">⭐ Add to Favorites</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="gallery">
+          ${hotel.images.map(img => `<img src="${encodeURI(img)}" alt="${hotel.name}"
+             onerror="this.onerror=null; if(this.src.toLowerCase().endsWith('.jpeg')){ this.src=this.src.replace(/\\.jpeg$/i,'.jpg'); } else { this.src='/images/logo.png'; }"
+          >`).join("")}
+        </div>
+
+        <div class="main-content">
+          <div class="hotel-info">
+            <h2 class="section-title">Room Options</h2>
+            ${hotel.rooms.map(r => `
+              <div class="room-option">
+                <h3>${r.name}</h3>
+                <div class="room-price">${formatMoneyUSDToCurrent(r.price)} / night</div>
+                <p>${r.description}</p>
+              </div>
+            `).join("")}
+          </div>
+
+          <div class="amenities-section">
+            <h2 class="section-title">Hotel Amenities</h2>
+            <div class="amenities-grid">
+              ${hotel.amenities.map(a => `
+                <div class="amenity-item">
+                  <div class="amenity-info">
+                    <i class="fas fa-check amenity-icon"></i>
+                    <span class="amenity-name">${a.name}</span>
+                  </div>
+                  <span class="amenity-price">
+                    ${a.isPaid ? formatMoneyUSDToCurrent(a.price) : "Included"}
+                  </span>
+                </div>
+              `).join("")}
+            </div>
+          </div>
+        </div>
+      `;
+
+      // ✅ Add to Favorites functionality
+      document.getElementById("addFavoriteBtn").addEventListener("click", async () => {
+        const token = localStorage.getItem("token");
+        const type = "hotel";
+
+        // If not logged in, store favorite locally
+        if (!token) {
+          try {
+            const store = JSON.parse(localStorage.getItem("guestFavorites") || "{}");
+            store.hotels = Array.isArray(store.hotels) ? store.hotels : [];
+            // Avoid duplicates
+            if (!store.hotels.find((h) => h.id === id)) {
+              store.hotels.push({ id, name: hotel.name });
+              localStorage.setItem("guestFavorites", JSON.stringify(store));
+            }
+            alert("Added to favorites ✅");
+          } catch (e) {
+            alert("Could not save favorite locally ❌");
+          }
+          return;
+        }
+
+        // Logged in: call API
+        try {
+          const res = await fetch("/api/users/favorites", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ type, id })
+          });
+
+          if (res.ok) {
+            alert("Added to favorites ✅");
+          } else {
+            alert("Failed to add favorite ❌");
+          }
+        } catch (err) {
+          alert("Error adding favorite");
+        }
+      });
+
+      // Set min dates
+      const today = new Date();
+      const todayStr = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString().split('T')[0];
+      const checkinEl = document.getElementById('detailCheckIn');
+      const checkoutEl = document.getElementById('detailCheckOut');
+      checkinEl.min = todayStr;
+      checkinEl.addEventListener('change', () => {
+        if (!checkinEl.value) return;
+        const inD = new Date(checkinEl.value);
+        const minOut = new Date(inD.getTime() + 24 * 60 * 60 * 1000);
+        const minOutStr = minOut.toISOString().split('T')[0];
+        checkoutEl.min = minOutStr;
+        if (checkoutEl.value && checkoutEl.value < minOutStr) {
+          checkoutEl.value = minOutStr;
+        }
+      });
+
+      // ✅ Booking navigation with auth check
+      window.handleBookCheck = async function (id) {
+        const checkIn = document.getElementById("detailCheckIn").value;
+        const checkOut = document.getElementById("detailCheckOut").value;
+        const roomName = document.getElementById("detailRoomSelection").value;
+        const msgEl = document.getElementById("avail-message");
+
+        if (!checkIn || !checkOut) {
+          msgEl.style.color = "#ffd700";
+          msgEl.innerText = "Please select dates to check availability.";
+          return;
+        }
+
+        msgEl.style.color = "#fff";
+        msgEl.innerText = "Checking availability...";
+
+        try {
+          const res = await fetch("/api/bookings/check-availability", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ hotel: id, roomName, checkIn, checkOut })
+          });
+          const data = await res.json();
+
+          if (data.available) {
+            msgEl.style.color = "#3bd45a";
+            msgEl.innerText = "Available! Redirecting to booking...";
+            setTimeout(() => {
+              const token = localStorage.getItem('token');
+              // Append dates to auto-fill them on the next page (optional enhancement we could handle in booking page later)
+              const target = `booking.html?id=${id}`;
+              if (!token) {
+                window.location.href = `auth.html?redirect=${encodeURIComponent(target)}`;
+              } else {
+                window.location.href = target;
+              }
+            }, 1000);
+          } else {
+            msgEl.style.color = "#fff";
+            msgEl.style.backgroundColor = "rgba(255, 77, 77, 0.9)";
+            msgEl.style.padding = "10px";
+            msgEl.style.borderRadius = "8px";
+            msgEl.style.height = "auto";
+            msgEl.innerHTML = "Sorry, we don't have any rooms free for these dates! All rooms are reserved. But visit next time, we would be greatly happy to see you again! 😊";
+          }
+        } catch (err) {
+          msgEl.style.color = "#ff4d4d";
+          msgEl.innerText = "Error connecting to servers.";
+        }
+      };
+    }
+
+    loadHotel();
+  </script>
+</body>
+
+</html>

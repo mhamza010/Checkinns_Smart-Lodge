@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - CheckInns</title>
+  <link rel="stylesheet" href="checkinns3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    :root {
+      --bg1: #0f1020;
+      --bg2: #1b1d3a;
+      --accent: #9e8bff;
+      --accent2: #68d4ff;
+      --panel: #0f1229;
+      --text: #e8e9ff;
+      --muted: #9aa0c3;
+      --ok: #3bd45a;
+      --err: #ff5e7e;
+    }
+
+    /* ========== LUXURY LOGIN PAGE ========== */
+    .login-page {
+      display: flex;
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(1000px 600px at 10% -10%, #2a2e68 0%, transparent 60%), radial-gradient(1200px 800px at 110% 10%, #1a1e52 0%, transparent 55%), linear-gradient(160deg, var(--bg1), var(--bg2));
+      z-index: 2000;
+      place-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .login-page.hidden {
+      display: none;
+    }
+
+    .glow {
+      position: absolute;
+      inset: -40%;
+      pointer-events: none;
+      background: radial-gradient(600px 400px at 30% 20%, rgba(158, 139, 255, .20), transparent 60%), radial-gradient(600px 400px at 70% 30%, rgba(104, 212, 255, .18), transparent 60%);
+      filter: blur(40px);
+    }
+
+    .shell {
+      position: relative;
+      width: min(1020px, 96vw);
+      height: min(680px, 96vh);
+      background: linear-gradient(180deg, #121437aa, #0f1229cc);
+      border: 1px solid #232756;
+      border-radius: 28px;
+      box-shadow: 0 30px 120px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(255, 255, 255, .03);
+      overflow: hidden;
+    }
+
+    .lux-brand {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      height: 100%;
+    }
+
+    @media (max-width: 860px) {
+      .lux-brand {
+        grid-template-columns: 1fr;
+      }
+
+      .right {
+        display: none
+      }
+    }
+
+    .left {
+      position: relative;
+      padding: 28px 28px 20px 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .hero {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    .badge {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-weight: 700;
+      letter-spacing: .3px;
+      color: #cfd2ff
+    }
+
+    .badge .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .lux-icon {
+      width: 180px;
+      height: 180px;
+      position: relative;
+    }
+
+    .lux-icon .gem {
+      position: absolute;
+      inset: 0;
+      border-radius: 26px;
+      background: conic-gradient(from 0deg, #bbaaff, #87ddff, #bbaaff);
+      filter: blur(0.2px);
+      animation: spin 10s linear infinite;
+      mask: radial-gradient(circle at 50% 50%, black 58%, transparent 60%);
+    }
+
+    .lux-icon .ring {
+      position: absolute;
+      inset: -16px;
+      border-radius: 50%;
+      border: 2px dashed rgba(158, 139, 255, .45);
+      animation: ring 18s linear infinite;
+    }
+
+    .lux-icon .shine {
+      position: absolute;
+      inset: 8px;
+      border-radius: 22px;
+      background: radial-gradient(120px 80px at 30% 20%, rgba(255, 255, 255, .35), transparent 50%);
+      mix-blend-mode: screen;
+      opacity: .8
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @keyframes ring {
+      to {
+        transform: rotate(-360deg)
+      }
+    }
+
+    .right {
+      padding: 28px;
+      background: linear-gradient(180deg, #0b0d22, #0b0d22d0);
+      border-left: 1px solid #232756;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .panel {
+      width: min(420px, 92%);
+      background: rgba(11, 13, 34, .5);
+      border: 1px solid #262b63;
+      border-radius: 18px;
+      padding: 22px 20px;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, .35), inset 0 0 40px rgba(158, 139, 255, .06);
+      backdrop-filter: blur(10px);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      background: #0b0d22;
+      padding: 6px;
+      border-radius: 12px;
+      border: 1px solid #232756;
+      margin-bottom: 16px;
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 10px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      color: #c3c6ff;
+      font-weight: 700;
+      letter-spacing: .2px;
+      transition: .2s
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, #6657ff, #50c2ff);
+      color: white;
+      box-shadow: 0 10px 26px rgba(102, 87, 255, .35)
+    }
+
+    label {
+      display: block;
+      font-size: .92rem;
+      margin: 10px 6px 6px;
+      color: #cfd2ff;
+      font-weight: 600
+    }
+
+    input {
+      width: 100%;
+      padding: 13px 14px;
+      border-radius: 12px;
+      border: 1px solid #2a2e68;
+      background: #0b0f2c;
+      color: #e8e9ff;
+      outline: none;
+      transition: border-color .2s
+    }
+
+    input:focus {
+      border-color: #6b79ff
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px
+    }
+
+    .submit {
+      margin-top: 12px;
+      width: 100%;
+      padding: 13px 16px;
+      font-weight: 800;
+      border: none;
+      border-radius: 12px;
+      color: white;
+      cursor: pointer;
+      background: linear-gradient(135deg, #6b79ff, #50c2ff);
+      box-shadow: 0 12px 26px rgba(80, 194, 255, .25);
+      transition: transform .12s, box-shadow .12s
+    }
+
+    .submit:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 18px 30px rgba(80, 194, 255, .35)
+    }
+
+    .hint {
+      color: var(--muted);
+      font-size: .9rem;
+      text-align: center;
+      margin-top: 10px
+    }
+
+    .err {
+      color: var(--err);
+      font-weight: 700;
+      margin-top: 8px;
+      min-height: 20px
+    }
+
+    .ok {
+      color: var(--ok);
+      font-weight: 700;
+      margin-top: 8px;
+      min-height: 20px
+    }
+
+    /* footer in login overlay only */
+    .login-page .footer {
+      position: absolute;
+      bottom: 16px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      justify-content: space-between;
+      color: #9aa0c3;
+      font-size: .9rem
+    }
+
+    .login-page .footer a {
+      color: #cfd2ff;
+      text-decoration: none
+    }
+
+    /* ========== DASHBOARD STYLES ========== */
+    body {
+      margin: 0;
+      font-family: "Poppins", "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: #eee;
+    }
+
+    .dashboard-wrapper {
+      max-width: 1200px;
+      margin: 3rem auto;
+      padding: 2.5rem;
+      background: rgba(17, 24, 39, 0.85);
+      border-radius: 20px;
+      box-shadow: 0 10px 35px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .logout-btn {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
+      background: linear-gradient(135deg, #ff6b6b, #ee5a6f);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .logout-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4);
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      margin-bottom: 2rem;
+      text-align: center;
+      color: #facc15;
+      font-weight: 600;
+      letter-spacing: 1px;
+    }
+
+    section {
+      margin-bottom: 2.2rem;
+      padding: 1.8rem;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 15px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    section:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+    }
+
+    section h2 {
+      margin-top: 0;
+      font-size: 1.5rem;
+      margin-bottom: 1rem;
+      color: #facc15;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      padding-bottom: 0.5rem;
+      font-weight: 500;
+    }
+
+    .profile p {
+      margin: 0.6rem 0;
+      font-size: 1rem;
+    }
+
+    .preferences label {
+      display: block;
+      margin: 1rem 0;
+      font-weight: 500;
+      color: #f8fafc;
+    }
+
+    .preferences input {
+      padding: 0.7rem;
+      width: 100%;
+      max-width: 400px;
+      border: none;
+      border-radius: 8px;
+      margin-top: 0.4rem;
+      font-size: 1rem;
+      background: rgba(255, 255, 255, 0.15);
+      color: #fff;
+      outline: none;
+      transition: background 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .preferences input:focus {
+      background: rgba(255, 255, 255, 0.25);
+      box-shadow: 0 0 8px #facc15;
+    }
+
+    .preferences button {
+      margin-top: 1.2rem;
+      padding: 0.9rem 1.8rem;
+      font-size: 1rem;
+      color: #111;
+      background: linear-gradient(135deg, #facc15, #fbbf24);
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: transform 0.2s ease, box-shadow 0.3s ease;
+    }
+
+    .preferences button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 15px rgba(250, 204, 21, 0.4);
+    }
+
+    .booking-card {
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 1.2rem;
+      margin: 1.2rem 0;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.08);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .booking-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+    }
+
+    .booking-card h3 {
+      margin: 0;
+      font-size: 1.3rem;
+      color: #93c5fd;
+    }
+
+    .booking-card p {
+      margin: 0.4rem 0;
+      font-size: 0.95rem;
+    }
+
+    .favorites h3 {
+      margin-top: 1rem;
+      color: #34d399;
+    }
+
+    .favorites p {
+      margin: 0.5rem 0;
+      padding-left: 1.5rem;
+      font-size: 1rem;
+      position: relative;
+    }
+
+    .favorites p::before {
+      content: "◆";
+      color: #facc15;
+      margin-right: 6px;
+      position: absolute;
+      left: 0;
+    }
+
+    @media (max-width: 768px) {
+      .dashboard-wrapper {
+        padding: 1.2rem;
+      }
+
+      section {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 1.8rem;
+      }
+
+      .logout-btn {
+        position: relative;
+        top: auto;
+        right: auto;
+        width: 100%;
+        margin-bottom: 20px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Dashboard Container -->
+  <div id="dashboardWrapper" class="dashboard-wrapper">
+    <button class="logout-btn" onclick="logout()"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    <h1>Welcome, <span id="username"></span></h1>
+
+    <!-- Profile Section -->
+    <section class="profile">
+      <h2>Your Profile</h2>
+      <p><strong>Name:</strong> <span id="profile-name"></span></p>
+      <p><strong>Email:</strong> <span id="profile-email"></span></p>
+    </section>
+
+    <!-- Preferences Section -->
+    <section class="preferences">
+      <h2>Your Preferences</h2>
+      <form id="dashPreferencesForm">
+        <label>Room Type:
+          <input type="text" id="dashboard-roomType" placeholder="e.g. Royal Suite, Deluxe">
+        </label>
+        <label>Cuisine:
+          <input type="text" id="dashboard-cuisine" placeholder="e.g. Italian, Pakistani, French">
+        </label>
+        <label>Lounge Type:
+          <input type="text" id="dashboard-loungeType" placeholder="e.g. VIP, Classic, Rooftop">
+        </label>
+        <button type="submit">💎 Save Preferences</button>
+      </form>
+    </section>
+
+    <!-- Bookings Section -->
+    <section class="bookings">
+      <h2>Your Bookings</h2>
+      <div id="bookingList">
+        <p>Loading bookings...</p>
+      </div>
+    </section>
+
+    <!-- Favorites Section -->
+    <section class="favorites">
+      <h2>Your Favorites</h2>
+      <div id="favoritesList">
+        <p>Loading favorites...</p>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    const dashboardWrapper = document.getElementById('dashboardWrapper');
+
+    // ========== LOGOUT ==========
+    function logout() {
+      localStorage.removeItem('token');
+      window.location.replace("auth.html?redirect=dashboard_new.html");
+    }
+
+    // ========== CHECK IF ALREADY LOGGED IN ==========
+    function checkLogin() {
+      const token = localStorage.getItem('token');
+      if (!token || token === "undefined" || token === "null") {
+        window.location.replace("auth.html?redirect=dashboard_new.html");
+      } else {
+        dashboardWrapper.style.display = 'block';
+        loadDashboard();
+      }
+    }
+
+    // ========== LOAD DASHBOARD ==========
+    async function loadDashboard() {
+      const token = localStorage.getItem("token");
+
+      try {
+        if (token) {
+          const profileRes = await fetch("/api/users/profile", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!profileRes.ok) throw new Error("Profile fetch failed");
+          const user = await profileRes.json();
+          document.getElementById("username").textContent = user.username || "User";
+          document.getElementById("profile-name").textContent = user.name || "N/A";
+          document.getElementById("profile-email").textContent = user.email || "N/A";
+
+          document.getElementById("dashboard-roomType").value = user.preferences?.roomType || "";
+          document.getElementById("dashboard-cuisine").value = user.preferences?.cuisine || "";
+          document.getElementById("dashboard-loungeType").value = user.preferences?.loungeType || "";
+        } else {
+          throw new Error("No token found");
+        }
+
+        const bookingList = document.getElementById("bookingList");
+        if (token) {
+          const bookingRes = await fetch("/api/users/bookings", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          const bookings = bookingRes.ok ? await bookingRes.json() : [];
+          bookingList.innerHTML = bookings.length === 0
+            ? "<p>No bookings yet.</p>"
+            : bookings.map(b => `
+              <div class="booking-card">
+                <h3>${b.hotel?.name || "Hotel"}</h3>
+                <p><strong>Check-in:</strong> ${b.checkIn ? new Date(b.checkIn).toLocaleDateString() : "N/A"}</p>
+                <p><strong>Check-out:</strong> ${b.checkOut ? new Date(b.checkOut).toLocaleDateString() : "N/A"}</p>
+                <p><strong>Total Price:</strong> $${b.totalPrice || 0}</p>
+              </div>
+            `).join("");
+        } else {
+          bookingList.innerHTML = "<p>Login to view your bookings.</p>";
+        }
+
+        const favList = document.getElementById("favoritesList");
+        if (token) {
+          const favRes = await fetch("/api/users/favorites", {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          let fData = { hotels: [], restaurants: [], lounges: [] };
+          if (favRes.ok) {
+            const data = await favRes.json();
+            fData = data.favorites || fData;
+          }
+          const favorites = fData;
+          favList.innerHTML = `
+            <h3>Hotels</h3> ${favorites.hotels?.length ? favorites.hotels.map(h => `<p>${h.name || h}</p>`).join("") : "<p>No hotels added.</p>"}
+            <h3>Restaurants</h3> ${favorites.restaurants?.length ? favorites.restaurants.map(r => `<p>${r.name || r}</p>`).join("") : "<p>No restaurants added.</p>"}
+            <h3>Lounges</h3> ${favorites.lounges?.length ? favorites.lounges.map(l => `<p>${l.name || l}</p>`).join("") : "<p>No lounges added.</p>"}
+          `;
+        } else {
+          throw new Error("No token found");
+        }
+
+      } catch (err) {
+        console.error("Error loading dashboard:", err);
+        logout();
+      }
+    }
+
+    // ========== PREFERENCES SAVE ==========
+    document.getElementById("dashPreferencesForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert("Please log in to save preferences.");
+        return;
+      }
+      const payload = {
+        roomType: document.getElementById("dashboard-roomType").value,
+        cuisine: document.getElementById("dashboard-cuisine").value,
+        loungeType: document.getElementById("dashboard-loungeType").value,
+      };
+
+      try {
+        const res = await fetch("/api/users/preferences", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Failed to save preferences");
+        alert("✅ Preferences saved successfully!");
+      } catch (err) {
+        alert("⚠️ Error: " + err.message);
+      }
+    });
+
+    // Initialize on page load
+    checkLogin();
+  </script>
+
+  <!-- global footer, mirrors main site style -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section about">
+        <h4>About CheckInns</h4>
+        <p>CheckInns provides seamless booking for hotels, restaurants and lounges worldwide. Our mission is privacy,
+          speed and security.</p>
+      </div>
+      <div class="footer-section links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="checkinns3.html">Browse</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="help.html">Help &amp; FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-section contact">
+        <h4>Contact</h4>
+        <p>Phone: <a href="tel:080099009292">0800&nbsp;990&nbsp;09292</a></p>
+        <p>Email: support@checkinns.com</p>
+      </div>
+    </div>
+    <div class="footer-bottom">&copy; 2026 CheckInns. All rights reserved.</div>
+  </footer>
+</body>
+
+</html>

@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Dashboard - CheckInns</title>
+  <link rel="stylesheet" href="checkinns3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.37.1/apexcharts.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    :root {
+      --bg1: #0f1020;
+      --bg2: #1b1d3a;
+      --accent: #9e8bff;
+      --accent2: #68d4ff;
+      --panel: #0f1229;
+      --text: #e8e9ff;
+      --muted: #9aa0c3;
+      --ok: #3bd45a;
+      --err: #ff5e7e;
+    }
+
+    .login-page {
+      display: flex;
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(1000px 600px at 10% -10%, #2a2e68 0%, transparent 60%), radial-gradient(1200px 800px at 110% 10%, #1a1e52 0%, transparent 55%), linear-gradient(160deg, var(--bg1), var(--bg2));
+      z-index: 2000;
+      place-items: center;
+      justify-content: center;
+    }
+
+    .login-page.hidden {
+      display: none;
+    }
+
+    .shell {
+      position: relative;
+      width: min(1020px, 96vw);
+      height: min(680px, 96vh);
+      background: linear-gradient(180deg, #121437aa, #0f1229cc);
+      border: 1px solid #232756;
+      border-radius: 28px;
+      box-shadow: 0 30px 120px rgba(0, 0, 0, .55), inset 0 0 0 1px rgba(255, 255, 255, .03);
+      overflow: hidden;
+    }
+
+    .lux-brand {
+      position: absolute;
+      inset: 0;
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      height: 100%;
+    }
+
+    @media (max-width: 860px) {
+      .lux-brand {
+        grid-template-columns: 1fr;
+      }
+
+      .right {
+        display: none
+      }
+    }
+
+    .left {
+      position: relative;
+      padding: 28px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .hero {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .badge {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-weight: 700;
+      letter-spacing: .3px;
+      color: #cfd2ff
+    }
+
+    .badge .dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    .lux-icon {
+      width: 180px;
+      height: 180px;
+      position: relative;
+    }
+
+    .lux-icon .gem {
+      position: absolute;
+      inset: 0;
+      border-radius: 26px;
+      background: conic-gradient(from 0deg, #bbaaff, #87ddff, #bbaaff);
+      animation: spin 10s linear infinite;
+    }
+
+    .lux-icon .ring {
+      position: absolute;
+      inset: -16px;
+      border-radius: 50%;
+      border: 2px dashed rgba(158, 139, 255, .45);
+      animation: ring 18s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg)
+      }
+    }
+
+    @keyframes ring {
+      to {
+        transform: rotate(-360deg)
+      }
+    }
+
+    .tagline {
+      color: #cfd2ff;
+      font-size: 13px;
+      text-align: center;
+    }
+
+    .right {
+      position: relative;
+      padding: 48px 32px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 28px;
+      background: linear-gradient(135deg, rgba(158, 139, 255, .05), rgba(104, 212, 255, .05));
+      border-left: 1px solid #232756;
+    }
+
+    .tabs {
+      display: flex;
+      gap: 8px;
+      background: #0d0e1e;
+      padding: 4px;
+      border-radius: 12px;
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 20px;
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: all .3s;
+    }
+
+    .tab-btn.active {
+      background: var(--panel);
+      color: var(--text);
+      box-shadow: 0 4px 12px rgba(158, 139, 255, .25);
+    }
+
+    .auth-form {
+      display: none;
+      animation: fadeIn .3s;
+    }
+
+    .auth-form.active {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+      }
+
+      to {
+        opacity: 1;
+      }
+    }
+
+    .input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .input-group label {
+      font-size: 12px;
+      font-weight: 600;
+      color: #9aa0c3;
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+
+    .input-group input {
+      padding: 12px 16px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid #232756;
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      transition: all .2s;
+    }
+
+    .input-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 12px rgba(158, 139, 255, .25);
+      background: rgba(158, 139, 255, .08);
+    }
+
+    .form-error {
+      font-size: 13px;
+      color: var(--err);
+      margin-top: -4px;
+    }
+
+    .auth-btn {
+      padding: 12px 24px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      border: none;
+      border-radius: 10px;
+      color: #0f1020;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .3s;
+    }
+
+    .auth-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(158, 139, 255, .35);
+    }
+
+    .dashboard-wrapper {
+      display: none;
+      height: 100vh;
+      background: linear-gradient(160deg, var(--bg1), var(--bg2));
+      overflow: hidden;
+    }
+
+    .dashboard-wrapper.active {
+      display: grid;
+      grid-template-columns: 240px 1fr;
+    }
+
+    .sidebar {
+      background: linear-gradient(180deg, #121437, #0d0e1e);
+      border-right: 1px solid #232756;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+    }
+
+    .logo-section {
+      margin-bottom: 30px;
+    }
+
+    .logo-section .logo-text {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 1px;
+    }
+
+    .sidebar-menu {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .menu-item {
+      padding: 12px 16px;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      color: var(--muted);
+      cursor: pointer;
+      transition: all .2s;
+    }
+
+    .menu-item:hover {
+      background: rgba(158, 139, 255, .1);
+      color: var(--text);
+    }
+
+    .menu-item.active {
+      background: rgba(158, 139, 255, .2);
+      color: var(--accent);
+      border-color: var(--accent);
+    }
+
+    .logout-btn {
+      margin-top: auto;
+      padding: 10px 16px;
+      background: var(--err);
+      color: white;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .main-content {
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .content-section {
+      display: none;
+      animation: fadeIn .3s;
+    }
+
+    .content-section.active {
+      display: block;
+    }
+
+    .section-title {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+
+    .profile-card {
+      background: linear-gradient(135deg, rgba(158, 139, 255, .1), rgba(104, 212, 255, .1));
+      border: 1px solid #232756;
+      border-radius: 16px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+
+    .profile-field {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .profile-label {
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .profile-value {
+      color: var(--text);
+      font-weight: 600;
+    }
+
+    .preferences-form {
+      background: linear-gradient(135deg, rgba(158, 139, 255, .1), rgba(104, 212, 255, .1));
+      border: 1px solid #232756;
+      border-radius: 16px;
+      padding: 24px;
+      max-width: 500px;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 14px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px 14px;
+      background: rgba(255, 255, 255, .05);
+      border: 1px solid #232756;
+      border-radius: 8px;
+      color: var(--text);
+    }
+
+    .form-group input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .save-btn {
+      padding: 10px 24px;
+      background: var(--ok);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .list-container {
+      background: linear-gradient(135deg, rgba(158, 139, 255, .1), rgba(104, 212, 255, .1));
+      border: 1px solid #232756;
+      border-radius: 16px;
+      padding: 20px;
+    }
+
+    .list-item {
+      padding: 16px;
+      background: rgba(0, 0, 0, .2);
+      border-radius: 10px;
+      margin-bottom: 12px;
+      transition: all 0.2s;
+    }
+
+    .list-item:hover {
+      background: rgba(158, 139, 255, .1);
+    }
+
+    .list-item p {
+      color: var(--text);
+      margin: 0;
+    }
+
+    .fav-card {
+      background: linear-gradient(135deg, rgba(158, 139, 255, .15), rgba(104, 212, 255, .05));
+      border: 1px solid rgba(158, 139, 255, 0.3);
+      border-radius: 12px;
+      padding: 15px;
+      margin-bottom: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      transition: all 0.3s ease;
+    }
+    .fav-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    }
+    .fav-card .fav-info { flex: 1; }
+    .fav-card strong { color: var(--text); font-size: 1.1em; }
+    .fav-card p { color: var(--muted); margin: 5px 0 0; font-size: 0.9em; }
+    .fav-card .fav-btn {
+      background: rgba(255, 94, 126, 0.1);
+      color: var(--err);
+      border: 1px solid rgba(255, 94, 126, 0.3);
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .fav-card .fav-btn:hover { background: var(--err); color: white; }
+
+    .chart-container {
+      background: linear-gradient(135deg, rgba(158, 139, 255, .1), rgba(104, 212, 255, .1));
+      border: 1px solid #232756;
+      border-radius: 16px;
+      padding: 20px;
+      margin-bottom: 30px;
+      position: relative;
+      height: 300px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, rgba(158, 139, 255, .1), rgba(104, 212, 255, .1));
+      border: 1px solid #232756;
+      border-radius: 16px;
+      padding: 16px;
+      text-align: center;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 12px;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 700;
+    }
+
+    body.light-mode {
+      --bg1: #f5f7fa;
+      --bg2: #e4e7eb;
+      --accent: #6b4ce6;
+      --accent2: #0099cc;
+      --panel: #ffffff;
+      --text: #2d3748;
+      --muted: #718096;
+    }
+
+    body.light-mode .shell {
+      background: #ffffff;
+      border: 1px solid #cbd5e0;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, .1);
+    }
+
+    body.light-mode .login-page {
+      background: linear-gradient(160deg, var(--bg1), var(--bg2));
+    }
+
+    body.light-mode input,
+    body.light-mode textarea,
+    body.light-mode select {
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      color: #0f172a !important;
+    }
+
+    .theme-toggle-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      background: var(--panel);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10000;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle-btn:hover {
+      transform: translateY(-3px) rotate(15deg);
+      box-shadow: 0 6px 16px rgba(158, 139, 255, 0.4);
+    }
+
+    @media (max-width: 860px) {
+      .dashboard-wrapper.active {
+        grid-template-columns: 1fr;
+        grid-template-rows: auto 1fr;
+        height: 100vh;
+      }
+      .sidebar {
+        border-right: none;
+        border-bottom: 1px solid #232756;
+        padding: 15px;
+        flex-direction: row;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        justify-content: space-between;
+      }
+      .sidebar-menu {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 5px;
+        width: 100%;
+        order: 3;
+      }
+      .menu-item {
+        padding: 8px 12px;
+        font-size: 13px;
+        flex: 1;
+        text-align: center;
+      }
+      .logo-section { margin-bottom: 0; }
+      .logout-btn { margin-top: 0; padding: 6px 12px; font-size: 12px; }
+      .main-content { padding: 15px; }
+      .chart-container { height: 250px; }
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <button class="theme-toggle-btn" onclick="toggleTheme()"><i class="fas fa-sun"></i></button>
+  <div id="dashboardWrapper" class="dashboard-wrapper">
+    <div class="sidebar">
+      <div class="logo-section" style="display:flex; align-items:center;">
+        <img src="/images/Logo Checkinns.png" alt="Logo" style="height:35px; background:white; padding:2px; border-radius:5px; margin-right:10px;">
+        <div class="logo-text">Check-Inns</div>
+      </div>
+      <div class="sidebar-menu">
+        <div class="menu-item active" onclick="showSection('profile')"> Profile</div>
+        <div class="menu-item" onclick="showSection('preferences')"> Preferences</div>
+        <div class="menu-item" onclick="showSection('bookings')"> Bookings</div>
+        <div class="menu-item" onclick="showSection('favorites')"> Favorites</div>
+        <div class="menu-item" onclick="showSection('wallet')"> Wallet & Benefits</div>
+        <div class="menu-item" onclick="showSection('notifications')"> Notifications <span id="notif-badge" style="background:var(--err); color:#fff; border-radius:12px; padding:2px 6px; font-size:10px; display:none; margin-left:5px;">0</span></div>
+        <div class="menu-item" onclick="showSection('settings')"> Settings</div>
+      </div>
+      <button class="logout-btn" onclick="logoutUser()">Logout</button>
+    </div>
+
+    <div class="main-content">
+      <section id="profile-section" class="content-section active">
+        <h1 class="section-title">Profile</h1>
+        <div class="profile-card">
+          <div class="profile-field">
+            <span class="profile-label">Name</span>
+            <span id="profile-name" class="profile-value">Loading...</span>
+          </div>
+          <div class="profile-field">
+            <span class="profile-label">Email</span>
+            <span id="profile-email" class="profile-value">Loading...</span>
+          </div>
+          <div class="profile-field">
+            <span class="profile-label">Member Since</span>
+            <span id="profile-date" class="profile-value">Loading...</span>
+          </div>
+        </div>
+      </section>
+
+      <section id="preferences-section" class="content-section">
+        <h1 class="section-title">Preferences</h1>
+        <form id="dashPreferencesForm" class="preferences-form">
+          <div class="form-group">
+            <label>Preferred Hotel Room Type</label>
+            <input type="text" id="pref-roomType" placeholder="e.g. Royal Suite, Deluxe">
+          </div>
+          <div class="form-group">
+            <label>Preferred Restaurant Cuisine</label>
+            <input type="text" id="pref-cuisine" placeholder="e.g. Italian, Pakistani, French">
+          </div>
+          <div class="form-group">
+            <label>Preferred Lounge Type</label>
+            <input type="text" id="pref-loungeType" placeholder="e.g. VIP, Classic, Rooftop">
+          </div>
+          <button type="submit" class="save-btn">Save Preferences</button>
+        </form>
+      </section>
+
+      <section id="bookings-section" class="content-section">
+        <h1 class="section-title">My Bookings</h1>
+
+        <!-- LOYALTY TRACKER -->
+        <div id="loyalty-tracker" style="background: linear-gradient(135deg, rgba(158,139,255,0.1) 0%, rgba(104,212,255,0.1) 100%); border: 1px solid var(--accent); border-radius: 12px; padding: 20px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <h3 style="margin: 0; color: var(--accent);"><i class="fas fa-crown"></i> CheckInns VIP Loyalty</h3>
+                <span id="loyalty-points" style="font-weight: bold; color: var(--text); font-size: 1.2rem;">0 Pts</span>
+            </div>
+            <div style="width: 100%; background: rgba(0,0,0,0.5); border-radius: 10px; height: 10px; overflow: hidden;">
+                <div id="loyalty-progress" style="width: 0%; height: 100%; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 1s ease;"></div>
+            </div>
+            <p id="loyalty-text" style="font-size: 0.85em; color: var(--muted); margin: 8px 0 0 0;">Earn points on every booking to unlock VIP perks!</p>
+            <div id="loyalty-awards" style="display: none; margin-top: 15px; padding: 12px; background: rgba(59, 212, 90, 0.1); border-left: 4px solid var(--ok); border-radius: 6px;">
+                <h4 style="margin: 0; color: var(--ok);"><i class="fas fa-gift"></i> VIP Perks Unlocked!</h4>
+                <p style="margin: 5px 0 0; font-size: 0.85em; color: var(--text);">You now enjoy <strong>Free Lounge Access</strong> and a flat <strong>10% off</strong> on all future luxury bookings!</p>
+            </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Total Bookings</div>
+            <div class="stat-value" id="stat-total-bookings">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Total Spent</div>
+            <div class="stat-value" id="stat-total-spent">$0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">This Month</div>
+            <div class="stat-value" id="stat-month-bookings">0</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-bottom: 24px;">
+            <div class="chart-container" style="height: auto; min-height: 350px;">
+                <h3 style="color: var(--text); margin-top: 0; margin-bottom: 15px; text-align: center;">Bookings by Type</h3>
+                <canvas id="bookingsChart" style="max-height: 250px;"></canvas>
+            </div>
+            <div class="chart-container" style="height: auto; min-height: 350px; background: rgba(255,255,255,0.02); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05);">
+                <h3 style="color: var(--text); margin-top: 0; margin-bottom: 15px; text-align: center;">Spending Analytics</h3>
+                <div id="apex-spending-chart" style="width: 100%; display: flex; justify-content: center;"></div>
+            </div>
+        </div>
+
+        <!-- UPCOMING TRIP & WEATHER -->
+        <h3 style="color:var(--text); margin-bottom:10px;"><i class="fas fa-plane-departure" style="color:var(--ok); margin-right:8px;"></i>Upcoming Trip & Weather</h3>
+        <div id="upcoming-trip-widget" style="background: rgba(255,255,255,0.03); border: 1px solid #232756; border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+            <p style="color:var(--muted); text-align:center; margin: 0;">Analyzing your itinerary...</p>
+        </div>
+
+        <h3 style="color:var(--text);"><i class="fas fa-history" style="color:var(--accent); margin-right:8px;"></i>Recent Activity</h3>
+        <div id="bookings-list" style="display: flex; flex-direction: column; gap: 10px;">
+          <p>Loading bookings...</p>
+        </div>
+      </section>
+
+      <section id="favorites-section" class="content-section">
+        <h1 class="section-title">Favorites</h1>
+        <div id="favorites-list" class="list-container">
+          <p>Loading favorites...</p>
+        </div>
+      </section>
+
+      <section id="wallet-section" class="content-section">
+        <h1 class="section-title">Wallet & Benefits</h1>
+        <div class="profile-card">
+          <h3 style="color:var(--accent); margin-top:0;">Refer-A-Friend</h3>
+          <p style="color:var(--muted); font-size:14px;">Share your unique referral link. When a friend signs up, you instantly get <strong style="color:var(--ok);">500 VIP points</strong>!</p>
+          <div style="margin-top:15px; display:flex; gap:10px;">
+            <input type="text" id="referral-link" readonly style="flex:1; background:rgba(0,0,0,0.3); border:1px solid #232756; color:var(--text); padding:10px; border-radius:8px;">
+            <button onclick="copyRefLink()" class="save-btn" style="white-space:nowrap; background:var(--accent);">Copy Link</button>
+          </div>
+        </div>
+      </section>
+
+      <section id="notifications-section" class="content-section">
+        <h1 class="section-title">Notifications</h1>
+        <div class="list-container" id="notifications-list" style="display: flex; flex-direction: column; gap: 15px;">
+          <p style="color:var(--muted);">Loading notifications...</p>
+        </div>
+      </section>
+
+      <section id="settings-section" class="content-section">
+        <h1 class="section-title">Account Settings</h1>
+        <form id="userSettingsForm" class="preferences-form">
+          <h3 style="margin-top:0; color:var(--text); margin-bottom:15px;">Update Profile</h3>
+          <div class="form-group">
+            <label>Name</label>
+            <input type="text" id="settings-name" placeholder="Your Name">
+          </div>
+          <h3 style="margin-top:30px; color:var(--text); margin-bottom:15px;">Change Password</h3>
+          <div class="form-group">
+            <label>Current Password</label>
+            <input type="password" id="settings-current-password" placeholder="Enter current to change">
+          </div>
+          <div class="form-group">
+            <label>New Password</label>
+            <input type="password" id="settings-new-password" placeholder="Enter new password">
+          </div>
+          <button type="submit" class="save-btn" id="settings-btn">Save Changes</button>
+        </form>
+      </section>
+    </div>
+  </div>
+
+  <!-- REVIEW MODAL -->
+  <div class="login-page" id="reviewModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="shell"
+      style="background: var(--panel); padding: 30px; border-radius: 20px; width: 400px; max-width: 90%; color: var(--text);">
+      <h2 style="margin-bottom: 10px; font-weight: 700;">Rate your experience</h2>
+      <p id="review-property-name" style="color: var(--muted); margin-bottom: 20px;"></p>
+
+      <div id="star-rating" style="margin-bottom: 20px; display: flex; gap: 10px; font-size: 2rem;">
+        <i class="fas fa-star star-select" data-val="1" style="color: #ccc; cursor: pointer;"></i>
+        <i class="fas fa-star star-select" data-val="2" style="color: #ccc; cursor: pointer;"></i>
+        <i class="fas fa-star star-select" data-val="3" style="color: #ccc; cursor: pointer;"></i>
+        <i class="fas fa-star star-select" data-val="4" style="color: #ccc; cursor: pointer;"></i>
+        <i class="fas fa-star star-select" data-val="5" style="color: #ccc; cursor: pointer;"></i>
+      </div>
+
+      <textarea id="reviewComment" rows="4"
+        style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid rgba(158,139,255,0.3); background: transparent; color: var(--text); font-family: inherit; resize: vertical;"
+        placeholder="Tell us how it was..."></textarea>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button id="submitReviewBtn" class="save-btn" style="flex: 1;">Submit</button>
+        <button onclick="closeReviewModal()" class="save-btn"
+          style="flex: 1; background: transparent; border: 1px solid var(--muted); color: var(--muted);">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANCELLATION MODAL -->
+  <div class="login-page" id="cancellationModal"
+    style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="shell"
+      style="background: var(--panel); padding: 30px; border-radius: 20px; width: 400px; max-width: 90%; color: var(--text);">
+      <h2 style="margin-bottom: 10px; font-weight: 700;">Cancel Booking</h2>
+      <p style="color: var(--muted); margin-bottom: 20px;">Please provide a reason for cancelling this booking.</p>
+
+      <textarea id="cancelReason" rows="3"
+        style="width: 100%; padding: 15px; border-radius: 10px; border: 1px solid rgba(158,139,255,0.3); background: transparent; color: var(--text); font-family: inherit; resize: vertical;"
+        placeholder="Reason for cancellation..."></textarea>
+
+      <div style="display: flex; gap: 10px; margin-top: 20px;">
+        <button id="confirmCancelBtn" class="save-btn" style="flex: 1; background: var(--err);">Confirm Cancel</button>
+        <button onclick="closeCancellationModal()" class="save-btn"
+          style="flex: 1; background: transparent; border: 1px solid var(--muted); color: var(--muted);">Keep Booking</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT MODAL -->
+  <div class="login-page" id="chatModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 1000; align-items: center; justify-content: center;">
+    <div class="shell" style="background: var(--panel); padding: 20px; border-radius: 20px; width: 450px; max-width: 90%; color: var(--text); display:flex; flex-direction:column; max-height: 80vh;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 10px;">
+        <h2 id="chat-title" style="margin:0; font-weight: 700;">Host Contact</h2>
+        <button onclick="closeChatModal()" style="background:transparent; border:none; color:var(--muted); font-size:20px; cursor:pointer;"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="chat-messages" style="flex:1; overflow-y:auto; background:rgba(0,0,0,0.2); border-radius:10px; padding:15px; display:flex; flex-direction:column; gap:10px; margin-bottom:15px; border:1px solid rgba(158,139,255,0.2); min-height:300px;">
+        <!-- messages -->
+      </div>
+      <div style="display:flex; gap:10px;">
+        <input type="text" id="chatInput" placeholder="Type a message..." style="flex:1; padding:12px; border-radius:10px; border:1px solid rgba(158,139,255,0.3); background:transparent; color:var(--text);">
+        <button onclick="sendChatMessage()" class="save-btn"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function toggleTheme() {
+      document.body.classList.toggle('light-mode');
+      const icon = document.querySelector('.theme-toggle-btn i');
+      if (document.body.classList.contains('light-mode')) {
+        icon.className = 'fas fa-moon';
+      } else {
+        icon.className = 'fas fa-sun';
+      }
+    }
+    const dashboardWrapper = document.getElementById('dashboardWrapper');
+    let bookingsChart = null;
+    let apexSpendingChart = null;
+
+    // Check for USER token (separate from ownerToken)
+    const token = localStorage.getItem('token');
+    if (!token || token === "undefined" || token === "null") {
+      window.location.replace("auth.html?redirect=dashboard.html");
+    } else {
+      // Prevent access if owner token exists
+      if (localStorage.getItem('ownerToken')) {
+        alert('Please logout from owner account first');
+        localStorage.removeItem('token');
+        window.location.replace("auth.html?redirect=dashboard.html");
+      } else {
+        dashboardWrapper.classList.add('active');
+        loadDashboard();
+      }
+    }
+
+    function loadDashboard() {
+      const token = localStorage.getItem('token');
+
+      // Load Profile
+      fetch('/api/users/profile', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+        .then(r => r.json())
+        .then(data => {
+          console.log('Profile data:', data);
+          if (data.user) {
+            document.getElementById('profile-name').textContent = data.user.name || 'N/A';
+            document.getElementById('profile-email').textContent = data.user.email || 'N/A';
+            document.getElementById('profile-date').textContent = data.user.createdAt ? new Date(data.user.createdAt).toLocaleDateString() : 'N/A';
+            const refLink = window.location.origin + '/auth.html?ref=' + data.user.id;
+            document.getElementById('referral-link').value = refLink;
+            
+            // Store VIP Points for later
+            window.userVipPoints = data.user.vipPoints || 0;
+
+            if (data.preferences) {
+              document.getElementById('pref-roomType').value = data.preferences.preferredRoomType || '';
+              document.getElementById('pref-cuisine').value = data.preferences.preferredCuisine || '';
+              document.getElementById('pref-loungeType').value = data.preferences.preferredLoungeType || '';
+            }
+          }
+        })
+        .catch(err => console.error('Profile error:', err));
+
+      // Load Notifications
+      loadNotificationsUser();
+
+      // Load Bookings with Analytics
+      fetch('/api/users/bookings', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+        .then(r => r.json())
+        .then(data => {
+          console.log('Bookings data:', data);
+          const list = document.getElementById('bookings-list');
+
+          if (data.bookings && data.bookings.length > 0) {
+            // Calculate stats
+            const totalBookings = data.bookings.length;
+            const totalSpent = data.bookings.reduce((sum, b) => sum + (b.totalPrice || 0), 0);
+            const thisMonth = data.bookings.filter(b => {
+              const bookingDate = new Date(b.createdAt);
+              const now = new Date();
+              return bookingDate.getMonth() === now.getMonth() && bookingDate.getFullYear() === now.getFullYear();
+            }).length;
+
+            document.getElementById('stat-total-bookings').textContent = totalBookings;
+            document.getElementById('stat-total-spent').textContent = '$' + totalSpent.toLocaleString();
+            document.getElementById('stat-month-bookings').textContent = thisMonth;
+
+            // Render Loyalty
+            const loyaltyPoints = Math.floor(totalSpent / 10) + (window.userVipPoints || 0);
+            const nextTier = 1000;
+            const progress = Math.min((loyaltyPoints / nextTier) * 100, 100);
+            document.getElementById('loyalty-points').textContent = loyaltyPoints.toLocaleString() + ' Pts';
+            document.getElementById('loyalty-progress').style.width = progress + '%';
+            document.getElementById('loyalty-text').textContent = progress >= 100 ? "You've unlocked VIP perks!" : `Earn ${Math.ceil(nextTier - loyaltyPoints)} more points to unlock VIP perks!`;
+            
+            const vipAwards = document.getElementById('loyalty-awards');
+            if (progress >= 100 && vipAwards) {
+                vipAwards.style.display = 'block';
+            } else if (vipAwards) {
+                vipAwards.style.display = 'none';
+            }
+
+            // Draw chart
+            drawBookingsChart(data.bookings);
+            drawApexSpendingChart(data.bookings); // Draw ApexChart
+            renderUpcomingTrip(data.bookings); // Render Weather/Trip Tracker
+
+            // List bookings
+            list.innerHTML = data.bookings.slice(0, 10).map(b => {
+              let propName = 'Booking';
+              let propId = null;
+              let propModel = 'Hotel';
+              let dateStr = `${new Date(b.createdAt).toLocaleDateString()}`;
+
+              if (b.hotel) {
+                propName = b.hotel.name || 'Hotel'; propId = b.hotel._id; propModel = 'Hotel';
+                if (b.checkIn && b.checkOut) {
+                  dateStr = `${new Date(b.checkIn).toLocaleDateString()} -> ${new Date(b.checkOut).toLocaleDateString()}`;
+                }
+              } else if (b.restaurant) {
+                propName = b.restaurant.name || 'Restaurant'; propId = b.restaurant._id; propModel = 'Restaurant';
+                if (b.date) {
+                  dateStr = new Date(b.date).toLocaleDateString();
+                }
+              } else if (b.lounge) {
+                propName = b.lounge.name || 'Lounge'; propId = b.lounge._id; propModel = 'Lounge';
+                if (b.date) {
+                  dateStr = new Date(b.date).toLocaleDateString();
+                }
+              }
+              
+              let statusStr = b.status ? b.status.charAt(0).toUpperCase() + b.status.slice(1) : "Pending";
+              let statusColor = statusStr === "Confirmed" ? "var(--ok)" : (statusStr === "Rejected" || statusStr === "Cancelled" ? "var(--err)" : "var(--accent2)");
+              let refundHtml = b.status === "cancelled" ? `<p style="font-size: 0.8em; color: var(--accent2); margin-top: 5px;">Refund Status: ${b.refundStatus || 'Pending'}</p><p style="font-size: 0.8em; color: var(--muted); margin-top: 2px;">Reason: ${b.cancellationReason || 'N/A'}</p>` : '';
+              let cancelBtn = (b.status !== "cancelled" && b.status !== "rejected") ? `<button onclick="openCancellationModal('${b._id}')" class="save-btn" style="padding: 8px 16px; font-size: 0.9em; width: auto; background: var(--err); margin-right: 5px;">Cancel</button>` : '';
+
+              return `
+              <div class="list-item" style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                   <p><strong>${propName}</strong> - $${b.totalPrice || 0}</p>
+                   <p style="font-size: 0.9em; color: var(--muted); margin-bottom: 4px;"><i class="fas fa-calendar-alt"></i> ${dateStr}</p>
+                   <span style="font-size: 0.8em; font-weight: bold; background: ${statusColor}; color: #000; padding: 2px 8px; border-radius: 10px;">Status: ${statusStr}</span>
+                   ${refundHtml}
+                </div>
+                <div style="display:flex; gap:10px;">
+                  ${cancelBtn}
+                  ${(propId && b.status === 'confirmed') ? `<button onclick="openReviewModal('${propId}', '${propModel}', '${propName.replace(/'/g, "\\'")}')" class="save-btn" style="padding: 8px 16px; font-size: 0.9em; width: auto; background: var(--accent);">Write Review &nbsp;<i class="fas fa-star"></i></button>` : ''}
+                  ${(b.status === 'confirmed') ? `<button onclick="downloadInvoice('${b._id}', '${propName.replace(/'/g, "\\'")}', '${b.totalPrice || 0}', '${dateStr}')" class="save-btn" style="padding: 8px 16px; font-size: 0.9em; width: auto; background: var(--accent2); color: black;">Download Invoice <i class="fas fa-file-pdf"></i></button>` : ''}
+                  ${(b.status === 'confirmed' && propId) ? `<button onclick="openChatModal('${b._id}', '${propId}', '${propModel}', '${propName.replace(/'/g, "\\'")}')" class="save-btn" style="display: none; padding: 8px 16px; font-size: 0.9em; width: auto; background: var(--text); color: black;">Contact Property <i class="fas fa-comments"></i></button>` : ''}
+                </div>
+              </div>`;
+            }).join('');
+          } else {
+            document.getElementById('stat-total-bookings').textContent = '0';
+            document.getElementById('stat-total-spent').textContent = '$0';
+            document.getElementById('stat-month-bookings').textContent = '0';
+            list.innerHTML = '<p>No bookings yet</p>';
+          }
+        })
+        .catch(err => console.error('Bookings error:', err));
+
+      // Load Favorites
+      loadFavorites();
+    }
+
+    function loadFavorites() {
+      const token = localStorage.getItem('token');
+      fetch('/api/users/favorites', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      })
+        .then(r => r.json())
+        .then(data => {
+          console.log('Favorites data:', data);
+          const list = document.getElementById('favorites-list');
+          list.innerHTML = '';
+          if (data.favorites && (data.favorites.hotels?.length || data.favorites.restaurants?.length || data.favorites.lounges?.length)) {
+            const renderSection = (items, title, removeType) => {
+              if(!items || !items.length) return '';
+              return `<h3 style="color:var(--accent); border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:5px; margin-top:20px;">${title}</h3>` + 
+                items.map(item => `
+                  <div class="fav-card">
+                    <div class="fav-info">
+                      <strong>${item.name || 'Property'}</strong>
+                      <p><i class="fas fa-map-marker-alt" style="margin-right:5px; color:var(--accent2);"></i>${item.location || 'Unknown'}</p>
+                    </div>
+                    <button class="fav-btn" onclick="removeFromFavorites('${item._id}', '${removeType}')" title="Remove from favorites"><i class="fas fa-heart-broken"></i></button>
+                  </div>
+                `).join('');
+            };
+            
+            list.innerHTML += renderSection(data.favorites.hotels, '<i class="fas fa-hotel"></i> Hotels', 'hotel');
+            list.innerHTML += renderSection(data.favorites.restaurants, '<i class="fas fa-utensils"></i> Restaurants', 'restaurant');
+            list.innerHTML += renderSection(data.favorites.lounges, '<i class="fas fa-glass-martini-alt"></i> Lounges', 'lounge');
+          } else {
+            list.innerHTML = '<p style="color:var(--muted); text-align:center; padding: 20px;">No favorites added yet.</p>';
+          }
+        })
+        .catch(err => console.error('Favorites error:', err));
+    }
+
+    async function removeFromFavorites(itemId, itemType) {
+      const token = localStorage.getItem('token');
+      try {
+         const res = await fetch('/api/users/favorites', {
+           method: 'POST',
+           headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+           body: JSON.stringify({ itemId, itemType, action: 'remove' })
+         });
+         if (res.ok) {
+           loadFavorites();
+         } else {
+           alert("Could not remove favorite");
+         }
+      } catch(e) { console.error(e); }
+    }
+
+    function drawBookingsChart(bookings) {
+      try {
+        const ctx = document.getElementById('bookingsChart').getContext('2d');
+
+        // Group by month
+        const months = {};
+        bookings.forEach(b => {
+          const date = new Date(b.createdAt);
+          const month = date.toLocaleString('default', { month: 'short', year: 'numeric' });
+          months[month] = (months[month] || 0) + (b.totalPrice || 0);
+        });
+
+        const labels = Object.keys(months);
+        const data = Object.values(months);
+
+        if (bookingsChart) {
+          bookingsChart.destroy();
+        }
+
+        bookingsChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Amount Spent ($)',
+              data: data,
+              backgroundColor: 'rgba(158, 139, 255, 0.6)',
+              borderColor: 'rgba(158, 139, 255, 1)',
+              borderWidth: 1,
+              borderRadius: 8
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                ticks: { color: document.body.classList.contains('light-mode') ? '#2d3748' : '#a0aec0' }
+              },
+              x: {
+                grid: { display: false },
+                ticks: { color: document.body.classList.contains('light-mode') ? '#2d3748' : '#a0aec0' }
+              }
+            },
+            plugins: {
+              legend: {
+                labels: { color: document.body.classList.contains('light-mode') ? '#2d3748' : 'white' }
+              }
+            }
+          }
+        });
+      } catch (err) {
+        console.error('Could not draw Bookings Chart', err);
+      }
+    }
+
+    function drawApexSpendingChart(bookings) {
+        let hotelSum = 0, restSum = 0, loungeSum = 0;
+        bookings.forEach(b => {
+            const amt = b.totalPrice || 0;
+            if (b.status !== 'cancelled') {
+                if (b.hotel) hotelSum += amt;
+                else if (b.restaurant) restSum += amt;
+                else if (b.lounge) loungeSum += amt;
+            }
+        });
+
+        if (hotelSum === 0 && restSum === 0 && loungeSum === 0) {
+            document.getElementById('apex-spending-chart').innerHTML = '<p style="color:var(--muted); text-align:center; padding-top:40px;">No spending data yet.</p>';
+            return;
+        }
+
+        const options = {
+            series: [hotelSum, restSum, loungeSum],
+            chart: {
+                type: 'radialBar',
+                height: 320,
+                background: 'transparent'
+            },
+            plotOptions: {
+                radialBar: {
+                    hollow: { size: '40%' },
+                    dataLabels: {
+                        name: { fontSize: '14px', color: '#e8e9ff' },
+                        value: { fontSize: '18px', color: '#68d4ff', formatter: function(val) { return '$' + val; } },
+                        total: {
+                            show: true,
+                            label: 'Total Spends',
+                            color: '#9E8BFF',
+                            formatter: function (w) {
+                                return '$' + (hotelSum + restSum + loungeSum).toLocaleString();
+                            }
+                        }
+                    }
+                }
+            },
+            labels: ['Hotels', 'Restaurants', 'Lounges'],
+            colors: ['#3bd45a', '#68d4ff', '#9E8BFF'],
+            stroke: { lineCap: 'round' }
+        };
+
+        if (apexSpendingChart) {
+            apexSpendingChart.destroy();
+        }
+        
+        apexSpendingChart = new ApexCharts(document.querySelector("#apex-spending-chart"), options);
+        apexSpendingChart.render();
+    }
+
+    function renderUpcomingTrip(bookings) {
+        const upcomingWidget = document.getElementById('upcoming-trip-widget');
+        const now = new Date();
+        const upcomingBookings = bookings.filter(b => b.status === "confirmed" && b.checkIn && new Date(b.checkIn) > now);
+        
+        // Sort by closest date
+        upcomingBookings.sort((a,b) => new Date(a.checkIn) - new Date(b.checkIn));
+        
+        if(upcomingBookings.length === 0) {
+            upcomingWidget.innerHTML = '<p style="color:var(--muted); text-align:center; font-size: 0.9em; margin: 0;">No upcoming trips planned yet. Explore CheckInns to book your next getaway!</p>';
+            return;
+        }
+
+        const trip = upcomingBookings[0];
+        const dest = trip.hotel ? (trip.hotel.location || "Your destination") : "Your destination";
+        const dateStr = new Date(trip.checkIn).toLocaleDateString([], {weekday: 'short', month: 'short', day: 'numeric'});
+        
+        let dummyWeather = ['Sunny', 'Cloudy', 'Clear Skies'][Math.floor(Math.random()*3)];
+        let temp = Math.floor(Math.random() * 15) + 65; // rand 65-80F
+        let icon = dummyWeather === 'Sunny' ? 'fa-sun' : (dummyWeather === 'Cloudy' ? 'fa-cloud' : 'fa-moon');
+
+        upcomingWidget.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                   <h4 style="margin:0 0 5px 0; color:var(--text); font-size: 1.1em;">${trip.hotel ? trip.hotel.name : 'Your Reservation'}</h4>
+                   <p style="margin:0; color:var(--muted); font-size: 0.9em;"><i class="fas fa-map-marker-alt" style="margin-right:4px; color:var(--accent2);"></i>${dest} • <i class="fas fa-calendar" style="margin-right:4px; margin-left:8px; color:var(--accent);"></i>${dateStr}</p>
+                </div>
+                <div style="text-align:right;">
+                   <h4 style="margin:0 0 2px 0; color:var(--ok); font-size: 1.1em;"><i class="fas ${icon}" style="margin-right:6px;"></i>${temp}°F</h4>
+                   <p style="margin:0; color:var(--muted); font-size: 0.8em;">Expected: ${dummyWeather}</p>
+                </div>
+            </div>
+            <div style="margin-top: 15px; background: rgba(104,212,255,0.05); padding: 10px; border-radius: 8px; border-left: 3px solid var(--accent2);">
+                <span style="font-size:0.85em; color:var(--text);"><strong>Pro tip:</strong> Perfect weather for a dip in the pool! Don't forget your SPF.</span>
+            </div>
+        `;
+    }
+
+    // --- Reviews Logic ---
+    let pendingReview = { id: null, model: null };
+    let selectedRating = 0;
+
+    function openReviewModal(propId, propModel, propName) {
+      pendingReview = { id: propId, model: propModel };
+      document.getElementById('review-property-name').textContent = "Property: " + propName;
+      document.getElementById('reviewModal').style.display = 'flex';
+    }
+
+    function closeReviewModal() {
+      document.getElementById('reviewModal').style.display = 'none';
+      document.getElementById('reviewComment').value = '';
+      selectedRating = 0;
+      document.querySelectorAll('.star-select').forEach(s => s.style.color = '#ccc');
+      pendingReview = { id: null, model: null };
+    }
+
+    document.querySelectorAll('.star-select').forEach(star => {
+      star.addEventListener('click', (e) => {
+        selectedRating = parseInt(e.target.getAttribute('data-val'));
+        document.querySelectorAll('.star-select').forEach(s => {
+          if (parseInt(s.getAttribute('data-val')) <= selectedRating) {
+            s.style.color = '#f5b301';
+          } else {
+            s.style.color = '#ccc';
+          }
+        });
+      });
+    });
+
+    document.getElementById('submitReviewBtn').addEventListener('click', async () => {
+      const comment = document.getElementById('reviewComment').value.trim();
+      if (!selectedRating || !comment) {
+        alert("Please provide a star rating and a comment.");
+        return;
+      }
+
+      const btn = document.getElementById('submitReviewBtn');
+      btn.innerText = "Submitting...";
+      btn.disabled = true;
+
+      try {
+        const token = localStorage.getItem('token');
+        const res = await fetch('/api/reviews', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+          body: JSON.stringify({
+            propertyId: pendingReview.id,
+            onModel: pendingReview.model,
+            rating: selectedRating,
+            comment
+          })
+        });
+        let data;
+        try {
+          data = await res.json();
+        } catch (err) {
+          throw new Error(`Server returned ${res.status}: ${res.statusText}. Please ensure your backend server is restarted!`);
+        }
+
+        if (res.ok) {
+          alert("Review successfully posted!");
+          closeReviewModal();
+          loadDashboard(); // Reload dashboard to reflect changes if any
+        } else {
+          alert(data?.error || "Failed to submit review.");
+        }
+      } catch (e) {
+        console.error(e);
+        alert(e.message || "Error submitting review.");
+      } finally {
+        btn.innerText = "Submit";
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById('dashPreferencesForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const token = localStorage.getItem('token');
+      const preferences = {
+        roomType: document.getElementById('pref-roomType').value,
+        cuisine: document.getElementById('pref-cuisine').value,
+        loungeType: document.getElementById('pref-loungeType').value
+      };
+
+      try {
+        const res = await fetch('/api/users/preferences', {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify(preferences)
+        });
+        const data = await res.json();
+        if (res.ok) alert('✅ Preferences saved!');
+        else alert(data.message || 'Error saving preferences');
+      } catch (err) {
+        alert('Error: ' + err.message);
+      }
+    });
+
+    function showSection(section) {
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      document.getElementById(section + '-section').classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    function logoutUser() {
+      localStorage.removeItem('token');
+      if (bookingsChart) bookingsChart.destroy();
+      window.location.replace("auth.html");
+    }
+
+    // ========== NOTIFICATIONS LOGIC ==========
+    async function loadNotificationsUser() {
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('/api/users/notifications', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        const list = document.getElementById('notifications-list');
+        const badge = document.getElementById('notif-badge');
+        
+        if (!data.notifications || data.notifications.length === 0) {
+          list.innerHTML = '<p style="color:var(--muted);">You have no notifications.</p>';
+          badge.style.display = 'none';
+          return;
+        }
+        
+        let unreadCount = 0;
+        list.innerHTML = data.notifications.map(n => {
+          if (!n.isRead) unreadCount++;
+          return `
+          <div style="background:rgba(255,255,255,0.03); padding:15px; border-radius:8px; border-left: 3px solid ${n.isRead ? '#232756' : 'var(--accent2)'}; display:flex; justify-content:space-between; align-items:center;">
+            <div>
+              <span style="font-size: 0.7em; font-weight: bold; background: var(--accent); color: #000; padding: 2px 8px; border-radius: 10px; text-transform: uppercase;">${n.type || 'SYSTEM'}</span>
+              <p style="margin:5px 0 5px 0; color:var(--text);">${n.message}</p>
+              <div style="font-size:11px; color:var(--muted);">${new Date(n.createdAt).toLocaleString()}</div>
+            </div>
+            ${!n.isRead ? `<button class="save-btn" onclick="markUserNotifRead('${n._id}')" style="background:transparent; border:1px solid var(--accent); color:var(--accent); font-size:12px; padding:4px 8px;">Mark Read</button>` : ''}
+          </div>
+        `}).join('');
+        
+        if (unreadCount > 0) {
+          badge.style.display = 'inline-block';
+          badge.textContent = unreadCount;
+        } else {
+          badge.style.display = 'none';
+        }
+      } catch (err) {
+        console.error("Notif Error:", err);
+      }
+    }
+    
+    async function markUserNotifRead(id) {
+      const token = localStorage.getItem('token');
+      try {
+        await fetch('/api/users/notifications/' + id + '/read', {
+          method: 'PUT',
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        loadNotificationsUser();
+      } catch(err) {
+        console.error(err);
+      }
+    }
+
+    let pendingCancelId = null;
+
+    function openCancellationModal(id) {
+      pendingCancelId = id;
+      document.getElementById('cancelReason').value = '';
+      document.getElementById('cancellationModal').style.display = 'flex';
+    }
+
+    function closeCancellationModal() {
+      pendingCancelId = null;
+      document.getElementById('cancellationModal').style.display = 'none';
+    }
+
+    document.getElementById('confirmCancelBtn').addEventListener('click', async () => {
+      if (!pendingCancelId) return;
+      const reason = document.getElementById('cancelReason').value.trim();
+      const token = localStorage.getItem('token');
+      
+      const btn = document.getElementById('confirmCancelBtn');
+      btn.innerText = 'Cancelling...';
+      btn.disabled = true;
+
+      try {
+        const res = await fetch(`/api/users/bookings/${pendingCancelId}/cancel`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({ reason: reason || 'User requested cancellation' })
+        });
+        const data = await res.json();
+        if (res.ok) {
+          alert("✅ Booking cancelled. Refund is being processed.");
+          closeCancellationModal();
+          loadDashboard(); // Refresh
+        } else {
+          alert(data.message || "Failed to cancel booking");
+        }
+      } catch (err) {
+        console.error("Cancel Error:", err);
+        alert("Server error processing cancellation");
+      } finally {
+        btn.innerText = 'Confirm Cancel';
+        btn.disabled = false;
+      }
+    });
+
+    // ========== SETTINGS LOGIC ==========
+    document.getElementById('userSettingsForm')?.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById('settings-btn');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+      
+      const token = localStorage.getItem('token');
+      const payload = {
+        name: document.getElementById('settings-name').value,
+        currentPassword: document.getElementById('settings-current-password').value,
+        newPassword: document.getElementById('settings-new-password').value
+      };
+      
+      try {
+        const res = await fetch('/api/users/profile-settings', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+          body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        
+        if (res.ok) {
+          alert('Profile updated successfully!');
+          document.getElementById('settings-current-password').value = '';
+          document.getElementById('settings-new-password').value = '';
+          loadDashboard(); // reload profile name
+        } else {
+          alert(data.message || 'Failed to update profile');
+        }
+      } catch(err) {
+        alert('Server error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Changes';
+      }
+    });
+
+    // ========== NEW FEATURES LOGIC ==========
+    let invoiceLogoUrl = null;
+    async function loadLogoAsDataURL(path) {
+      try {
+        const res = await fetch(path);
+        const blob = await res.blob();
+        return await new Promise((resolve) => {
+          const reader = new FileReader();
+          reader.onloadend = () => resolve(reader.result);
+          reader.readAsDataURL(blob);
+        });
+      } catch (e) { return null; }
+    }
+    loadLogoAsDataURL("/images/Logo Checkinns.png").then(url => invoiceLogoUrl = url);
+
+    function copyRefLink() {
+      const link = document.getElementById('referral-link');
+      link.select();
+      link.setSelectionRange(0, 99999);
+      navigator.clipboard.writeText(link.value);
+      alert('Referral link copied!');
+    }
+
+    function downloadInvoice(id, propName, price, dateStr) {
+      if (!window.jspdf) {
+        alert("PDF generator not fully loaded yet. Please try again.");
+        return;
+      }
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      if (invoiceLogoUrl) {
+          try {
+            doc.addImage(invoiceLogoUrl, "PNG", 15, 10, 40, 40);
+          } catch {}
+          doc.setFontSize(22);
+          doc.text("Check-Inns - Invoice", 60, 30);
+      } else {
+          doc.setFontSize(22);
+          doc.text("Check-Inns - Invoice", 20, 25);
+      }
+
+      doc.setFontSize(16);
+      doc.text("Property Details", 20, 70);
+      doc.setFontSize(12);
+      doc.text("Property Name: " + propName, 20, 80);
+      doc.text("Booking Date(s): " + dateStr, 20, 90);
+
+      doc.setFontSize(16);
+      doc.text("Payment Info", 20, 110);
+      doc.setFontSize(12);
+      doc.text("Booking ID: " + id, 20, 120);
+      doc.text("Total Paid: $" + price, 20, 130);
+
+      doc.setFontSize(10);
+      doc.setTextColor(100);
+      doc.text("Thank you for choosing Check-Inns. If you have any questions, please contact the host.", 20, 180);
+      
+      doc.save("Invoice_" + id + ".pdf");
+    }
+
+    let activeChatBookingId = null;
+
+    async function openChatModal(bookingId, propId, propModel, propName) {
+      activeChatBookingId = bookingId;
+      document.getElementById('chat-title').innerText = 'Contact: ' + propName;
+      document.getElementById('chatModal').style.display = 'flex';
+      document.getElementById('chat-messages').innerHTML = '<p style="color:var(--muted); text-align:center;">Loading messages...</p>';
+      await loadChatMessages();
+    }
+
+    function closeChatModal() {
+      document.getElementById('chatModal').style.display = 'none';
+      activeChatBookingId = null;
+    }
+
+    async function loadChatMessages() {
+      if (!activeChatBookingId) return;
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('/api/messages/' + activeChatBookingId, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        const chatBox = document.getElementById('chat-messages');
+        if (!res.ok) {
+            chatBox.innerHTML = '<p style="color:var(--err); text-align:center;">Failed to load messages</p>';
+            return;
+        }
+        
+        chatBox.innerHTML = '';
+        
+        if (!data.messages || data.messages.length === 0) {
+            chatBox.innerHTML = '<p style="color:var(--muted); text-align:center; font-size:0.9em;">Start conversation with host.</p>';
+            return;
+        }
+        
+        data.messages.forEach(msg => {
+            const isMe = msg.senderRole === 'user';
+            const align = isMe ? 'flex-end' : 'flex-start';
+            const bg = isMe ? 'var(--accent)' : 'rgba(255,255,255,0.1)';
+            const color = isMe ? '#000' : 'var(--text)';
+            const senderName = isMe ? 'You' : 'Host';
+            chatBox.innerHTML += 
+                '<div style="align-self: ' + align + '; background: ' + bg + '; color: ' + color + '; padding: 8px 12px; border-radius: 12px; max-width: 80%; font-size: 0.9em; word-wrap: break-word;">' +
+                   '<strong style="font-size:0.8em; margin-bottom: 2px; display:block;">'+senderName+'</strong>' +
+                    msg.text +
+                '</div>' +
+                '<div style="align-self: ' + align + '; font-size: 0.7em; color: var(--muted); margin-bottom: 5px;">' + new Date(msg.createdAt).toLocaleTimeString() + '</div>';
+        });
+        chatBox.scrollTop = chatBox.scrollHeight;
+      } catch(e) { console.error(e); }
+    }
+
+    async function sendChatMessage() {
+      if (!activeChatBookingId) return;
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      const token = localStorage.getItem('token');
+      try {
+        const res = await fetch('/api/messages', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+            body: JSON.stringify({ bookingId: activeChatBookingId, text, senderRole: 'user' })
+        });
+        if (res.ok) {
+            input.value = '';
+            await loadChatMessages();
+        }
+      } catch(e) { console.error(e); }
+    }
+  </script>
+</body>
+
+</html>

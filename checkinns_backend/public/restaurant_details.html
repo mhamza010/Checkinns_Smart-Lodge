@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reserve Table - Azure Sky Restaurant</title>
+  <link rel="stylesheet" href="checkinns3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body {
+      margin: 0;
+      font-family: "Segoe UI", sans-serif;
+      background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+      color: #333;
+    }
+
+    .container {
+      max-width: 1100px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    /* Hero Section */
+    .restaurant-hero {
+      height: 320px;
+      position: relative;
+      border-radius: 20px;
+      overflow: hidden;
+      margin-bottom: 30px;
+    }
+    .restaurant-hero-overlay {
+      background: rgba(0, 0, 0, 0.45);
+      color: white;
+      padding: 30px;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    .restaurant-hero h1 {
+      font-size: 2.2rem;
+      margin: 0;
+    }
+    .restaurant-hero .tagline {
+      font-size: 1.1rem;
+      margin: 10px 0;
+      font-style: italic;
+    }
+    .restaurant-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      font-size: 0.95rem;
+    }
+    .restaurant-stats .stat {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* Gallery */
+    .gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 30px;
+    }
+    .gallery img {
+      width: 160px;
+      height: 110px;
+      border-radius: 12px;
+      object-fit: cover;
+      box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+      transition: transform 0.3s ease;
+    }
+    .gallery img:hover {
+      transform: scale(1.05);
+    }
+
+    /* About Section */
+    .about-section {
+      margin-bottom: 30px;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+    }
+    .about-section h2 {
+      color: #ee5a24;
+      margin-bottom: 15px;
+    }
+    .chef-note {
+      margin-top: 15px;
+      font-style: italic;
+      color: #555;
+    }
+
+    /* Features Section */
+    .features-section {
+      margin-bottom: 30px;
+      background: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 6px 15px rgba(0, 0, 0, 0.05);
+    }
+    .features-section h2 {
+      color: #ee5a24;
+      margin-bottom: 15px;
+    }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 10px;
+    }
+    .feature-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      font-size: 0.95rem;
+    }
+    .feature-item i {
+      color: #27ae60;
+    }
+
+    /* Buttons */
+    .reserve-table-btn,
+    .add-fav-btn {
+      padding: 14px 26px;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    .reserve-table-btn {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+      color: white;
+    }
+    .reserve-table-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(255, 107, 107, 0.25);
+    }
+    .add-fav-btn {
+      background: #fff;
+      color: #ee5a24;
+      margin-top: 10px;
+    }
+    .add-fav-btn:hover {
+      background: #ffe5d0;
+      transform: translateY(-2px);
+    }
+
+    @media (max-width: 768px) {
+      .restaurant-hero {
+        height: 240px;
+      }
+      .restaurant-hero h1 {
+        font-size: 1.6rem;
+      }
+      .gallery img {
+        width: 120px;
+        height: 90px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div id="restaurant-detail"></div>
+
+ <script>
+  const params = new URLSearchParams(window.location.search);
+  const restaurantId = params.get("id");
+
+  async function loadRestaurant() {
+    try {
+      const res = await fetch(`/api/restaurants/${restaurantId}`);
+      if (!res.ok) throw new Error("Failed to fetch restaurant");
+
+      const restaurant = await res.json();
+
+      // ✅ Render full page content once
+      document.getElementById("restaurant-detail").innerHTML = `
+        <div class="restaurant-hero" style="background:url('${encodeURI(restaurant.mainImage || "" ) || "/images/logo.png"}') center/cover no-repeat;">
+          <div class="restaurant-hero-overlay">
+            <h1>${restaurant.name || "Unnamed Restaurant"}</h1>
+            <div class="tagline">${restaurant.description || ""}</div>
+            <div class="restaurant-stats">
+              <div class="stat"><i class="fas fa-utensils"></i> ${restaurant.cuisine || "Various"}</div>
+              <div class="stat"><i class="fas fa-star"></i> ${restaurant.rating || "N/A"}/5</div>
+              <div class="stat"><i class="fas fa-map-marker-alt"></i> ${restaurant.location || "Location not available"}</div>
+              <div class="stat"><i class="fas fa-money-bill-wave"></i> ${restaurant.priceRange || "N/A"}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="container">
+          <div class="gallery">
+            ${(restaurant.images && restaurant.images.length) 
+              ? restaurant.images.map(img => `<img src="${img}" alt="${restaurant.name}">`).join("") 
+              : "<p>No images available.</p>"}
+          </div>
+
+          <div class="about-section">
+            <h2>About ${restaurant.name || "the restaurant"}</h2>
+            <p>${restaurant.description || "No description available."}</p>
+            <div class="chef-note">“Our passion is to create dishes that surprise and inspire.”</div>
+          </div>
+
+          <div class="features-section">
+            <h2>Features & Amenities</h2>
+            <div class="features-grid">
+              ${(restaurant.features && restaurant.features.length)
+                ? restaurant.features.map(f => `<div class="feature-item"><i class="fas fa-check"></i> ${f}</div>`).join("")
+                : "<p>No features listed.</p>"}
+            </div>
+          </div>
+
+          <a href="restaurant_booking.html?id=${restaurant._id}">
+            <button class="reserve-table-btn"><i class="fas fa-calendar-check"></i> Reserve Your Table</button>
+          </a>
+          <button id="addFavoriteBtn" class="add-fav-btn">⭐ Add to Favorites</button>
+        </div>
+      `;
+
+      // ✅ Attach favorite button listener (AFTER rendering)
+      document.getElementById("addFavoriteBtn").addEventListener("click", async () => {
+        const token = localStorage.getItem("token");
+
+        // Guest mode: save locally
+        if (!token) {
+          try {
+            const store = JSON.parse(localStorage.getItem("guestFavorites") || "{}");
+            store.restaurants = Array.isArray(store.restaurants) ? store.restaurants : [];
+            if (!store.restaurants.find((r) => r.id === restaurant._id)) {
+              store.restaurants.push({ id: restaurant._id, name: restaurant.name });
+              localStorage.setItem("guestFavorites", JSON.stringify(store));
+            }
+            alert("Added to favorites ✅");
+          } catch (e) {
+            alert("Could not save favorite locally ❌");
+          }
+          return;
+        }
+
+        // Logged in: call API
+        try {
+          const res = await fetch("/api/users/favorites", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ type: "restaurant", id: restaurant._id })
+          });
+
+          if (res.ok) {
+            alert("Added to favorites ✅");
+          } else {
+            alert("Failed to add favorite ❌");
+          }
+        } catch (err) {
+          alert("Error adding favorite");
+        }
+      });
+
+    } catch (err) {
+      document.getElementById("restaurant-detail").innerHTML = `<p style="text-align:center; padding:20px; color:red;">Unable to load restaurant details.</p>`;
+      console.error(err);
+    }
+  }
+
+  loadRestaurant();
+</script>
+
+</body>
+</html>

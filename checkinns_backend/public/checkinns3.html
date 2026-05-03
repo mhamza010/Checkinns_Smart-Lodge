@@ -1,0 +1,909 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Check-Inns</title>
+  <link rel="stylesheet" href="checkinns3.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+</head>
+
+<body>
+  <div class="chatbot">
+    <button class="chatbot-toggle">💬 Chat</button>
+    <div class="chat-window">
+      <div class="chat-header">
+        <span>Hotel Assistant</span>
+        <button class="close-chat" onclick="closeChat()">×</button>
+      </div>
+      <div id="chat-body" class="chat-messages"></div>
+      <div id="chat-options" class="chat-options">
+        <!-- Initial options will be loaded here -->
+      </div>
+      <div class="chat-input" style="display:flex; gap:8px; padding:8px; border-top:1px solid #eee;">
+        <input id="chatText" type="text" placeholder="Type your question..." style="flex:1; padding:8px;" />
+        <button onclick="sendFreeText()">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="slider-background">
+    <div class="slide slide1"></div>
+    <div class="slide slide2"></div>
+    <div class="slide slide3"></div>
+    <div class="slide slide4"></div>
+  </div>
+
+  <nav class="navbar splash-navbar"
+    style="position: fixed; top: 0; left: 0; width: 100%; z-index: 10000; display: flex; justify-content: space-between; align-items: center; padding: 10px 40px; box-sizing: border-box; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
+    <h2 style="display:flex; align-items:center; gap:10px; margin:0; color:white;">
+      <img src="/images/Logo Checkinns.png" alt="Logo" style="height:40px;"> Check-Inns
+    </h2>
+    <div class="currency-selector" style="display: flex; align-items: center;">
+      <label for="currency" style="color: white; margin-right: 10px;">Currency:</label>
+      <select id="currency" style="padding: 5px; border-radius: 5px;">
+        <option value="USD">USD ($)</option>
+        <option value="KWD">Kuwaiti Dinar (KD)</option>
+        <option value="SAR">Saudi Riyal (SAR)</option>
+        <option value="PKR">Pakistani Rupees (Rs)</option>
+        <option value="QAR">Qatar Riyal (QAR)</option>
+      </select>
+      <ul class="nav-links"
+        style="display:flex; gap:20px; list-style:none; margin:0; padding:0; align-items:center; margin-left: 30px;">
+        <li><a href="dashboard.html" style="color:white; text-decoration:none; font-weight:500;">Dashboard</a></li>
+        <li><a href="owner_dashboard.html" style="color:white; text-decoration:none; font-weight:500;">Owner Portal</a>
+        </li>
+        <li><a href="admin_dashboard.html" style="color:white; text-decoration:none; font-weight:500;">Admin</a></li>
+        <li><a href="auth.html"
+            style="color:white; text-decoration:none; font-weight:500; background:#259bfc; padding:8px 16px; border-radius:20px;">Login</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
+
+  <div class="splash-screen">
+    <div class="splash-content">
+      <h1 class="splash-title">Smart Lodge</h1>
+      <p class="splash-moto">Discover Elegance. Find Your Perfect Stay.</p>
+
+      <!-- Elegant Navigation Menu -->
+      <div class="splash-menu">
+        <a href="#hotels" class="menu-item" data-icon="🏨">
+          <span class="menu-icon">🏨</span>
+          <span class="menu-label">Hotels</span>
+        </a>
+        <a href="#restaurants" class="menu-item" data-icon="🍽️">
+          <span class="menu-icon">🍽️</span>
+          <span class="menu-label">Restaurants</span>
+        </a>
+        <a href="#lounges" class="menu-item" data-icon="🍹">
+          <span class="menu-icon">🍹</span>
+          <span class="menu-label">Lounges</span>
+        </a>
+        <a href="dashboard.html" class="menu-item" data-icon="👤">
+          <span class="menu-icon">👤</span>
+          <span class="menu-label">Dashboard</span>
+        </a>
+        <a href="owner_dashboard.html" class="menu-item" data-icon="🏢">
+          <span class="menu-icon">🏢</span>
+          <span class="menu-label">For Owners</span>
+        </a>
+        <!-- ⚠️ TO HIDE THIS FROM PUBLIC: Delete the 4 lines below ⚠️ -->
+        <a href="admin_dashboard.html" class="menu-item" data-icon="👑">
+          <span class="menu-icon">👑</span>
+          <span class="menu-label"
+            style="color: #d4af37; font-weight: bold; text-shadow: 0 0 10px rgba(212,175,55,0.5);">Apex Command</span>
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <header class="hero">
+    <div class="hero-content">
+      <h1>Find Your Perfect Stay</h1>
+      <div class="search-container">
+        <input id="global-search" type="text" placeholder="Search hotels, restaurants, lounges...">
+        <input type="date" class="date-picker" id="checkin-date" placeholder="Check-in Date">
+        <input type="date" class="date-picker" id="checkout-date" placeholder="Check-out Date">
+        <select id="guests" class="guest-selector">
+          <option value="1">1 Guest</option>
+          <option value="2">2 Guests</option>
+          <option value="3">3 Guests</option>
+          <option value="4">4 Guests</option>
+          <option value="5">5 Guests</option>
+          <option value="6">6 Guests</option>
+          <option value="7">7 Guests</option>
+          <option value="8">8 Guests</option>
+        </select>
+        <button id="search-btn"><i class="fas fa-search"></i> Search</button>
+      </div>
+
+      <!-- Advanced Filter Toggle -->
+      <div style="display: none; margin-top: 20px; text-align: center;">
+        <button id="toggle-filters"
+          style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.3); color: white; padding: 10px 20px; border-radius: 30px; cursor: pointer; font-weight: 600; backdrop-filter: blur(10px); transition: 0.3s;">
+          <i class="fas fa-sliders-h"></i> Advanced Filters
+        </button>
+      </div>
+
+      <!-- Advanced Filters Panel -->
+      <div id="filters-panel"
+        style="display: none; max-width: 900px; margin: 20px auto; background: rgba(15, 16, 32, 0.85); border: 1px solid rgba(158, 139, 255, 0.3); border-radius: 20px; padding: 25px; backdrop-filter: blur(20px); box-shadow: 0 20px 50px rgba(0,0,0,0.5); animation: slideDown 0.4s ease-out;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 30px;">
+
+          <!-- Price Range -->
+          <div>
+            <h4 style="color: var(--accent); margin-top: 0; margin-bottom: 15px;">Price Range (USD)</h4>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <input type="number" id="min-price" placeholder="Min"
+                style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #2a2e68; background: #0b0f2c; color: white;">
+              <span style="color: var(--muted);">-</span>
+              <input type="number" id="max-price" placeholder="Max"
+                style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #2a2e68; background: #0b0f2c; color: white;">
+            </div>
+          </div>
+
+          <!-- Rating -->
+          <div>
+            <h4 style="color: var(--accent); margin-top: 0; margin-bottom: 15px;">Minimum Rating</h4>
+            <select id="min-rating"
+              style="width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #2a2e68; background: #0b0f2c; color: white; cursor: pointer;">
+              <option value="0">Any Rating</option>
+              <option value="4">4+ Stars</option>
+              <option value="4.5">4.5+ Stars</option>
+              <option value="5">5 Stars only</option>
+            </select>
+          </div>
+
+          <!-- Amenities -->
+          <div>
+            <h4 style="color: var(--accent); margin-top: 0; margin-bottom: 15px;">Key Amenities</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.85rem; color: #cfd2ff;">
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" class="amenity-check" value="Pool"> Pool
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" class="amenity-check" value="WiFi"> WiFi
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" class="amenity-check" value="Gym"> Gym
+              </label>
+              <label style="display: flex; align-items: center; gap: 6px; cursor: pointer;">
+                <input type="checkbox" class="amenity-check" value="Spa"> Spa
+              </label>
+            </div>
+          </div>
+
+        </div>
+        <div style="margin-top: 25px; display: flex; justify-content: center; gap: 15px;">
+          <button id="apply-filters"
+            style="background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; color: white; padding: 10px 30px; border-radius: 12px; font-weight: 700; cursor: pointer; transition: 0.3s;">Apply
+            Filters</button>
+          <button id="reset-filters"
+            style="background: transparent; border: 1px solid var(--muted); color: var(--muted); padding: 10px 20px; border-radius: 12px; cursor: pointer; transition: 0.3s;">Reset</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <style>
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    #toggle-filters:hover {
+      background: rgba(255, 255, 255, 0.25) !important;
+      transform: scale(1.05);
+    }
+  </style>
+  <!-- Country Selection Section -->
+  <section class="country-select-section">
+    <h2 class="country-select-title">Choose a Country</h2>
+    <div class="country-list" id="country-list"></div>
+  </section>
+  <style>
+    .country-select-section {
+      text-align: center;
+      margin: 40px 0 20px 0;
+    }
+
+    .country-select-title {
+      font-size: 2rem;
+      color: #259bfc;
+      margin-bottom: 18px;
+    }
+
+    .country-list {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 28px;
+      margin-bottom: 18px;
+    }
+
+    .country-card {
+      background: linear-gradient(135deg, #11cb6e 0%, #259bfc 100%);
+      color: #fff;
+      border-radius: 18px;
+      box-shadow: 0 4px 18px rgba(37, 155, 252, 0.10);
+      padding: 32px 38px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      border: 2px solid transparent;
+      transition: border 0.2s, box-shadow 0.2s, transform 0.2s;
+      min-width: 120px;
+    }
+
+    .country-card.selected,
+    .country-card:hover {
+      border: 2px solid #ffd700;
+      box-shadow: 0 8px 32px rgba(255, 215, 0, 0.18);
+      transform: scale(1.07);
+    }
+
+    .country-flag {
+      font-size: 2.8rem;
+      margin-bottom: 6px;
+      text-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 700;
+      margin: 40px 0 10px;
+      text-align: center;
+      color: #222;
+    }
+
+    .section-subtitle {
+      font-size: 1.1rem;
+      color: #555;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+  </style>
+  <div id="country-list" class="country-list"></div>
+  <div id="hotels" class="hotel-list"></div>
+
+  <!-- Restaurants Section -->
+  <section class="restaurant-section" id="restaurants">
+    <h2 class="section-title"> Exquisite Dining Experiences</h2>
+    <p class="section-subtitle">Discover culinary excellence with our curated selection of world-class restaurants</p>
+    <div class="restaurant-grid"></div>
+  </section>
+
+  <!-- Lounges Section -->
+  <section class="lounge-section" id="lounges">
+    <h2 class="section-title"> Premium Lounge Experiences</h2>
+    <p class="section-subtitle">Unwind in style with our exclusive lounges designed for every occasion</p>
+    <div class="lounge-grid"></div>
+  </section>
+
+  <script>
+    // --- Currency helpers ---
+    function getCurrencySettings() {
+      const code = localStorage.getItem('currency_code') || 'USD';
+      const rates = { USD: 1, KWD: 0.31, SAR: 3.75, PKR: 278, QAR: 3.64 };
+      const symbols = { USD: '$', KWD: 'KD ', SAR: 'SAR ', PKR: 'Rs ', QAR: 'QAR ' };
+      return { code, rate: rates[code] || 1, symbol: symbols[code] || '$' };
+    }
+    function formatMoneyUSDToCurrent(amountUSD) {
+      const { rate, symbol } = getCurrencySettings();
+      const val = Number(amountUSD || 0) * rate;
+      return symbol + (Math.round(val * 100) / 100).toFixed(2);
+    }
+
+    const countries = [
+      { name: 'Pakistan', flag: '' },
+      { name: 'UAE', flag: '' },
+      { name: 'Bahrain', flag: '' },
+      { name: 'Qatar', flag: '' },
+      { name: 'Saudi Arabia', flag: '' }
+    ];
+
+    let hotels = [];
+    let restaurantsData = [];
+    let loungesData = [];
+    let selectedCountry = null;
+
+    // --- Fetch Hotels ---
+    async function loadHotels() {
+      try {
+        const res = await fetch("/api/hotels");
+        hotels = await res.json();
+        renderCountries();
+        renderHotels();
+      } catch (err) {
+        console.error(" Error fetching hotels:", err);
+      }
+    }
+
+    // --- Country Filter ---
+    function renderCountries() {
+      const clist = document.getElementById('country-list');
+      clist.innerHTML = '';
+      countries.forEach(c => {
+        const card = document.createElement('div');
+        card.className = 'country-card' + (selectedCountry === c.name ? ' selected' : '');
+        card.innerHTML = `<span class='country-flag'>${c.flag}</span><span>${c.name}</span>`;
+        card.onclick = () => { selectedCountry = c.name; renderCountries(); renderHotels(); };
+        clist.appendChild(card);
+      });
+      const showAll = document.createElement('button');
+      showAll.className = 'show-all-btn';
+      showAll.textContent = 'Show All';
+      showAll.onclick = () => { selectedCountry = null; renderCountries(); renderHotels(); };
+      clist.appendChild(showAll);
+    }
+
+    // --- Render Hotels ---
+    function renderHotels() {
+      const hlist = document.getElementById('hotels');
+      hlist.innerHTML = '';
+
+      let filtered = selectedCountry ? hotels.filter(h => h.country === selectedCountry) : hotels;
+
+      // Sort by Admin Boost first, then membership tier
+      const tierWeights = { premium: 4, gold: 3, silver: 2, standard: 1 };
+      filtered.sort((a, b) => {
+        if (a.isBoosted && !b.isBoosted) return -1;
+        if (!a.isBoosted && b.isBoosted) return 1;
+        return (tierWeights[b.membershipTier || 'standard'] || 1) - (tierWeights[a.membershipTier || 'standard'] || 1);
+      });
+
+      if (filtered.length === 0) {
+        hlist.innerHTML = `<div style='color:#aaa; font-size:1.2rem; margin:30px;'>No hotels found for this country.</div>`;
+        return;
+      }
+
+      filtered.forEach(hotel => {
+        let memBadge = '';
+        if (hotel.isBoosted) {
+          memBadge = `<div style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg, #ff007f, #7928ca); color: #fff; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; z-index: 10; text-transform: uppercase; box-shadow: 0 0 15px rgba(255,0,127,0.8); letter-spacing: 1px;"><i class="fas fa-fire"></i> Market Leader</div>`;
+        } else if (hotel.isFeatured) {
+          let tierText = (hotel.membershipTier && hotel.membershipTier !== 'standard') ? hotel.membershipTier : 'Property';
+          memBadge = `<div style="position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #d4af37, #f3e5ab); color: #000; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 11px; z-index: 10; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"><i class="fas fa-crown"></i> Featured ${tierText}</div>`;
+        }
+
+        const card = document.createElement('div');
+        card.className = 'hotel-card';
+        card.style.position = 'relative';
+        if (hotel.isBoosted) {
+          card.style.border = "2px solid #ff007f";
+          card.style.boxShadow = "0 0 20px rgba(255,0,127,0.3)";
+        }
+
+        card.innerHTML = `
+        ${memBadge}
+        <img src="${hotel.mainImage || (hotel.images && hotel.images[0]) || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="${hotel.name}" class="hotel-img" loading="lazy" />
+        <div class="hotel-content">
+          <h3>${hotel.name}</h3>
+          <p>${hotel.location}</p>
+          <p class="hotel-price">From ${formatMoneyUSDToCurrent(hotel.pricePerNight)} / night</p>
+          <a href="hotel_details.html?id=${hotel._id}" class="details-btn">View Details</a>
+        </div>
+      `;
+        hlist.appendChild(card);
+      });
+    }
+
+    // --- Load Restaurants ---
+    async function loadRestaurants() {
+      try {
+        const res = await fetch("/api/restaurants");
+        const restaurants = await res.json();
+        restaurantsData = restaurants;
+
+        const grid = document.querySelector(".restaurant-grid");
+        grid.innerHTML = "";
+
+        restaurants.forEach(r => {
+          const div = document.createElement("div");
+          div.className = "restaurant-card";
+          div.innerHTML = `
+          <div class="restaurant-image">
+            <a href="restaurant_details.html?id=${r._id}">
+              <img src="${r.mainImage || (r.images && r.images[0]) || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="${r.name}" loading="lazy">
+            </a>
+            <div class="restaurant-badge">${r.category || ""}</div>
+          </div>
+          <div class="restaurant-content">
+            <a href="restaurant_details.html?id=${r._id}" style="text-decoration:none;color:inherit;">
+              <h3>${r.name}</h3>
+            </a>
+            <p class="restaurant-cuisine">${r.cuisine || ""} • ${r.priceRange || ""}</p>
+            <p class="restaurant-desc">${r.description || ""}</p>
+            <div class="restaurant-features">
+              ${(r.features || []).map(f => `<span class="feature">${f}</span>`).join("")}
+            </div>
+            <a href="restaurant_details.html?id=${r._id}" class="details-btn">View Details</a>
+
+          </div>
+        `;
+          grid.appendChild(div);
+        });
+      } catch (err) {
+        console.error(" Error loading restaurants", err);
+      }
+    }
+
+    // --- Load Lounges ---
+    async function loadLounges() {
+      try {
+        const res = await fetch("/api/lounges");
+        const lounges = await res.json();
+        loungesData = lounges;
+
+        const grid = document.querySelector(".lounge-grid");
+        grid.innerHTML = "";
+
+        lounges.forEach(l => {
+          const div = document.createElement("div");
+          div.className = "lounge-card";
+          div.innerHTML = `
+          <div class="lounge-image">
+            <a href="lounge_details.html?id=${l._id}">
+              <img src="${l.mainImage || (l.images?.[0]) || 'default.jpg'}" alt="${l.name}" loading="lazy">
+            </a>
+            <div class="lounge-badge">${l.category || ""}</div>
+          </div>
+          <div class="lounge-content">
+            <a href="lounge_details.html?id=${l._id}" style="text-decoration:none;color:inherit;">
+              <h3>${l.name}</h3>
+            </a>
+            <p class="lounge-type">${l.type || ""}</p>
+            <p class="lounge-desc">${l.description || ""}</p>
+            <div class="lounge-features">
+              ${(l.features || []).map(f => `<span class="feature">${f}</span>`).join("")}
+            </div>
+            <a href="lounge_details.html?id=${l._id}" class="details-btn">View Details</a>
+
+          </div>
+        `;
+          grid.appendChild(div);
+        });
+      } catch (err) {
+        console.error(" Error loading lounges", err);
+      }
+    }
+
+    // --- Run After DOM Ready ---
+    document.addEventListener("DOMContentLoaded", () => {
+      loadHotels();
+      loadRestaurants();
+      loadLounges();
+
+      // Initialize currency selector state
+      const curSel = document.getElementById('currency');
+      if (curSel) {
+        const saved = localStorage.getItem('currency_code') || 'USD';
+        curSel.value = saved;
+        curSel.addEventListener('change', () => {
+          localStorage.setItem('currency_code', curSel.value);
+          if (document.getElementById('global-search')?.value) {
+            triggerSearch();
+          } else {
+            renderHotels();
+          }
+        });
+      }
+
+      const searchInput = document.getElementById("global-search");
+      const searchBtn = document.getElementById("search-btn");
+      const triggerSearch = () => {
+        const q = (searchInput.value || '').trim().toLowerCase();
+        applyGlobalSearch(q);
+      };
+
+      if (searchBtn) searchBtn.addEventListener('click', triggerSearch);
+      if (searchInput) searchInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') triggerSearch(); });
+
+      // Date constraints for hero date pickers
+      const checkin = document.getElementById('checkin-date');
+      const checkout = document.getElementById('checkout-date');
+      if (checkin && checkout) {
+        const today = new Date();
+        const todayStr = new Date(today.getFullYear(), today.getMonth(), today.getDate()).toISOString().split('T')[0];
+        checkin.min = todayStr;
+        checkin.addEventListener('change', () => {
+          if (!checkin.value) return;
+          const inD = new Date(checkin.value);
+          const minOut = new Date(inD.getTime() + 24 * 60 * 60 * 1000);
+          const minOutStr = minOut.toISOString().split('T')[0];
+          checkout.min = minOutStr;
+          if (checkout.value && checkout.value < minOutStr) {
+            checkout.value = minOutStr;
+          }
+        });
+      }
+
+      // --- Advanced Filter UI Handlers ---
+      const toggleFiltersBtn = document.getElementById('toggle-filters');
+      const filtersPanel = document.getElementById('filters-panel');
+      const applyFiltersBtn = document.getElementById('apply-filters');
+      const resetFiltersBtn = document.getElementById('reset-filters');
+
+      if (toggleFiltersBtn && filtersPanel) {
+        toggleFiltersBtn.addEventListener('click', () => {
+          const isHidden = filtersPanel.style.display === 'none';
+          filtersPanel.style.display = isHidden ? 'block' : 'none';
+        });
+      }
+
+      if (applyFiltersBtn) {
+        applyFiltersBtn.addEventListener('click', () => {
+          triggerSearch();
+        });
+      }
+
+      if (resetFiltersBtn) {
+        resetFiltersBtn.addEventListener('click', () => {
+          const minP = document.getElementById('min-price');
+          const maxP = document.getElementById('max-price');
+          const minR = document.getElementById('min-rating');
+          if (minP) minP.value = '';
+          if (maxP) maxP.value = '';
+          if (minR) minR.value = '0';
+          document.querySelectorAll('.amenity-check').forEach(ck => ck.checked = false);
+          triggerSearch();
+        });
+      }
+
+      // Splash screen scroll handler
+      function hideSplashScreen() {
+        const splash = document.querySelector('.splash-screen');
+        const slider = document.querySelector('.slider-background');
+        const nav = document.querySelector('.splash-navbar');
+
+        if (splash) {
+          splash.style.opacity = '0';
+          splash.style.pointerEvents = 'none';
+          setTimeout(() => splash.style.display = '0', 500);
+        }
+        if (slider) {
+          slider.style.opacity = '0';
+          slider.style.pointerEvents = 'none';
+          setTimeout(() => slider.style.display = '0', 500);
+        }
+        if (nav) {
+          nav.classList.remove('splash-navbar');
+        }
+      }
+
+      //  window.addEventListener('scroll', () => {
+      //   if (window.scrollY > 0) {
+      //      hideSplashScreen();
+      //    }
+      //  });
+
+      // Handle splash menu clicks
+      /*  document.querySelectorAll('.splash-menu .menu-item').forEach(item => {
+          item.addEventListener('click', hideSplashScreen);
+        });*/
+    });
+
+    // --- Global Search Across Entities ---
+    function applyGlobalSearch(query) {
+      // Hotels
+      const hlist = document.getElementById('hotels');
+      const hotelsFiltered = (selectedCountry ? hotels.filter(h => h.country === selectedCountry) : hotels)
+        .filter(h => !query || matchesQuery(h, ['name', 'description', 'location', 'country']));
+
+      const tierWeights = { premium: 4, gold: 3, silver: 2, standard: 1 };
+      hotelsFiltered.sort((a, b) => {
+        if (a.isBoosted && !b.isBoosted) return -1;
+        if (!a.isBoosted && b.isBoosted) return 1;
+        return (tierWeights[b.membershipTier || 'standard'] || 1) - (tierWeights[a.membershipTier || 'standard'] || 1);
+      });
+
+      hlist.innerHTML = '';
+      if (hotelsFiltered.length === 0) {
+        hlist.innerHTML = `<div class='no-results'>No matching hotels found.</div>`;
+      } else {
+        hotelsFiltered.forEach(hotel => {
+          let memBadge = '';
+          if (hotel.isBoosted) {
+            memBadge = `<div style="position: absolute; top: 10px; left: 50%; transform: translateX(-50%); background: linear-gradient(90deg, #ff007f, #7928ca); color: #fff; padding: 6px 15px; border-radius: 20px; font-weight: bold; font-size: 12px; z-index: 10; text-transform: uppercase; box-shadow: 0 0 15px rgba(255,0,127,0.8); letter-spacing: 1px;"><i class="fas fa-fire"></i> Market Leader</div>`;
+          } else if (hotel.isFeatured) {
+            let tierText = (hotel.membershipTier && hotel.membershipTier !== 'standard') ? hotel.membershipTier : 'Property';
+            memBadge = `<div style="position: absolute; top: 10px; right: 10px; background: linear-gradient(135deg, #d4af37, #f3e5ab); color: #000; padding: 4px 10px; border-radius: 20px; font-weight: bold; font-size: 11px; z-index: 10; text-transform: uppercase; box-shadow: 0 4px 10px rgba(0,0,0,0.5);"><i class="fas fa-crown"></i> Featured ${tierText}</div>`;
+          }
+
+          const card = document.createElement('div');
+          card.className = 'hotel-card';
+          card.style.position = 'relative';
+          if (hotel.isBoosted) {
+            card.style.border = "2px solid #ff007f";
+            card.style.boxShadow = "0 0 20px rgba(255,0,127,0.3)";
+          }
+
+          card.innerHTML = `
+          ${memBadge}
+          <img src="${hotel.mainImage || (hotel.images && hotel.images[0]) || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="${hotel.name}" class="hotel-img" loading="lazy" />
+          <div class="hotel-content">
+            <h3>${hotel.name}</h3>
+            <p>${hotel.location}</p>
+            <p class="hotel-price">From ${formatMoneyUSDToCurrent(hotel.pricePerNight)} / night</p>
+            <a href="hotel_details.html?id=${hotel._id}" class="details-btn">View Details</a>
+          </div>`;
+          hlist.appendChild(card);
+        });
+      }
+
+      // Restaurants
+      const rgrid = document.querySelector('.restaurant-grid');
+      const restaurantsFiltered = restaurantsData.filter(r => !query || matchesQuery(r, ['name', 'description', 'cuisine', 'category', 'location']));
+      rgrid.innerHTML = '';
+      if (restaurantsFiltered.length === 0) {
+        rgrid.innerHTML = `<div class='no-results' style='grid-column:1/-1'>No matching restaurants found.</div>`;
+      } else {
+        restaurantsFiltered.forEach(r => {
+          const div = document.createElement('div');
+          div.className = 'restaurant-card';
+          div.innerHTML = `
+          <div class="restaurant-image">
+            <a href="restaurant_details.html?id=${r._id}">
+              <img src="${r.mainImage || (r.images && r.images[0]) || 'https://via.placeholder.com/300x200?text=No+Image'}" alt="${r.name}" loading="lazy">
+            </a>
+            <div class="restaurant-badge">${r.category || ""}</div>
+          </div>
+          <div class="restaurant-content">
+            <a href="restaurant_details.html?id=${r._id}" style="text-decoration:none;color:inherit;">
+              <h3>${r.name}</h3>
+            </a>
+            <p class="restaurant-cuisine">${r.cuisine || ""} • ${r.priceRange || ""}</p>
+            <p class="restaurant-desc">${r.description || ""}</p>
+            <div class="restaurant-features">
+              ${(r.features || []).map(f => `<span class="feature">${f}</span>`).join("")}
+            </div>
+            <a href="restaurant_details.html?id=${r._id}" class="details-btn">View Details</a>
+          </div>`;
+          rgrid.appendChild(div);
+        });
+      }
+
+      // Lounges
+      const lgrid = document.querySelector('.lounge-grid');
+      const loungesFiltered = loungesData.filter(l => !query || matchesQuery(l, ['name', 'description', 'type', 'category', 'location']));
+      lgrid.innerHTML = '';
+      if (loungesFiltered.length === 0) {
+        lgrid.innerHTML = `<div class='no-results' style='grid-column:1/-1'>No matching lounges found.</div>`;
+      } else {
+        loungesFiltered.forEach(l => {
+          const div = document.createElement('div');
+          div.className = 'lounge-card';
+          div.innerHTML = `
+          <div class="lounge-image">
+            <a href="lounge_details.html?id=${l._id}">
+              <img src="${l.mainImage}" alt="${l.name}" loading="lazy">
+            </a>
+            <div class="lounge-badge">${l.category || ""}</div>
+          </div>
+          <div class="lounge-content">
+            <a href="lounge_details.html?id=${l._id}" style="text-decoration:none;color:inherit;">
+              <h3>${l.name}</h3>
+            </a>
+            <p class="lounge-type">${l.type || ""}</p>
+            <p class="lounge-desc">${l.description || ""}</p>
+            <div class="lounge-features">
+              ${(l.features || []).map(f => `<span class="feature">${f}</span>`).join("")}
+            </div>
+            <a href="lounge_details.html?id=${l._id}" class="details-btn">View Details</a>
+          </div>`;
+          lgrid.appendChild(div);
+        });
+      }
+    }
+
+    function matchesQuery(item, fields) {
+      const q = (document.getElementById('global-search')?.value || '').trim().toLowerCase();
+
+      // Basic text search
+      let textMatch = !q || fields.some(f => (item[f] || '').toString().toLowerCase().includes(q));
+      if (!textMatch) return false;
+
+      // Advanced Filters
+      const minP = parseFloat(document.getElementById('min-price')?.value) || 0;
+      const maxP = parseFloat(document.getElementById('max-price')?.value) || Infinity;
+      const minR = parseFloat(document.getElementById('min-rating')?.value) || 0;
+
+      // Price Check (assuming item has pricePerNight or similar)
+      const currentPrice = item.pricePerNight || item.basePrice || 0;
+      if (currentPrice < minP || currentPrice > maxP) return false;
+
+      // Rating Check
+      const currentRating = item.rating || 0;
+      if (currentRating < minR) return false;
+
+      // Amenity Check
+      const checkedAmenities = Array.from(document.querySelectorAll('.amenity-check:checked')).map(ck => ck.value);
+      if (checkedAmenities.length > 0) {
+        const itemAmenities = (item.amenities || []).map(a => typeof a === 'string' ? a : (a.name || ''));
+        const hasAll = checkedAmenities.every(req => itemAmenities.some(itemA => itemA.toLowerCase().includes(req.toLowerCase())));
+        if (!hasAll) return false;
+      }
+
+      return true;
+    }
+  </script>
+
+  <!-- help toggle removed – replaced by a dedicated help page -->
+  <!-- users can visit /help.html for FAQs and contact information -->
+
+  <script>
+    // Chatbot functionality
+    let chatState = 'initial';
+    let userPreferences = {};
+    let activeSessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+
+    document.querySelector('.chatbot-toggle').addEventListener('click', () => {
+      document.querySelector('.chatbot').classList.toggle('active');
+      if (document.querySelector('.chatbot').classList.contains('active')) {
+        initializeChat();
+      } else {
+        // Clear in-memory state when chat is hidden
+        userPreferences = {};
+        chatState = 'initial';
+      }
+    });
+
+    function closeChat() {
+      // Tell backend to delete history context
+      fetch('/api/chat/clear', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: activeSessionId })
+      }).catch(console.error);
+
+      // Generate a fresh session ID for the next time it's opened
+      activeSessionId = 'session_' + Math.random().toString(36).substr(2, 9);
+
+      document.querySelector('.chatbot').classList.remove('active');
+      // Clear UI and in-memory state so no prior context remains
+      const chatBody = document.getElementById('chat-body');
+      const chatOptions = document.getElementById('chat-options');
+      if (chatBody) chatBody.innerHTML = '';
+      if (chatOptions) chatOptions.innerHTML = '';
+      userPreferences = {};
+      chatState = 'initial';
+    }
+
+    function initializeChat() {
+      const chatBody = document.getElementById('chat-body');
+      const chatOptions = document.getElementById('chat-options');
+
+      // Clear previous chat
+      chatBody.innerHTML = '';
+      if (chatOptions) chatOptions.innerHTML = '';
+
+      // Add welcome message
+      addBotMessage("Hi there! I'm Smart Lodger, your AI concierge. I can intimately search across all our Hotels, Restaurants, and Lounges for you. Tell me exactly what kind of trip you want!");
+
+      const txt = document.getElementById('chatText');
+      if (txt) {
+        txt.onkeydown = (e) => { if (e.key === 'Enter') sendFreeText(); };
+      }
+    }
+
+    // Call backend directly with the user's raw message
+    async function askAI(message) {
+      try {
+        addBotMessage('Thinking...');
+        const res = await fetch('/api/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message, sessionId: activeSessionId })
+        });
+        const data = await res.json();
+        const chatBody = document.getElementById('chat-body');
+        const last = chatBody.querySelector('.chat-message.bot:last-child');
+
+        if (last && last.textContent === 'Thinking...') {
+          last.innerHTML = formatAIResponse(data.reply || 'Sorry, I could not get a reply right now.');
+        } else {
+          addBotMessage(data.reply || 'Sorry, I could not get a reply right now.');
+        }
+      } catch (e) {
+        const chatBody = document.getElementById('chat-body');
+        const last = chatBody.querySelector('.chat-message.bot:last-child');
+        if (last && last.textContent === 'Thinking...') {
+          last.textContent = 'Network error contacting AI concierge.';
+        } else {
+          addBotMessage('Network error contacting AI concierge.');
+        }
+      }
+    }
+
+    function formatAIResponse(text) {
+      if (!text) return '';
+      // Basic formatting to make AI bullets look nice in HTML
+      return text.replace(/\n/g, '<br/>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.*?)\*/g, '<em>$1</em>');
+    }
+
+    function addUserMessage(messageElement) {
+      const chatBody = document.getElementById('chat-body');
+      chatBody.appendChild(messageElement);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    function addBotMessage(text) {
+      const chatBody = document.getElementById('chat-body');
+      const botMsg = document.createElement('div');
+      botMsg.className = 'chat-message bot';
+      botMsg.innerHTML = text; // Using innerHTML to allow HTML rendering from formatAIResponse
+      chatBody.appendChild(botMsg);
+      chatBody.scrollTop = chatBody.scrollHeight;
+    }
+
+    // --- Gemini Deep AI Text ---
+    async function sendFreeText() {
+      const input = document.getElementById('chatText');
+      const text = (input?.value || '').trim();
+      if (!text) return;
+
+      const userMsg = document.createElement('div');
+      userMsg.className = 'chat-message user';
+      userMsg.textContent = text;
+      addUserMessage(userMsg);
+      if (input) input.value = '';
+
+      // Fully entrust the logic to the backend AI agent
+      askAI(text);
+    }
+
+  </script>
+
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-section about">
+        <h4>About CheckInns</h4>
+        <p>CheckInns helps you find and book hotels, restaurants, and lounges worldwide with speed, privacy and
+          security. From budget stays to luxury escapes, we make travelling easier.</p>
+      </div>
+      <div class="footer-section links">
+        <h4>Quick Links</h4>
+        <ul>
+          <li><a href="checkinns3.html">Browse</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="help.html">Help &amp; FAQ</a></li>
+        </ul>
+      </div>
+      <div class="footer-section contact">
+        <h4>Contact</h4>
+        <p>Phone: <a href="tel:080099009292">0800 990 09292</a></p>
+        <p>Email: support@checkinns.com</p>
+      </div>
+      <div class="footer-section social">
+        <h4>Follow Us</h4>
+        <div class="social-icons">
+          <a href="https://www.facebook.com/checkinns" target="_blank"><i class="fab fa-facebook-f"></i></a>
+          <a href="https://www.instagram.com/checkinns" target="_blank"><i class="fab fa-instagram"></i></a>
+          <a href="https://www.twitter.com/checkinns" target="_blank"><i class="fab fa-twitter"></i></a>
+          <a href="https://www.linkedin.com/checkinns" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 CheckInns. All rights reserved.
+    </div>
+  </footer>
+</body>
+
+</html>
