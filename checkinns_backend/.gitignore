@@ -1,0 +1,13 @@
+node_modules/
+.env
+.DS_Store
+dist/
+public/uploads/*
+!public/uploads/.gitkeep
+*.log
+err.txt
+err2.txt
+temp_*.json
+temp_*.txt
+test-output.txt
+seed-output.log
