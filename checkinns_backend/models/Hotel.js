@@ -30,8 +30,13 @@ const hotelSchema = new mongoose.Schema(
     rooms: [roomSchema],
     owner: { type: String }, // Optional owner identifier for dashboard grouping
     isApproved: { type: Boolean, default: false },
-    isBoosted: { type: Boolean, default: false },
     isFeatured: { type: Boolean, default: false },
+    boostData: {
+      isBoosted: { type: Boolean, default: false },
+      boostStartDate: { type: Date },
+      views: { type: Number, default: 0 },
+      bookings: { type: Number, default: 0 }
+    },
     membershipTier: { type: String, enum: ['standard', 'silver', 'gold', 'premium'], default: 'standard' }
   },
   { timestamps: true }

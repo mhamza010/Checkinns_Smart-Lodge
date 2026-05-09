@@ -85,9 +85,9 @@ app.use((req, res, next) => {
   const csp = [
     "default-src 'self'",
     // Scripts: allow Stripe JS and Radar domains
-    "script-src 'self' 'unsafe-inline' https://js.stripe.com https://m.stripe.com https://q.stripe.com https://*.stripe.com https://cdnjs.cloudflare.com",
+    "script-src 'self' 'unsafe-inline' https://js.stripe.com https://m.stripe.com https://q.stripe.com https://*.stripe.com https://cdnjs.cloudflare.com https://www.googletagmanager.com",
     // XHR/WebSocket connections
-    "connect-src 'self' https://api.stripe.com https://m.stripe.com https://q.stripe.com https://*.stripe.com https://cdnjs.cloudflare.com",
+    "connect-src 'self' https://api.stripe.com https://m.stripe.com https://q.stripe.com https://*.stripe.com https://cdnjs.cloudflare.com https://www.google-analytics.com https://www.googletagmanager.com",
     // Frames for Elements + 3DS challenge
     "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://*.stripe.com",
     // Child sources (legacy alias for frames in some browsers)
@@ -95,7 +95,7 @@ app.use((req, res, next) => {
     // Styles
     "style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com",
     // Images - allow data URLs, self, stripe, and external image services
-    "img-src 'self' data: blob: https://*.stripe.com https://via.placeholder.com https://*.cloudinary.com https://images.unsplash.com https://*",
+    "img-src 'self' data: blob: https://*.stripe.com https://via.placeholder.com https://*.cloudinary.com https://images.unsplash.com https://www.googletagmanager.com https://*",
     // Fonts
     "font-src 'self' data: https://cdnjs.cloudflare.com"
   ].join('; ');
@@ -149,6 +149,6 @@ app.get("/", (req, res) => {
 // ✅ Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`✅ Server running on http://localhost:${PORT}`));
-
+console.log(`✅ Server running on port ${PORT}`);
 
 export default app;

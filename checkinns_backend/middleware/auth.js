@@ -9,7 +9,7 @@ const authMiddleware = async (req, res, next) => {
       return res.status(401).json({ msg: "No token, authorization denied" });
     }
 
-    const decoded = jwt.verify(token, JWT_SECRET); // ✅ use the secret from config
+    const decoded = jwt.verify(token, JWT_SECRET);
     req.user = { id: decoded.id };
 
     const user = await User.findById(req.user.id);
@@ -17,7 +17,10 @@ const authMiddleware = async (req, res, next) => {
 
     next();
   } catch (err) {
-    console.error(err);
+    if (err.name === "TokenExpiredError") {
+      return res.status(401).json({ msg: "Session expired, please login again", expired: true });
+    }
+    console.error("Auth Error:", err.message);
     res.status(401).json({ msg: "Token is invalid" });
   }
 };

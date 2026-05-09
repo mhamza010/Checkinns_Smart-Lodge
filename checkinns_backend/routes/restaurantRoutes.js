@@ -21,6 +21,13 @@ router.get("/:id", async (req, res) => {
   try {
     const restaurant = await Restaurant.findById(req.params.id);
     if (!restaurant) return res.status(404).json({ message: "Restaurant not found" });
+
+    // Track View for Boosted Performance
+    if (restaurant.boostData?.isBoosted) {
+      restaurant.boostData.views = (restaurant.boostData.views || 0) + 1;
+      await restaurant.save();
+    }
+
     res.json(restaurant);
   } catch (err) {
     res.status(500).json({ message: err.message });

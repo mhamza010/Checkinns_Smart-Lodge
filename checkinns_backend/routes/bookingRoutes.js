@@ -5,6 +5,8 @@ import Booking from "../models/Booking.js"; // Hotel bookings
 import LoungeBooking from "../models/LoungeBooking.js"; // Lounge bookings
 import RestaurantBooking from "../models/RestaurantBooking.js"; // Restaurant bookings
 import Hotel from "../models/Hotel.js";
+import Restaurant from "../models/Restaurant.js";
+import Lounge from "../models/Lounge.js";
 
 
 const router = express.Router();
@@ -141,6 +143,13 @@ router.post("/", async (req, res) => {
       });
 
       await booking.save();
+
+      // Track Booking for Boosted Performance
+      if (hotelDoc.boostData?.isBoosted) {
+        hotelDoc.boostData.bookings = (hotelDoc.boostData.bookings || 0) + 1;
+        await hotelDoc.save();
+      }
+
       return res.status(201).json(booking);
     }
 
@@ -204,6 +213,14 @@ router.post("/", async (req, res) => {
       });
 
       await booking.save();
+
+      // Track Booking for Boosted Performance
+      const restDoc = await Restaurant.findById(restaurant);
+      if (restDoc && restDoc.boostData?.isBoosted) {
+        restDoc.boostData.bookings = (restDoc.boostData.bookings || 0) + 1;
+        await restDoc.save();
+      }
+
       return res.status(201).json(booking);
     }
 
@@ -269,6 +286,14 @@ router.post("/", async (req, res) => {
       });
 
       await booking.save();
+
+      // Track Booking for Boosted Performance
+      const loungeDoc = await Lounge.findById(lounge);
+      if (loungeDoc && loungeDoc.boostData?.isBoosted) {
+        loungeDoc.boostData.bookings = (loungeDoc.boostData.bookings || 0) + 1;
+        await loungeDoc.save();
+      }
+
       return res.status(201).json(booking);
     }
 

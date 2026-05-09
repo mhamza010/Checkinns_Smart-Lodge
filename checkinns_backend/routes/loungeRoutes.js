@@ -21,6 +21,13 @@ router.get("/:id", async (req, res) => {
   try {
     const lounge = await Lounge.findById(req.params.id);
     if (!lounge) return res.status(404).json({ msg: "Lounge not found" });
+
+    // Track View for Boosted Performance
+    if (lounge.boostData?.isBoosted) {
+      lounge.boostData.views = (lounge.boostData.views || 0) + 1;
+      await lounge.save();
+    }
+
     res.json(lounge);
   } catch (err) {
     res.status(500).json({ msg: "Server error" });

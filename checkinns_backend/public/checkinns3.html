@@ -8,6 +8,15 @@
   <link rel="stylesheet" href="checkinns3.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
 
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q4CLRC8PZ3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Q4CLRC8PZ3');
+  </script>
 </head>
 
 <body>
@@ -36,32 +45,136 @@
     <div class="slide slide4"></div>
   </div>
 
-  <nav class="navbar splash-navbar"
-    style="position: fixed; top: 0; left: 0; width: 100%; z-index: 10000; display: flex; justify-content: space-between; align-items: center; padding: 10px 40px; box-sizing: border-box; background: rgba(0,0,0,0.5); backdrop-filter: blur(10px);">
-    <h2 style="display:flex; align-items:center; gap:10px; margin:0; color:white;">
-      <img src="/images/Logo Checkinns.png" alt="Logo" style="height:40px;"> Check-Inns
+  <nav class="navbar splash-navbar">
+    <h2 class="nav-brand">
+      <img src="/images/Logo Checkinns.png" alt="Logo"> Check-Inns
     </h2>
-    <div class="currency-selector" style="display: flex; align-items: center;">
-      <label for="currency" style="color: white; margin-right: 10px;">Currency:</label>
-      <select id="currency" style="padding: 5px; border-radius: 5px;">
-        <option value="USD">USD ($)</option>
-        <option value="KWD">Kuwaiti Dinar (KD)</option>
-        <option value="SAR">Saudi Riyal (SAR)</option>
-        <option value="PKR">Pakistani Rupees (Rs)</option>
-        <option value="QAR">Qatar Riyal (QAR)</option>
-      </select>
-      <ul class="nav-links"
-        style="display:flex; gap:20px; list-style:none; margin:0; padding:0; align-items:center; margin-left: 30px;">
-        <li><a href="dashboard.html" style="color:white; text-decoration:none; font-weight:500;">Dashboard</a></li>
-        <li><a href="owner_dashboard.html" style="color:white; text-decoration:none; font-weight:500;">Owner Portal</a>
-        </li>
-        <li><a href="admin_dashboard.html" style="color:white; text-decoration:none; font-weight:500;">Admin</a></li>
-        <li><a href="auth.html"
-            style="color:white; text-decoration:none; font-weight:500; background:#259bfc; padding:8px 16px; border-radius:20px;">Login</a>
-        </li>
+    
+    <div class="nav-toggle" id="nav-toggle">
+      <i class="fas fa-bars"></i>
+    </div>
+
+    <div class="nav-container" id="nav-container">
+      <div class="currency-selector">
+        <label for="currency">Currency:</label>
+        <select id="currency">
+          <option value="USD">USD ($)</option>
+          <option value="KWD">Kuwaiti Dinar (KD)</option>
+          <option value="SAR">Saudi Riyal (SAR)</option>
+          <option value="PKR">Pakistani Rupees (Rs)</option>
+          <option value="QAR">Qatar Riyal (QAR)</option>
+        </select>
+      </div>
+      <ul class="nav-links">
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="owner_dashboard.html">Owner Portal</a></li>
+        <li><a href="admin_dashboard.html">Admin</a></li>
+        <li><a href="auth.html" class="login-btn">Login</a></li>
       </ul>
     </div>
   </nav>
+
+  <style>
+    /* Navbar Base Styles */
+    .navbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      z-index: 10000;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 40px;
+      box-sizing: border-box;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(15px);
+      transition: all 0.3s ease;
+    }
+
+    .nav-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0;
+      color: white;
+      font-size: 1.5rem;
+    }
+
+    .nav-brand img {
+      height: 40px;
+    }
+
+    .nav-container {
+      display: flex;
+      align-items: center;
+      gap: 30px;
+    }
+
+    .nav-toggle {
+      display: none;
+      color: white;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+
+    .login-btn {
+      background: #259bfc;
+      padding: 8px 20px;
+      border-radius: 20px;
+      transition: background 0.3s ease;
+    }
+
+    .login-btn:hover {
+      background: #11cb6e;
+    }
+
+    /* Mobile Styles */
+    @media (max-width: 860px) {
+      .navbar {
+        padding: 10px 20px;
+      }
+
+      .nav-toggle {
+        display: block;
+      }
+
+      .nav-container {
+        display: none;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: rgba(0,0,0,0.9);
+        flex-direction: column;
+        padding: 20px;
+        gap: 20px;
+        box-sizing: border-box;
+        border-top: 1px solid rgba(255,255,255,0.1);
+      }
+
+      .nav-container.active {
+        display: flex;
+      }
+
+      .nav-links {
+        flex-direction: column;
+        width: 100%;
+        text-align: center;
+      }
+
+      .currency-selector {
+        margin-left: 0 !important;
+        margin-bottom: 10px;
+      }
+    }
+  </style>
+
+  <script>
+    document.getElementById('nav-toggle').addEventListener('click', function() {
+      document.getElementById('nav-container').classList.toggle('active');
+    });
+  </script>
 
   <div class="splash-screen">
     <div class="splash-content">

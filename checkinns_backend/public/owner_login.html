@@ -3,32 +3,223 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Owner Sign In • Check-Inns</title>
-  <link rel="stylesheet" href="checkinns3.css">
+  <title>Partner Command • Check-Inns</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q4CLRC8PZ3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Q4CLRC8PZ3');
+  </script>
+  <style>
+    :root {
+      --bg-deep: #05060f;
+      --accent-primary: #d4af37;
+      --accent-secondary: #9e8bff;
+      --glass: rgba(15, 18, 41, 0.7);
+      --glass-border: rgba(255, 255, 255, 0.1);
+      --text: #e8e9ff;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg-deep);
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      overflow: hidden;
+      color: var(--text);
+    }
+
+    .bg-immersive {
+      position: fixed;
+      inset: 0;
+      background: url('owner_login_bg_1778304742320.png') no-repeat center center/cover;
+      filter: brightness(0.4) saturate(1.2);
+      z-index: -1;
+    }
+
+    .bg-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at center, transparent 0%, var(--bg-deep) 100%);
+      z-index: -1;
+    }
+
+    .login-shell {
+      width: min(450px, 90vw);
+      background: var(--glass);
+      backdrop-filter: blur(25px);
+      border: 1px solid var(--glass-border);
+      border-radius: 32px;
+      padding: 50px 40px;
+      box-shadow: 0 40px 100px rgba(0, 0, 0, 0.8), 0 0 20px rgba(158, 139, 255, 0.1) inset;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .brand-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+
+    .brand-icon {
+      font-size: 3rem;
+      background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      margin-bottom: 15px;
+      display: inline-block;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 300;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #fff;
+    }
+
+    .sub-title {
+      font-size: 0.85rem;
+      color: #9aa0c3;
+      margin-top: 5px;
+    }
+
+    .form-group {
+      margin-bottom: 25px;
+    }
+
+    label {
+      display: block;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+      color: #7d84ab;
+      font-weight: 600;
+    }
+
+    .input-wrapper {
+      position: relative;
+    }
+
+    .input-wrapper i {
+      position: absolute;
+      left: 15px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: #535a81;
+    }
+
+    input {
+      width: 100%;
+      background: rgba(0, 0, 0, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 15px 15px 15px 45px;
+      border-radius: 14px;
+      color: #fff;
+      font-size: 1rem;
+      outline: none;
+      transition: 0.3s;
+    }
+
+    input:focus {
+      border-color: var(--accent-secondary);
+      background: rgba(0, 0, 0, 0.5);
+      box-shadow: 0 0 15px rgba(158, 139, 255, 0.2);
+    }
+
+    .action-btn {
+      width: 100%;
+      padding: 16px;
+      border: none;
+      border-radius: 14px;
+      background: linear-gradient(135deg, var(--accent-secondary), #4f46e5);
+      color: #fff;
+      font-weight: bold;
+      font-size: 1rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: 0.3s;
+      margin-top: 10px;
+      box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+    }
+
+    .action-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 15px 30px rgba(79, 70, 229, 0.4);
+      filter: brightness(1.1);
+    }
+
+    .footer-links {
+      text-align: center;
+      margin-top: 30px;
+      font-size: 0.85rem;
+    }
+
+    .footer-links a {
+      color: var(--accent-primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: 0.3s;
+    }
+
+    .footer-links a:hover {
+      color: #fff;
+      text-shadow: 0 0 10px var(--accent-primary);
+    }
+  </style>
 </head>
 <body>
-  <div class="owner-auth-container">
-    <img src="images/logo.png" alt="Check-Inns" class="logo">
-    <h1>Owner Sign In</h1>
+  <div class="bg-immersive"></div>
+  <div class="bg-overlay"></div>
+
+  <div class="login-shell">
+    <div class="brand-header">
+      <div class="brand-icon"><i class="fas fa-gem"></i></div>
+      <h1>Partner Access</h1>
+      <p class="sub-title">Enter the Command Center</p>
+    </div>
+
     <form id="owner-login-form">
-      <input type="email" id="owner-login-email" placeholder="Business Email" required>
-      <input type="password" id="owner-login-password" placeholder="Password" required>
-      <button type="submit">Sign In</button>
+      <div class="form-group">
+        <label>Intelligence ID (Email)</label>
+        <div class="input-wrapper">
+          <i class="fas fa-envelope"></i>
+          <input type="email" id="owner-login-email" placeholder="commander@checkinns.com" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Authorization Pass</label>
+        <div class="input-wrapper">
+          <i class="fas fa-lock"></i>
+          <input type="password" id="owner-login-password" placeholder="••••••••" required>
+        </div>
+      </div>
+      <button type="submit" class="action-btn">Initialize Session</button>
     </form>
-    <a href="owner_signup.html">Need an owner account? Create one</a>
+
+    <div class="footer-links">
+      <p style="color:#535a81; margin-bottom:10px;">New Intelligence?</p>
+      <a href="owner_signup.html">Request Partner Clearance</a>
+    </div>
   </div>
 
   <script>
-    const form = document.getElementById('owner-login-form');
-    form.addEventListener('submit', async (e) => {
+    document.getElementById('owner-login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       const email = document.getElementById('owner-login-email').value.trim();
       const password = document.getElementById('owner-login-password').value.trim();
-
-      if (!email || !password) {
-        alert('Please enter email and password');
-        return;
-      }
 
       try {
         const res = await fetch('/api/owner/login', {
@@ -37,19 +228,15 @@
           body: JSON.stringify({ username: email, password })
         });
         if (!res.ok) {
-          const errText = await res.text();
-          throw new Error(errText || 'Login failed');
+          const data = await res.json();
+          throw new Error(data.msg || 'Authentication failed');
         }
         const data = await res.json();
-        // Store separately to distinguish from user token
         localStorage.setItem('ownerToken', data.token);
         localStorage.setItem('ownerName', data.owner?.name || '');
-        // Redirect to owner dashboard
-        const redirect = new URLSearchParams(window.location.search).get('redirect') || 'owner_dashboard.html';
-        window.location.href = redirect;
+        window.location.href = 'owner_dashboard.html';
       } catch (err) {
-        console.error('Owner login error:', err);
-        alert('Owner login failed: ' + err.message);
+        alert('Access Denied: ' + err.message);
       }
     });
   </script>

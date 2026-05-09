@@ -62,12 +62,35 @@
     }
 
     @media (max-width: 860px) {
-      .lux-brand {
-        grid-template-columns: 1fr;
+      body {
+        overflow: auto;
+        padding: 20px 0;
       }
-
+      .shell {
+        height: auto;
+        min-height: 600px;
+        width: 92vw;
+        position: relative;
+        overflow: visible;
+      }
+      .lux-brand {
+        position: relative;
+        inset: auto;
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .left {
+        display: none;
+      }
       .right {
-        display: none
+        border-left: none;
+        padding: 30px 20px;
+        width: 100%;
+        height: auto;
+      }
+      .panel {
+        width: 100%;
+        box-shadow: none;
       }
     }
 

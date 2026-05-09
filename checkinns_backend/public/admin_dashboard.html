@@ -8,6 +8,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.37.1/apexcharts.min.js"></script>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q4CLRC8PZ3"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+
+        gtag('config', 'G-Q4CLRC8PZ3');
+    </script>
     <style>
         :root {
             --bg-dark: #0a0a0f;
@@ -345,6 +354,146 @@
             background: var(--accent-red);
             color: white;
         }
+        /* RESPONSIVE FIXES */
+        @media (max-width: 860px) {
+            body {
+                overflow-y: auto;
+                height: auto;
+            }
+
+            .login-box {
+                width: 100%;
+                max-width: 400px;
+                margin: auto;
+                padding: 25px;
+            }
+
+            #login-overlay {
+                padding: 20px;
+                overflow-y: auto;
+                align-items: flex-start;
+            }
+
+            .dashboard {
+                flex-direction: column;
+                height: auto;
+                min-height: 100vh;
+            }
+
+            /* HAMBURGER TOGGLE */
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                bottom: 0;
+                z-index: 10000; /* High z-index */
+                transition: 0.3s;
+                width: 280px !important;
+                box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+                height: 100vh !important;
+                display: flex !important;
+            }
+
+            .sidebar.show {
+                left: 0;
+            }
+
+            .nav-menu {
+                flex-direction: column !important;
+                padding: 20px 0;
+            }
+
+            .nav-item {
+                padding: 15px 30px;
+                font-size: 14px;
+                flex: none;
+                border-right: none !important;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
+
+            .nav-item.active {
+                border-right: 3px solid var(--accent-gold) !important;
+                border-bottom: 1px solid rgba(255,255,255,0.05);
+            }
+
+            .hamburger {
+                display: none !important;
+                position: fixed;
+                top: 15px;
+                left: 15px;
+                z-index: 10001;
+                background: var(--bg-panel);
+                border: 1px solid var(--border);
+                color: var(--accent-gold);
+                padding: 10px;
+                border-radius: 8px;
+                cursor: pointer;
+            }
+
+            @media (max-width: 860px) {
+                .hamburger {
+                    display: block !important;
+                }
+            }
+
+            .sidebar {
+                overflow-y: auto !important;
+                padding-bottom: 0 !important;
+            }
+
+            .nav-menu {
+                padding-bottom: 100px !important;
+            }
+
+            .logout-btn {
+                position: sticky !important;
+                bottom: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                z-index: 10002 !important;
+                background: var(--accent-red) !important;
+                margin: 0 !important;
+                border: none !important;
+                border-radius: 0 !important;
+                padding: 20px !important;
+                box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+                justify-content: center !important;
+                display: flex !important;
+            }
+
+            /* Elegant Scrollbar */
+            .sidebar::-webkit-scrollbar {
+                width: 4px;
+            }
+            .sidebar::-webkit-scrollbar-track {
+                background: transparent;
+            }
+            .sidebar::-webkit-scrollbar-thumb {
+                background: rgba(212, 175, 55, 0.3);
+                border-radius: 10px;
+            }
+
+            .main-content {
+                padding: 80px 20px 20px 20px !important;
+                overflow: visible;
+            }
+
+            .grid-cards {
+                grid-template-columns: 1fr;
+            }
+
+            .data-table-container {
+                overflow-x: auto;
+            }
+
+            table {
+                min-width: 600px;
+            }
+        }
+
+        .hamburger {
+            display: none;
+        }
     </style>
 </head>
 
@@ -369,6 +518,11 @@
             </form>
         </div>
     </div>
+
+    <!-- HAMBURGER -->
+    <button class="hamburger" id="ham-toggle" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+    </button>
 
     <!-- DASHBOARD -->
     <div id="dashboard" class="dashboard">
@@ -472,7 +626,12 @@
 
             <!-- USERS LIST -->
             <div id="users-section" class="section">
-                <h1 class="page-title">Global Users Directory</h1>
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h1 class="page-title" style="margin:0;">Registered Users</h1>
+                    <button class="action-btn" onclick="exportUsersCSV()" style="background: #17a2b8; font-weight: bold; padding: 10px 20px;">
+                        <i class="fas fa-file-export" style="margin-right: 5px;"></i> Export Users CSV
+                    </button>
+                </div>
                 <div class="data-table-container">
                     <table>
                         <thead>
@@ -575,6 +734,7 @@
                                 <th>Property Name</th>
                                 <th>Membership Tier</th>
                                 <th>Current Quota / Delivered</th>
+                                <th>Performance (Boost)</th>
                                 <th>Status</th>
                                 <th>Actions</th>
                             </tr>
@@ -710,6 +870,11 @@
             document.getElementById(tabId + '-section').classList.add('active');
             event.currentTarget.classList.add('active');
 
+            // Close sidebar on mobile after clicking
+            if (window.innerWidth <= 860) {
+                document.querySelector('.sidebar').classList.remove('show');
+            }
+
             if (tabId === 'users') fetchUsers();
             if (tabId === 'owners') fetchOwners();
             if (tabId === 'approvals') fetchApprovals();
@@ -717,6 +882,10 @@
             if (tabId === 'bossincome') fetchBossIncome();
             if (tabId === 'memberships') fetchMemberships();
             if (tabId === 'config') fetchConfigEngine();
+        }
+
+        function toggleSidebar() {
+            document.querySelector('.sidebar').classList.toggle('show');
         }
 
         // Logout
@@ -761,13 +930,14 @@
         let apexRevChart = null;
         function drawApexRevenueChart(cats, commissionPercent) {
             if (!cats) return;
-            const hotelEarning = (Number(cats.hotel) || 0) * (commissionPercent / 100);
-            const restEarning = (Number(cats.restaurant) || 0) * (commissionPercent / 100);
-            const loungeEarning = (Number(cats.lounge) || 0) * (commissionPercent / 100);
+            const comm = Number(commissionPercent) || 10;
+            const hotelEarning = (Number(cats.hotel) || 0) * (comm / 100);
+            const restEarning = (Number(cats.restaurant) || 0) * (comm / 100);
+            const loungeEarning = (Number(cats.lounge) || 0) * (comm / 100);
 
-            const he = isNaN(hotelEarning) ? 0 : hotelEarning;
-            const re = isNaN(restEarning) ? 0 : restEarning;
-            const le = isNaN(loungeEarning) ? 0 : loungeEarning;
+            const he = (isNaN(hotelEarning) || !isFinite(hotelEarning)) ? 0 : hotelEarning;
+            const re = (isNaN(restEarning) || !isFinite(restEarning)) ? 0 : restEarning;
+            const le = (isNaN(loungeEarning) || !isFinite(loungeEarning)) ? 0 : loungeEarning;
 
             const maxValRaw = Math.max(he || 0, re || 0, le || 0, 10) * 1.2;
             const maxVal = isNaN(maxValRaw) ? 12 : maxValRaw;
@@ -1014,6 +1184,10 @@
                                 statusHtml = `<span style="color:var(--text-muted);">-</span>`;
                             }
 
+                            const boost = h.boostData || { views: 0, bookings: 0, isBoosted: false };
+                            const conversion = boost.views > 0 ? ((boost.bookings / boost.views) * 100).toFixed(1) : 0;
+                            const convColor = conversion > 10 ? '#3bd45a' : (conversion < 3 && boost.views > 10 ? '#ff3366' : '#aaa');
+
                             return `
                             <tr>
                                 <td>${h.name}</td>
@@ -1021,6 +1195,20 @@
                                     <strong style="color: var(--accent-gold); text-transform: uppercase;">${h.membershipTier}</strong>
                                 </td>
                                 <td>${quota > 0 ? quota : 'N/A'} / <span style="color:var(--accent-gold);">${h.customersDelivered}</span></td>
+                                <td>
+                                    ${boost.isBoosted 
+                                        ? `
+                                            <div style="font-size:12px; color:#aaa; line-height: 1.4;">
+                                                <i class="fas fa-eye"></i> ${boost.views} views <br>
+                                                <i class="fas fa-calendar-check"></i> ${boost.bookings} bookings <br>
+                                                <span style="color:${convColor}; font-weight:bold;">
+                                                    <i class="fas fa-chart-line"></i> ${conversion}% conv.
+                                                </span>
+                                            </div>
+                                        `
+                                        : '<span style="color:#555;">-</span>'
+                                    }
+                                </td>
                                 <td>${statusHtml}</td>
                                 <td>
                                     ${h.isBoosted
@@ -1043,7 +1231,7 @@
         async function boostProperty(id, name) {
             if (!confirm(`Are you sure you want to blast a marketing campaign for ${name} to all users?`)) return;
             try {
-                const res = await fetch(`/api/admin/properties/${id}/boost`, {
+                const res = await fetch(`/api/admin/properties/hotel/${id}/boost`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + adminToken }
                 });
@@ -1056,7 +1244,7 @@
         async function unboostProperty(id, name) {
             if (!confirm(`Are you sure you want to remove the boost from ${name}?`)) return;
             try {
-                const res = await fetch(`/api/admin/properties/${id}/unboost`, {
+                const res = await fetch(`/api/admin/properties/hotel/${id}/unboost`, {
                     method: 'POST',
                     headers: { 'Authorization': 'Bearer ' + adminToken }
                 });
@@ -1077,6 +1265,24 @@
                 alert(data.msg || 'Property Featured!');
                 fetchMemberships();
             } catch (e) { console.error(e); }
+        }
+
+        async function exportUsersCSV() {
+            try {
+                const res = await fetch('/api/admin/export/users', fetchConfig());
+                if (!res.ok) throw new Error("Export failed");
+                const blob = await res.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = "checkinns_users_report.csv";
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+            } catch (err) {
+                alert("Export Error: " + err.message);
+            }
         }
 
         async function unfeatureProperty(id, name) {

@@ -9,7 +9,15 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/apexcharts/3.37.1/apexcharts.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q4CLRC8PZ3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Q4CLRC8PZ3');
+  </script>
   <style>
     :root {
       --bg1: #0f1020;
@@ -57,12 +65,20 @@
     }
 
     @media (max-width: 860px) {
+      .shell {
+        height: auto;
+        min-height: 500px;
+        width: 95vw;
+      }
       .lux-brand {
         grid-template-columns: 1fr;
       }
-
+      .left {
+        display: none;
+      }
       .right {
-        display: none
+        padding: 30px 20px;
+        width: 100%;
       }
     }
 
@@ -559,44 +575,131 @@
     }
 
     @media (max-width: 860px) {
+      .shell {
+        height: auto;
+        min-height: 500px;
+        width: 95vw;
+        margin: 20px auto;
+      }
+      .lux-brand {
+        grid-template-columns: 1fr;
+      }
+      .left {
+        display: none;
+      }
+      .right {
+        padding: 30px 20px;
+        width: 100%;
+      }
+
       .dashboard-wrapper.active {
         grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-        height: 100vh;
+        grid-template-rows: 1fr;
+        height: auto;
+        min-height: 100vh;
       }
+
+      /* HAMBURGER TOGGLE */
       .sidebar {
-        border-right: none;
-        border-bottom: 1px solid #232756;
-        padding: 15px;
-        flex-direction: row;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: space-between;
+        position: fixed;
+        left: -100%;
+        top: 0;
+        bottom: 0;
+        z-index: 1000;
+        transition: 0.3s;
+        width: 260px !important;
+        background: #0f1020;
+        box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+        display: flex !important;
+        flex-direction: column !important;
+        height: 100vh !important;
       }
+
+      .sidebar.show {
+        left: 0;
+      }
+
       .sidebar-menu {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 5px;
-        width: 100%;
-        order: 3;
+        flex-direction: column !important;
+        align-items: stretch !important;
       }
+
       .menu-item {
-        padding: 8px 12px;
-        font-size: 13px;
-        flex: 1;
-        text-align: center;
+        flex: none !important;
+        text-align: left !important;
+        padding: 15px 25px !important;
       }
-      .logo-section { margin-bottom: 0; }
-      .logout-btn { margin-top: 0; padding: 6px 12px; font-size: 12px; }
-      .main-content { padding: 15px; }
-      .chart-container { height: 250px; }
-      .stats-grid { grid-template-columns: 1fr; }
+
+      .hamburger {
+        display: none !important;
+        position: fixed;
+        top: 15px;
+        left: 15px;
+        z-index: 10001;
+        background: #1b1d3a;
+        border: 1px solid #232756;
+        color: #9e8bff;
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+      }
+
+      @media (max-width: 860px) {
+        .hamburger {
+          display: block !important;
+        }
+      }
+
+      .sidebar {
+        overflow-y: auto !important;
+        padding-bottom: 0 !important;
+      }
+
+      .sidebar-menu {
+        padding-bottom: 100px !important;
+      }
+
+      .logout-btn {
+        position: sticky !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        z-index: 10002 !important;
+        background: #ff3366 !important;
+        margin: 0 !important;
+        border-radius: 0 !important;
+        padding: 20px !important;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+      }
+
+      /* Elegant Scrollbar */
+      .sidebar::-webkit-scrollbar {
+        width: 4px;
+      }
+      .sidebar::-webkit-scrollbar-track {
+        background: transparent;
+      }
+      .sidebar::-webkit-scrollbar-thumb {
+        background: rgba(158, 139, 255, 0.3);
+        border-radius: 10px;
+      }
+
+      .main-content {
+        padding: 80px 15px 15px 15px !important;
+        overflow: visible;
+      }
+    }
+
+    .hamburger {
+      display: none;
     }
   </style>
 </head>
 
 <body>
+  <button class="hamburger" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
   <button class="theme-toggle-btn" onclick="toggleTheme()"><i class="fas fa-sun"></i></button>
   <div id="dashboardWrapper" class="dashboard-wrapper">
     <div class="sidebar">
@@ -1290,6 +1393,36 @@
         alert('Error: ' + err.message);
       }
     });
+
+    function showSection(id) {
+      // The section IDs have a '-section' suffix
+      const sectionId = id.endsWith('-section') ? id : id + '-section';
+      
+      document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(sectionId);
+      if (target) {
+        target.classList.add('active');
+      }
+
+      document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+      if (event && event.currentTarget) {
+          event.currentTarget.classList.add('active');
+      }
+
+      // Close sidebar on mobile
+      if (window.innerWidth <= 860) {
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) sidebar.classList.remove('show');
+      }
+
+      if (id === 'overview') loadOverview();
+      if (id === 'favorites') loadFavorites();
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.querySelector('.sidebar');
+      if (sidebar) sidebar.classList.toggle('show');
+    }
 
     function showSection(section) {
       document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));

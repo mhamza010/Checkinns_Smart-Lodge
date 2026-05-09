@@ -12,7 +12,14 @@ const restaurantSchema = new mongoose.Schema(
     cuisines: [String], // e.g. ["Italian", "Pakistani", "Chinese"]
     priceRange: String, // e.g. "$$", "$$$"
     owner: { type: String }, // Optional owner identifier
-    isApproved: { type: Boolean, default: false }
+    isApproved: { type: Boolean, default: false },
+    boostData: {
+      isBoosted: { type: Boolean, default: false },
+      boostStartDate: { type: Date },
+      views: { type: Number, default: 0 },
+      bookings: { type: Number, default: 0 }
+    },
+    membershipTier: { type: String, enum: ['standard', 'silver', 'gold', 'premium'], default: 'standard' }
   },
   { timestamps: true }
 );

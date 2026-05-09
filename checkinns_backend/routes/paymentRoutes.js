@@ -113,9 +113,10 @@ router.post("/create-upgrade-intent", async (req, res) => {
   try {
     if (!stripe) return res.status(500).json({ error: "Stripe not configured" });
 
-    const { hotelId, tier, price } = req.body;
+    const { hotelId, tier, price, type } = req.body;
     if (!hotelId || !tier) return res.status(400).json({ error: "hotelId and tier are required" });
 
+    const propType = type || 'hotel';
     const amount = Math.round(Number(price || 50) * 100); // 50 USD if not specified
 
     const paymentIntent = await stripe.paymentIntents.create({
@@ -124,7 +125,8 @@ router.post("/create-upgrade-intent", async (req, res) => {
       metadata: {
         hotelId,
         tier,
-        type: "upgrade"
+        type: "upgrade",
+        propType: propType
       },
       automatic_payment_methods: { enabled: true },
     });
@@ -149,27 +151,32 @@ router.post("/update-upgrade-status", async (req, res) => {
     if (pi.status === "succeeded") {
       const hotelId = pi.metadata?.hotelId;
       const tier = pi.metadata?.tier;
+      const propType = pi.metadata?.propType || 'hotel';
       const amountPaid = pi.amount / 100;
 
       if (hotelId && tier) {
-        const Hotel = (await import("../models/Hotel.js")).default;
-        const updatedHotel = await Hotel.findByIdAndUpdate(hotelId, { membershipTier: tier }, { new: true });
+        let Model;
+        if (propType === 'restaurant') Model = (await import("../models/Restaurant.js")).default;
+        else if (propType === 'lounge') Model = (await import("../models/Lounge.js")).default;
+        else Model = (await import("../models/Hotel.js")).default;
+
+        const updatedProp = await Model.findByIdAndUpdate(hotelId, { membershipTier: tier }, { new: true });
 
         // Log this into AuditLog to act as admin income
         const AuditLog = (await import("../models/AuditLog.js")).default;
         await AuditLog.create({
           action: "Package Purchased",
-          description: `Owner upgraded hotel to ${tier}. Revenue: $${amountPaid}`,
+          description: `Owner upgraded ${propType} to ${tier}. Revenue: $${amountPaid}`,
           userType: "owner",
           revenue: amountPaid
         });
 
         // Blast an email to all users
-        if (updatedHotel) {
+        if (updatedProp) {
           const users = await User.find({ email: { $exists: true, $ne: null } }).select("email").lean();
           const emailList = users.map(u => u.email).filter(e => e);
           if (emailList.length > 0) {
-            await sendMarketingBlastEmail(emailList, updatedHotel.name, tier);
+            await sendMarketingBlastEmail(emailList, updatedProp.name, tier);
           }
         }
       }

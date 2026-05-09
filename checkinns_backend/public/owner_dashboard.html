@@ -10,6 +10,15 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/6.1.15/index.global.min.js"></script>
   <script src="https://js.stripe.com/v3/"></script>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q4CLRC8PZ3"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-Q4CLRC8PZ3');
+  </script>
   <style>
     :root {
       --bg1: #0f1020;
@@ -57,12 +66,22 @@
     }
 
     @media (max-width: 860px) {
+      .shell {
+        height: auto;
+        max-height: 90vh; /* Don't take full screen to keep context */
+        width: 95vw;
+        overflow-y: auto !important; /* Enable scroll for signup */
+      }
       .lux-brand {
         grid-template-columns: 1fr;
+        position: relative; /* Allow height to expand */
       }
-
+      .left {
+        display: none;
+      }
       .right {
-        display: none
+        padding: 30px 20px;
+        width: 100%;
       }
     }
 
@@ -250,6 +269,7 @@
       box-shadow: 0 8px 24px rgba(158, 139, 255, .35);
     }
 
+    /* DESKTOP LAYOUT (Default) */
     .dashboard-wrapper {
       display: none;
       height: 100vh;
@@ -259,7 +279,7 @@
 
     .dashboard-wrapper.active {
       display: grid;
-      grid-template-columns: 240px 1fr;
+      grid-template-columns: 280px 1fr;
     }
 
     .sidebar {
@@ -268,18 +288,12 @@
       padding: 20px;
       display: flex;
       flex-direction: column;
-      overflow-y: auto;
-    }
-
-    .logo-section {
-      margin-bottom: 30px;
-    }
-
-    .logo-section .logo-text {
-      font-size: 20px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: 1px;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      overflow-y: auto; /* Handle short screens */
     }
 
     .sidebar-menu {
@@ -311,19 +325,24 @@
     }
 
     .logout-btn {
-      margin-top: auto;
-      padding: 10px 16px;
+      padding: 12px 16px;
       background: var(--err);
       color: white;
       border: none;
       border-radius: 10px;
       cursor: pointer;
       font-weight: 600;
+      margin-top: auto;
+      margin-bottom: 20px; /* Space from bottom edge */
     }
 
     .main-content {
       padding: 30px;
       overflow-y: auto;
+    }
+
+    .hamburger {
+      display: none !important; /* Force hide on desktop */
     }
 
     .content-section {
@@ -414,43 +433,6 @@
       margin-bottom: 30px;
     }
 
-    .form-group {
-      margin-bottom: 20px;
-    }
-
-    .form-group label {
-      display: block;
-      margin-bottom: 8px;
-      color: var(--muted);
-      font-weight: 600;
-      font-size: 14px;
-    }
-
-    .form-group input,
-    .form-group textarea,
-    .form-group select {
-      width: 100%;
-      padding: 10px 14px;
-      background: rgba(255, 255, 255, .05);
-      border: 1px solid #232756;
-      border-radius: 8px;
-      color: var(--text);
-      font-family: inherit;
-    }
-
-    .form-group input:focus,
-    .form-group textarea:focus,
-    .form-group select:focus {
-      outline: none;
-      border-color: var(--accent);
-      background: rgba(158, 139, 255, .08);
-    }
-
-    .form-group textarea {
-      resize: vertical;
-      min-height: 80px;
-    }
-
     .image-upload-area {
       border: 2px dashed #232756;
       border-radius: 10px;
@@ -463,11 +445,6 @@
     .image-upload-area:hover {
       border-color: var(--accent);
       background: rgba(158, 139, 255, .05);
-    }
-
-    .image-upload-area.dragover {
-      border-color: var(--accent);
-      background: rgba(158, 139, 255, .15);
     }
 
     .image-preview {
@@ -485,10 +462,6 @@
       border: 1px solid #232756;
     }
 
-    .preview-container {
-      position: relative;
-    }
-
     .remove-img {
       position: absolute;
       top: 5px;
@@ -504,6 +477,42 @@
       align-items: center;
       justify-content: center;
       font-size: 12px;
+    }
+
+    .theme-toggle-btn {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      width: 45px;
+      height: 45px;
+      border-radius: 14px; /* More modern rounded corners */
+      background: rgba(15, 18, 41, 0.7); /* Glass effect */
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(158, 139, 255, 0.4);
+      color: var(--accent);
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      z-index: 10000;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    .theme-toggle-btn:hover {
+      transform: translateY(-3px) scale(1.05);
+      background: rgba(158, 139, 255, 0.15);
+      border-color: var(--accent);
+      box-shadow: 0 12px 40px rgba(158, 139, 255, 0.25);
+    }
+
+    .theme-toggle-btn i {
+      transition: transform 0.5s ease;
+    }
+
+    .theme-toggle-btn:hover i {
+      transform: rotate(45deg);
     }
 
     .add-btn,
@@ -526,12 +535,6 @@
       transform: translateY(-2px);
     }
 
-    .upload-status {
-      font-size: 12px;
-      color: var(--muted);
-      margin-top: 8px;
-    }
-
     body.light-mode {
       --bg1: #f5f7fa;
       --bg2: #e4e7eb;
@@ -542,85 +545,95 @@
       --muted: #718096;
     }
 
-    body.light-mode .shell {
-      background: #ffffff;
-      border: 1px solid #cbd5e0;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, .1);
-    }
-
-    body.light-mode .login-page {
-      background: linear-gradient(160deg, var(--bg1), var(--bg2));
-    }
-
-    body.light-mode input,
-    body.light-mode textarea,
-    body.light-mode select {
-      background: #f8fafc !important;
-      border-color: #cbd5e1 !important;
-      color: #0f172a !important;
-    }
-
-    .theme-toggle-btn {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      width: 45px;
-      height: 45px;
-      border-radius: 50%;
-      background: var(--panel);
-      border: 2px solid var(--accent);
-      color: var(--accent);
-      font-size: 20px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      z-index: 10000;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      transition: all 0.3s ease;
-    }
-
-    .theme-toggle-btn:hover {
-      transform: translateY(-3px) rotate(15deg);
-      box-shadow: 0 6px 16px rgba(158, 139, 255, 0.4);
-    }
-
+    /* MOBILE LAYOUT (Responsive) */
     @media (max-width: 860px) {
       .dashboard-wrapper.active {
-        grid-template-columns: 1fr;
-        grid-template-rows: auto 1fr;
-        height: 100vh;
+        display: block; 
+        height: auto;
+        min-height: 100vh;
       }
+
       .sidebar {
-        border-right: none;
-        border-bottom: 1px solid #232756;
-        padding: 15px;
-        flex-direction: row;
+        position: fixed;
+        left: -320px; /* Further back */
+        top: 0;
+        bottom: 0;
+        z-index: 10000;
+        width: 280px;
+        transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: none; /* No shadow when hidden */
+        height: 100vh !important;
+        overflow-y: auto !important;
+        background: #0d0e1e !important;
+        padding-bottom: 0 !important;
+        visibility: hidden; /* Completely hide from screen */
+      }
+
+      .sidebar.show {
+        left: 0;
+        box-shadow: 20px 0 50px rgba(0,0,0,0.5);
+        visibility: visible;
+      }
+
+      .hamburger {
+        display: flex !important;
+        position: fixed;
+        top: 15px;
+        right: 15px; /* Shifted to right as requested */
+        z-index: 10001;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        color: var(--accent);
+        padding: 10px;
+        border-radius: 8px;
+        cursor: pointer;
+        width: 45px;
+        height: 45px;
         align-items: center;
-        flex-wrap: wrap;
-        gap: 10px;
-        justify-content: space-between;
+        justify-content: center;
       }
-      .sidebar-menu {
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 5px;
-        width: 100%;
-        order: 3;
+
+      .main-content {
+        padding: 80px 15px 15px 15px !important;
       }
-      .menu-item {
-        padding: 8px 12px;
-        font-size: 13px;
-        flex: 1;
+
+      .theme-toggle-btn {
+        left: 15px !important; 
+        right: auto !important;
+        top: 15px !important;
+        z-index: 10001 !important; 
+        width: 45px;
+        height: 45px;
+        background: rgba(15, 18, 41, 0.8) !important;
+        border: 1px solid var(--accent) !important;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4) !important;
+      }
+
+      .logout-btn {
+        position: sticky !important;
+        bottom: 0 !important;
+        width: 100% !important;
+        z-index: 10002 !important;
+        background: var(--err) !important;
+        border-radius: 0 !important;
+        padding: 20px !important;
+        box-shadow: 0 -10px 30px rgba(0, 0, 0, 0.5);
+        margin-top: 50px; 
+        display: block !important;
         text-align: center;
       }
-      .logo-section { margin-bottom: 0; }
-      .logout-btn { margin-top: 0; padding: 6px 12px; font-size: 12px; }
-      .main-content { padding: 15px; }
-      .chart-container { height: 250px; }
-      .stats-grid { grid-template-columns: 1fr; }
-      .property-form { max-width: 100%; }
-      .property-card { flex-direction: column; }
+    }
+
+    /* Elegant Scrollbar */
+    .sidebar::-webkit-scrollbar {
+      width: 4px;
+    }
+    .sidebar::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    .sidebar::-webkit-scrollbar-thumb {
+      background: rgba(158, 139, 255, 0.3);
+      border-radius: 10px;
     }
   </style>
 </head>
@@ -628,7 +641,12 @@
 <body>
   <button class="theme-toggle-btn" onclick="toggleTheme()"><i class="fas fa-sun"></i></button>
   <!-- LOGIN PAGE -->
-  <div id="loginPage" class="login-page">
+  <!-- HAMBURGER -->
+  <button class="hamburger" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+  </button>
+
+  <div id="login-page" class="login-page">
     <div class="shell">
       <div class="lux-brand">
         <div class="left">
@@ -1044,7 +1062,7 @@
       }
     }
 
-    const loginPage = document.getElementById('loginPage');
+    const loginPage = document.getElementById('login-page');
     const dashboardWrapper = document.getElementById('dashboardWrapper');
     let revenueChart = null;
 
@@ -1210,7 +1228,7 @@
       }
     });
 
-    async function loadDashboard() {
+    async function loadOverview() {
       const ownerToken = localStorage.getItem('ownerToken');
 
       // Decode token to get owner name safely
@@ -1236,37 +1254,31 @@
         document.getElementById('stat-hotels').textContent = data.counts.hotels;
         document.getElementById('stat-restaurants').textContent = data.counts.restaurants;
         document.getElementById('stat-lounges').textContent = data.counts.lounges;
-        document.getElementById('stat-revenue').textContent = '$' + data.revenue.total.toLocaleString();
+        document.getElementById('stat-revenue').textContent = '$' + (data.revenue.total || 0).toLocaleString();
         
-        const yearlyTax = data.revenue.total * 0.15; // Assuming 15% estimated tax
+        const yearlyTax = (data.revenue.total || 0) * 0.15; // Assuming 15% estimated tax
         const monthlyTax = yearlyTax / 12;
         document.getElementById('tax-monthly').textContent = '$' + monthlyTax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
         document.getElementById('tax-yearly').textContent = '$' + yearlyTax.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
 
         // Draw revenue chart
         drawRevenueChart({
-          hotel: data.revenue.hotel,
-          restaurant: data.revenue.restaurant,
-          lounge: data.revenue.lounge
+          hotel: data.revenue.hotel || 0,
+          restaurant: data.revenue.restaurant || 0,
+          lounge: data.revenue.lounge || 0
         });
-
-        // Load properties
-        loadProperties();
-
-        // Load reviews & analytics
-        loadReviews();
-
-        // Load Advanced Analytics
-        loadAdvancedAnalytics();
-        
-        // Load Notifications
-        loadNotifications();
-
-        // Load bookings
-        loadBookings();
       } catch (err) {
-        console.error('Dashboard error:', err);
+        console.error('Overview error:', err);
       }
+    }
+
+    async function loadDashboard() {
+        await loadOverview();
+        await loadMyProperties();
+        await loadReviews();
+        await loadAdvancedAnalytics();
+        await loadNotifications();
+        await loadBookings();
     }
 
     let globalRevenueTrendsChart = null;
@@ -1592,7 +1604,7 @@
       }
     }
 
-    async function loadProperties() {
+    async function loadMyProperties() {
       const ownerToken = localStorage.getItem('ownerToken');
       const decoded = JSON.parse(atob(ownerToken.split('.')[1]));
       const ownerName = decoded.username;
@@ -1646,7 +1658,7 @@
             <div class="property-detail"><i class="fas fa-dollar-sign"></i> \$${h.pricePerNight} / night</div>
             ${memBadge}
             <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
-              <button class="save-btn" onclick="openPackageUpgrade('${h._id}')" style="padding: 6px 12px; font-size: 12px; background:linear-gradient(135deg, #d4af37, #f3e5ab); color:#000; font-weight:bold;">Buy/Upgrade Package</button>
+              <button class="save-btn" onclick="openPackageUpgrade('${h._id}', 'hotel')" style="padding: 6px 12px; font-size: 12px; background:linear-gradient(135deg, #d4af37, #f3e5ab); color:#000; font-weight:bold;">Buy/Upgrade Package</button>
               <button class="save-btn" onclick="editProperty('hotel', '${h._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--accent);">Edit</button>
               <button class="save-btn" onclick="deleteProperty('hotel', '${h._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--err);">Delete</button>
             </div>
@@ -1660,6 +1672,7 @@
             <div class="property-detail"><i class="fas fa-map-marker-alt"></i> ${r.location}</div>
             <div class="property-detail"><i class="fas fa-utensils"></i> ${r.cuisines?.join(', ')}</div>
             <div style="margin-top: 15px; display: flex; gap: 10px;">
+              <button class="save-btn" onclick="openPackageUpgrade('${r._id}', 'restaurant')" style="padding: 6px 12px; font-size: 12px; background:linear-gradient(135deg, #d4af37, #f3e5ab); color:#000; font-weight:bold;">Buy/Upgrade Package</button>
               <button class="save-btn" onclick="editProperty('restaurant', '${r._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--accent);">Edit</button>
               <button class="save-btn" onclick="deleteProperty('restaurant', '${r._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--err);">Delete</button>
             </div>
@@ -1672,6 +1685,7 @@
             <div class="property-detail"><i class="fas fa-map-marker-alt"></i> ${l.location}</div>
             <div class="property-detail"><i class="fas fa-glass-martini-alt"></i> ${l.features?.join(', ')}</div>
             <div style="margin-top: 15px; display: flex; gap: 10px;">
+              <button class="save-btn" onclick="openPackageUpgrade('${l._id}', 'lounge')" style="padding: 6px 12px; font-size: 12px; background:linear-gradient(135deg, #d4af37, #f3e5ab); color:#000; font-weight:bold;">Buy/Upgrade Package</button>
               <button class="save-btn" onclick="editProperty('lounge', '${l._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--accent);">Edit</button>
               <button class="save-btn" onclick="deleteProperty('lounge', '${l._id}')" style="padding: 6px 12px; font-size: 12px; background:var(--err);">Delete</button>
             </div>
@@ -1768,11 +1782,37 @@
       }
     }
 
-    function showSection(section) {
+    function showSection(id) {
+      // The section IDs have a '-section' suffix in this file
+      const sectionId = id.endsWith('-section') ? id : id + '-section';
+      
       document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+      const target = document.getElementById(sectionId);
+      
+      if (target) {
+        target.classList.add('active');
+      } else {
+        console.error("Section not found:", sectionId);
+      }
+
       document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-      document.getElementById(section + '-section').classList.add('active');
-      event.target.classList.add('active');
+      // Find the menu item that was clicked (the event is triggered by onclick)
+      if (event && event.currentTarget) {
+          event.currentTarget.classList.add('active');
+      }
+
+      // Close sidebar on mobile
+      if (window.innerWidth <= 860) {
+        const sidebar = document.querySelector('.sidebar');
+        if (sidebar) sidebar.classList.remove('show');
+      }
+
+      if (id === 'overview') loadOverview();
+      if (id === 'my-properties' || id === 'hotels') loadMyProperties();
+    }
+
+    function toggleSidebar() {
+      document.querySelector('.sidebar').classList.toggle('show');
     }
 
     async function deleteProperty(type, id) {
@@ -1787,7 +1827,7 @@
         });
         if (res.ok) {
           alert('Property deleted.');
-          loadProperties();
+          loadMyProperties();
           loadAdvancedAnalytics();
         } else {
           alert('Failed to delete property.');
@@ -1799,11 +1839,10 @@
     
     // --- Package Upgrade Processing ---
     let upgradeHotelId = null;
-    let stripeInstance = null;
-    let elementsInstance = null;
-    let packagePrices = { silver: 50, gold: 100, premium: 200 };
-    function openPackageUpgrade(hotelId) {
+    let upgradePropType = 'hotel';
+    function openPackageUpgrade(hotelId, type = 'hotel') {
         upgradeHotelId = hotelId;
+        upgradePropType = type;
         document.getElementById('upgrade-modal').style.display = 'flex';
         document.getElementById('upgrade-step-1').style.display = 'block';
         document.getElementById('upgrade-step-2').style.display = 'none';
@@ -1846,7 +1885,7 @@
             const res = await fetch('/api/payments/create-upgrade-intent', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ hotelId: upgradeHotelId, tier, price })
+                body: JSON.stringify({ hotelId: upgradeHotelId, tier, price, type: upgradePropType })
             });
             const data = await res.json();
             
@@ -1887,7 +1926,7 @@
                     });
                     alert(`Success! You have officially upgraded to ${tier.toUpperCase()} membership.`);
                     closeUpgradeModal();
-                    loadProperties(); // Refresh UI
+                    loadMyProperties(); // Refresh UI
                 }
             };
         } catch(e) {

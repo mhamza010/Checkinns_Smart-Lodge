@@ -126,10 +126,21 @@ router.get("/boss-income", adminAuth, async (req, res) => {
             if (log.revenue) {
                 const m = new Date(log.createdAt).getMonth();
                 monthlyIncome[m] += log.revenue;
-                const extractedDetails = log.description.split(' upgraded hotel to ');
-                const hotelNameMatch = log.description.match(/Owner upgraded hotel to (.*)\. Revenue/);
-                const hotelName = hotelNameMatch ? hotelNameMatch[1] : 'Unknown Hotel';
-                incomeDetails.push({ source: hotelName, owner: log.userType || 'owner', amount: log.revenue, type: 'Package Subscription', date: log.createdAt });
+                
+                // Flexible parsing for different property types
+                let propName = 'Unknown Property';
+                const match = log.description.match(/Owner upgraded (hotel|restaurant|lounge) to (.*)\. Revenue/i) 
+                           || log.description.match(/Owner upgraded (.*) to (.*)\. Revenue/i);
+                
+                if (match) propName = match[1];
+                
+                incomeDetails.push({ 
+                    source: propName, 
+                    owner: log.userType || 'owner', 
+                    amount: log.revenue, 
+                    type: 'Package Subscription', 
+                    date: log.createdAt 
+                });
             }
         });
 
@@ -158,6 +169,23 @@ router.get("/owners", adminAuth, async (req, res) => {
         const owners = await Owner.find({}, "-password").sort({ createdAt: -1 });
         res.json(owners);
     } catch (err) { res.status(500).json({ msg: "Server Error" }); }
+});
+
+// Export Data
+router.get("/export/users", adminAuth, async (req, res) => {
+    try {
+        const users = await User.find({}, "username email createdAt").lean();
+        let csv = "Username,Email,Joined\n";
+        users.forEach(u => {
+            csv += `"${u.username}","${u.email}","${u.createdAt.toISOString().split('T')[0]}"\n`;
+        });
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=users.csv');
+        res.status(200).send(csv);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ msg: "Server Error" });
+    }
 });
 
 // Delete Actions
@@ -261,27 +289,47 @@ router.get("/memberships", adminAuth, async (req, res) => {
         startOfMonth.setDate(1);
         startOfMonth.setHours(0, 0, 0, 0);
 
-        const hotels = await Hotel.find({ isApproved: true }).lean();
+        const [hotels, restaurants, lounges] = await Promise.all([
+            Hotel.find({ isApproved: true }).lean(),
+            Restaurant.find({ isApproved: true }).lean(),
+            Lounge.find({ isApproved: true }).lean()
+        ]);
+
+        const allProps = [
+            ...hotels.map(p => ({ ...p, propertyType: 'hotel' })),
+            ...restaurants.map(p => ({ ...p, propertyType: 'restaurant' })),
+            ...lounges.map(p => ({ ...p, propertyType: 'lounge' }))
+        ];
+
         const hotelIds = hotels.map(h => h._id);
+        const restIds = restaurants.map(r => r._id);
+        const loungeIds = lounges.map(l => l._id);
 
-        const bookingsThisMonth = await Booking.find({
-            hotel: { $in: hotelIds },
-            status: { $ne: 'cancelled' },
-            createdAt: { $gte: startOfMonth }
-        }).lean();
+        const [hBookings, rBookings, lBookings] = await Promise.all([
+            Booking.find({ hotel: { $in: hotelIds }, status: { $ne: 'cancelled' }, createdAt: { $gte: startOfMonth } }).lean(),
+            RestaurantBooking.find({ restaurant: { $in: restIds }, status: { $ne: 'cancelled' }, createdAt: { $gte: startOfMonth } }).lean(),
+            LoungeBooking.find({ lounge: { $in: loungeIds }, status: { $ne: 'cancelled' }, createdAt: { $gte: startOfMonth } }).lean()
+        ]);
 
-        const data = hotels.map(h => {
-            const hBookings = bookingsThisMonth.filter(b => b.hotel.toString() === h._id.toString());
+        const data = allProps.map(p => {
+            let pBookings = [];
+            if (p.propertyType === 'hotel') pBookings = hBookings.filter(b => b.hotel.toString() === p._id.toString());
+            else if (p.propertyType === 'restaurant') pBookings = rBookings.filter(b => b.restaurant.toString() === p._id.toString());
+            else if (p.propertyType === 'lounge') pBookings = lBookings.filter(b => b.lounge.toString() === p._id.toString());
+
             return {
-                _id: h._id,
-                name: h.name,
-                owner: h.owner,
-                membershipTier: h.membershipTier || 'standard',
-                isBoosted: h.isBoosted || false,
-                isFeatured: h.isFeatured || false,
-                customersDelivered: hBookings.length
+                _id: p._id,
+                name: p.name,
+                owner: p.owner,
+                propertyType: p.propertyType,
+                membershipTier: p.membershipTier || 'standard',
+                isBoosted: p.boostData?.isBoosted || false,
+                isFeatured: p.isFeatured || false,
+                boostData: p.boostData || { isBoosted: false, views: 0, bookings: 0 },
+                customersDelivered: pBookings.length
             };
         });
+
         res.json(data);
     } catch (err) { res.status(500).json({ msg: "Server Error" }); }
 });
@@ -370,30 +418,45 @@ router.put("/memberships/:id", adminAuth, async (req, res) => {
 });
 
 // Boost Property (Sends marketing blast and flags property)
-router.post("/properties/:id/boost", adminAuth, async (req, res) => {
+router.post("/properties/:type/:id/boost", adminAuth, async (req, res) => {
     try {
-        const hotel = await Hotel.findById(req.params.id);
-        if (!hotel) return res.status(404).json({ msg: "Hotel not found" });
+        const { type, id } = req.params;
+        let model;
+        if (type === "hotel") model = Hotel;
+        else if (type === "restaurant") model = Restaurant;
+        else if (type === "lounge") model = Lounge;
+        else return res.status(400).json({ msg: "Invalid property type" });
 
-        // Update a field in hotel (create one if doesn't exist, we'll use isBoosted = true)
-        hotel.isBoosted = true;
-        await hotel.save();
+        const property = await model.findById(id);
+        if (!property) return res.status(404).json({ msg: "Property not found" });
+
+        // Initialize Performance Tracking
+        property.boostData = {
+            isBoosted: true,
+            boostStartDate: new Date(),
+            views: 0,
+            bookings: 0
+        };
+        // For backward compatibility
+        property.isBoosted = true;
+
+        await property.save();
 
         // Send a massive push notification to ALL users
-        const msg = `🔥 FEATURED OF THE WEEK: ${hotel.name} is now offering exclusive luxury stays! Check it out now.`;
+        const msg = `🔥 FEATURED OF THE WEEK: ${property.name} is now offering exclusive luxury stays! Check it out now.`;
         await Notification.create({ recipient: "all", role: "user", type: "marketing", message: msg, isRead: false });
 
         // Send Email Blast to ALL users
         const users = await User.find({ email: { $exists: true, $ne: null } }).select("email").lean();
         const emailList = users.map(u => u.email).filter(e => e);
         if (emailList.length > 0) {
-            await sendMarketingBlastEmail(emailList, hotel.name, hotel.membershipTier || "Premium");
+            await sendMarketingBlastEmail(emailList, property.name, property.membershipTier || "Premium");
         }
 
         // Audit Log
         await AuditLog.create({
             action: "Property Market Boost",
-            description: `Admin blasted a marketing campaign for ${hotel.name}`,
+            description: `Admin blasted a marketing campaign for ${property.name} (${type})`,
             userType: "admin"
         });
 
@@ -402,17 +465,27 @@ router.post("/properties/:id/boost", adminAuth, async (req, res) => {
 });
 
 // Unboost Property
-router.post("/properties/:id/unboost", adminAuth, async (req, res) => {
+router.post("/properties/:type/:id/unboost", adminAuth, async (req, res) => {
     try {
-        const hotel = await Hotel.findById(req.params.id);
-        if (!hotel) return res.status(404).json({ msg: "Hotel not found" });
+        const { type, id } = req.params;
+        let model;
+        if (type === "hotel") model = Hotel;
+        else if (type === "restaurant") model = Restaurant;
+        else if (type === "lounge") model = Lounge;
+        else return res.status(400).json({ msg: "Invalid property type" });
 
-        hotel.isBoosted = false;
-        await hotel.save();
+        const property = await model.findById(id);
+        if (!property) return res.status(404).json({ msg: "Property not found" });
+
+        if (property.boostData) {
+            property.boostData.isBoosted = false;
+        }
+        property.isBoosted = false;
+        await property.save();
 
         await AuditLog.create({
             action: "Property Market Unboost",
-            description: `Admin removed boost for ${hotel.name}`,
+            description: `Admin removed boost for ${property.name}`,
             userType: "admin"
         });
 

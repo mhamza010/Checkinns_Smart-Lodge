@@ -20,6 +20,13 @@ router.get("/:id", async (req, res) => {
   try {
     const hotel = await Hotel.findById(req.params.id);
     if (!hotel) return res.status(404).json({ error: "Hotel not found" });
+
+    // Track View for Boosted Performance
+    if (hotel.boostData?.isBoosted) {
+      hotel.boostData.views = (hotel.boostData.views || 0) + 1;
+      await hotel.save();
+    }
+
     res.json(hotel);
   } catch (err) {
     res.status(500).json({ error: "Server error" });
