@@ -8,7 +8,9 @@ const platformConfigSchema = new mongoose.Schema({
   silverPackagePrice: { type: Number, default: 50 },
   goldPackagePrice: { type: Number, default: 100 },
   premiumPackagePrice: { type: Number, default: 200 },
-  maintenanceMode: { type: Boolean, default: false }
+  maintenanceMode: { type: Boolean, default: false },
+  isAdminOnline: { type: Boolean, default: false },
+  adminLastActive: { type: Date }
 }, { timestamps: true });
 
 export default mongoose.model("PlatformConfig", platformConfigSchema);

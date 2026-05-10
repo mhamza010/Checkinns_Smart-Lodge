@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Blog Details - Check-Inns</title>
+    <link rel="stylesheet" href="checkinns3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0b0f2c;
+            --accent: #9e8bff;
+            --accent2: #68d4ff;
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            line-height: 1.8;
+        }
+
+        .article-hero {
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        #article-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .hero-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(transparent, var(--bg-dark));
+        }
+
+        .article-header {
+            max-width: 800px;
+            margin: -100px auto 0;
+            position: relative;
+            z-index: 2;
+            padding: 0 20px;
+            text-align: center;
+        }
+
+        .article-title {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+        }
+
+        .article-meta {
+            color: #9aa0c3;
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .article-content {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            color: #cfd2ff;
+            font-size: 1.1rem;
+        }
+
+        .back-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 10px 20px;
+            border-radius: 30px;
+            color: #fff;
+            text-decoration: none;
+            backdrop-filter: blur(10px);
+            z-index: 100;
+            transition: 0.3s;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .back-btn:hover {
+            background: var(--accent);
+            transform: translateX(-5px);
+        }
+    </style>
+</head>
+<body>
+    <a href="blog.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Blog</a>
+
+    <div class="article-hero">
+        <img id="article-image" src="" alt="">
+        <div class="hero-overlay"></div>
+    </div>
+
+    <header class="article-header">
+        <h1 class="article-title" id="article-title">Loading...</h1>
+        <div class="article-meta">
+            <span id="article-date"></span>
+            <span id="article-author"></span>
+            <span id="article-views"></span>
+        </div>
+    </header>
+
+    <div class="article-content" id="article-content">
+        <!-- Content will be injected here -->
+    </div>
+
+    <script>
+        async function loadArticle() {
+            const params = new URLSearchParams(window.location.search);
+            const slug = params.get('slug');
+            if (!slug) {
+                window.location.href = 'blog.html';
+                return;
+            }
+
+            try {
+                const res = await fetch(`/api/blogs/${slug}`);
+                const blog = await res.json();
+
+                if (res.status === 404) {
+                    document.getElementById('article-title').innerText = "Article Not Found";
+                    return;
+                }
+
+                document.title = `${blog.title} - Check-Inns`;
+                document.getElementById('article-image').src = blog.mainImage || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?auto=format&fit=crop&w=1600&q=80';
+                document.getElementById('article-title').innerText = blog.title;
+                document.getElementById('article-date').innerHTML = `<i class="far fa-calendar"></i> ${new Date(blog.createdAt).toLocaleDateString()}`;
+                document.getElementById('article-author').innerHTML = `<i class="far fa-user"></i> ${blog.author}`;
+                document.getElementById('article-views').innerHTML = `<i class="far fa-eye"></i> ${blog.views} views`;
+                
+                // Use innerHTML but in a real app we'd want to sanitize or use a markdown parser
+                document.getElementById('article-content').innerHTML = blog.content.replace(/\n/g, '<br>');
+            } catch (err) {
+                console.error("Error loading article:", err);
+            }
+        }
+
+        loadArticle();
+    </script>
+</body>
+</html>

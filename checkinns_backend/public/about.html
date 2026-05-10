@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us - Check-Inns</title>
+    <link rel="stylesheet" href="checkinns3.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        :root {
+            --bg-dark: #0b0f2c;
+            --accent: #9e8bff;
+            --accent2: #68d4ff;
+            --gold: #d4af37;
+            --glass: rgba(255, 255, 255, 0.05);
+            --border: rgba(255, 255, 255, 0.1);
+        }
+
+        body {
+            background: var(--bg-dark);
+            color: #fff;
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        /* Hero Section */
+        .about-hero {
+            height: 60vh;
+            background: linear-gradient(rgba(11, 15, 44, 0.7), rgba(11, 15, 44, 1)), url('https://images.unsplash.com/photo-1436491865332-7a61a109cc05?auto=format&fit=crop&w=1600&q=80') center/cover;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .about-hero h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .about-hero p {
+            font-size: 1.2rem;
+            max-width: 700px;
+            color: #9aa0c3;
+        }
+
+        /* Content Sections */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 80px 20px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+            margin-bottom: 100px;
+        }
+
+        .grid-2 img {
+            width: 100%;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+
+        .section-tag {
+            color: var(--accent);
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 2px;
+            display: block;
+            margin-bottom: 10px;
+        }
+
+        .section-title {
+            font-size: 2.5rem;
+            margin-bottom: 25px;
+        }
+
+        .section-text {
+            color: #9aa0c3;
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+        }
+
+        /* Review Section */
+        .reviews-section {
+            background: rgba(255,255,255,0.02);
+            padding: 100px 0;
+        }
+
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-top: 50px;
+        }
+
+        .review-card {
+            background: var(--glass);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px solid var(--border);
+            transition: 0.3s;
+            position: relative;
+        }
+
+        .review-card:hover {
+            transform: translateY(-10px);
+            background: rgba(255,255,255,0.08);
+            border-color: var(--accent);
+        }
+
+        .review-card i.quote {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2rem;
+            color: rgba(255,255,255,0.1);
+        }
+
+        .stars {
+            color: var(--gold);
+            margin-bottom: 15px;
+        }
+
+        .reviewer {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .reviewer img {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+
+        .reviewer-info h4 {
+            margin: 0;
+            font-size: 1rem;
+        }
+
+        .reviewer-info span {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+        .tag-owner { background: rgba(212, 175, 55, 0.2); color: var(--gold); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+        .tag-user { background: rgba(158, 139, 255, 0.2); color: var(--accent); padding: 2px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; }
+
+        footer {
+            padding: 40px;
+            text-align: center;
+            border-top: 1px solid var(--border);
+            color: #9aa0c3;
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 { grid-template-columns: 1fr; gap: 40px; }
+            .about-hero h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="navbar" style="position: absolute; width: 100%; box-sizing: border-box; background: transparent; box-shadow: none;">
+        <h2 class="nav-brand" style="color: white;">CheckInns</h2>
+        <ul class="nav-links">
+            <li><a href="checkinns3.html" style="color: white;">Home</a></li>
+            <li><a href="blog.html" style="color: white;">Blog</a></li>
+        </ul>
+    </nav>
+
+    <header class="about-hero">
+        <span class="section-tag">Innovation in Travel</span>
+        <h1>Redefining Hospitality</h1>
+        <p>At Check-Inns, we combine cutting-edge AI technology with world-class hospitality to create seamless experiences for travelers and business owners alike.</p>
+    </header>
+
+    <div class="container">
+        <div class="grid-2">
+            <div>
+                <span class="section-tag">Our Mission</span>
+                <h2 class="section-title">Beyond Just Bookings</h2>
+                <p class="section-text">Launched in 2024, Check-Inns was born out of a desire to eliminate the friction in travel planning. We don't just provide a directory; we provide an intelligent ecosystem that understands your preferences.</p>
+                <p class="section-text">From our <strong>Smart Lodger AI</strong> that acts as your personal concierge to our <strong>Apex Command</strong> dashboard for business partners, we are constantly launching new products to push the boundaries of what's possible.</p>
+            </div>
+            <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=800&q=80" alt="Office">
+        </div>
+
+        <div class="grid-2" style="direction: rtl;">
+            <div style="direction: ltr;">
+                <span class="section-tag">For Partners</span>
+                <h2 class="section-title">Empowering Growth</h2>
+                <p class="section-text">We provide hotel, restaurant, and lounge owners with the tools they need to thrive in a digital-first world. Our platform offers real-time analytics, automated booking management, and high-conversion marketing tools.</p>
+                <div style="display: flex; gap: 20px;">
+                    <div style="background: var(--glass); padding: 15px; border-radius: 12px; flex: 1; text-align: center;">
+                        <h3 style="color: var(--accent); margin: 0;">500+</h3>
+                        <small>Global Partners</small>
+                    </div>
+                    <div style="background: var(--glass); padding: 15px; border-radius: 12px; flex: 1; text-align: center;">
+                        <h3 style="color: var(--accent2); margin: 0;">24/7</h3>
+                        <small>Live Support</small>
+                    </div>
+                </div>
+            </div>
+            <img src="https://images.unsplash.com/photo-1556761175-b413da4baf72?auto=format&fit=crop&w=800&q=80" alt="Partners">
+        </div>
+    </div>
+
+    <section class="reviews-section">
+        <div class="container">
+            <div style="text-align: center; margin-bottom: 60px;">
+                <span class="section-tag">Testimonials</span>
+                <h2 class="section-title">What Our Community Says</h2>
+            </div>
+
+            <div class="reviews-grid">
+                <!-- User Review -->
+                <div class="review-card">
+                    <i class="fas fa-quote-right quote"></i>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p>"The Smart Lodger AI is a game changer. I told it I wanted a quiet beach hotel with a spa in Greece, and it found the perfect spot in seconds. Highly recommend!"</p>
+                    <div class="reviewer">
+                        <img src="https://i.pravatar.cc/150?u=sarah" alt="User">
+                        <div class="reviewer-info">
+                            <h4>Sarah Jenkins <span class="tag-user">Traveler</span></h4>
+                            <span>Verified Member</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Owner Review -->
+                <div class="review-card">
+                    <i class="fas fa-quote-right quote"></i>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <p>"As a boutique hotel owner, the Apex Command dashboard has given me insights I never had before. My bookings increased by 35% in the first two months."</p>
+                    <div class="reviewer">
+                        <img src="https://i.pravatar.cc/150?u=marco" alt="Owner">
+                        <div class="reviewer-info">
+                            <h4>Marco Rossi <span class="tag-owner">Hotel Owner</span></h4>
+                            <span>Grand Plaza Suites</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- User Review -->
+                <div class="review-card">
+                    <i class="fas fa-quote-right quote"></i>
+                    <div class="stars">
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star"></i>
+                        <i class="fas fa-star-half-alt"></i>
+                    </div>
+                    <p>"I love how clean the interface is. Booking a restaurant table and a hotel room in one place is so convenient. The dark mode design is also beautiful."</p>
+                    <div class="reviewer">
+                        <img src="https://i.pravatar.cc/150?u=alex" alt="User">
+                        <div class="reviewer-info">
+                            <h4>Alex Rivera <span class="tag-user">Traveler</span></h4>
+                            <span>Frequent Flyer</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026 Check-Inns. Built for the future of travel.</p>
+    </footer>
+
+</body>
+</html>

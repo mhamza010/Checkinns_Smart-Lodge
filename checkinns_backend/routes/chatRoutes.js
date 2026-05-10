@@ -25,8 +25,9 @@ router.post("/", async (req, res) => {
       return res.status(400).json({ error: "message is required" });
     }
 
+    // Using gemini-flash-latest as it is the most robust alias in the v1beta model list
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash", version: "v1beta" });
+    const model = genAI.getGenerativeModel({ model: "gemini-flash-latest" });
 
     // Always provide deep structural grounding context from DB
     let groundingContext = "";

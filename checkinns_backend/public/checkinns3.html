@@ -12,7 +12,7 @@
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-Q4CLRC8PZ3"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
+    function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
     gtag('config', 'G-Q4CLRC8PZ3');
@@ -49,7 +49,7 @@
     <h2 class="nav-brand">
       <img src="/images/Logo Checkinns.png" alt="Logo"> Check-Inns
     </h2>
-    
+
     <div class="nav-toggle" id="nav-toggle">
       <i class="fas fa-bars"></i>
     </div>
@@ -66,6 +66,7 @@
         </select>
       </div>
       <ul class="nav-links">
+        <li><a href="blog.html">Blog</a></li>
         <li><a href="dashboard.html">Dashboard</a></li>
         <li><a href="owner_dashboard.html">Owner Portal</a></li>
         <li><a href="admin_dashboard.html">Admin</a></li>
@@ -87,7 +88,7 @@
       align-items: center;
       padding: 10px 40px;
       box-sizing: border-box;
-      background: rgba(0,0,0,0.7);
+      background: rgba(0, 0, 0, 0.7);
       backdrop-filter: blur(15px);
       transition: all 0.3s ease;
     }
@@ -145,12 +146,12 @@
         top: 100%;
         left: 0;
         width: 100%;
-        background: rgba(0,0,0,0.9);
+        background: rgba(0, 0, 0, 0.9);
         flex-direction: column;
         padding: 20px;
         gap: 20px;
         box-sizing: border-box;
-        border-top: 1px solid rgba(255,255,255,0.1);
+        border-top: 1px solid rgba(255, 255, 255, 0.1);
       }
 
       .nav-container.active {
@@ -171,7 +172,7 @@
   </style>
 
   <script>
-    document.getElementById('nav-toggle').addEventListener('click', function() {
+    document.getElementById('nav-toggle').addEventListener('click', function () {
       document.getElementById('nav-container').classList.toggle('active');
     });
   </script>
@@ -926,6 +927,16 @@
         const chatBody = document.getElementById('chat-body');
         const last = chatBody.querySelector('.chat-message.bot:last-child');
 
+        if (!res.ok) {
+          const errorMsg = data.details || data.error || 'Server error';
+          if (last && last.textContent === 'Thinking...') {
+            last.textContent = 'Error: ' + errorMsg;
+          } else {
+            addBotMessage('Error: ' + errorMsg);
+          }
+          return;
+        }
+
         if (last && last.textContent === 'Thinking...') {
           last.innerHTML = formatAIResponse(data.reply || 'Sorry, I could not get a reply right now.');
         } else {
@@ -994,6 +1005,7 @@
         <h4>Quick Links</h4>
         <ul>
           <li><a href="checkinns3.html">Browse</a></li>
+          <li><a href="about.html">About Us</a></li>
           <li><a href="dashboard.html">Dashboard</a></li>
           <li><a href="help.html">Help &amp; FAQ</a></li>
         </ul>
@@ -1001,7 +1013,7 @@
       <div class="footer-section contact">
         <h4>Contact</h4>
         <p>Phone: <a href="tel:080099009292">0800 990 09292</a></p>
-        <p>Email: support@checkinns.com</p>
+        <p>Email: checkinns.lodge@gmail.com</p>
       </div>
       <div class="footer-section social">
         <h4>Follow Us</h4>
@@ -1014,9 +1026,275 @@
       </div>
     </div>
     <div class="footer-bottom">
-      &copy; 2026 CheckInns. All rights reserved.
+      &copy; 2025 CheckInns. All rights reserved.
     </div>
   </footer>
+  <!-- Live Support Chat (Admin Support) -->
+  <div class="support-chat">
+    <div class="support-toggle" onclick="toggleSupport()">
+      <span class="status-dot offline" id="admin-status-dot"></span>
+      <i class="fas fa-headset"></i> Support
+    </div>
+    <div class="support-window" id="support-window">
+      <div class="support-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <div class="status-dot offline" id="admin-status-dot-inner"></div>
+          <div>
+            <div style="font-weight: bold;">Elite Support</div>
+            <div style="font-size: 10px; color: #9aa0c3;" id="admin-status-text">We are offline</div>
+          </div>
+        </div>
+        <button onclick="toggleSupport()"
+          style="background:none; border:none; color:white; font-size:20px; cursor:pointer;">×</button>
+      </div>
+      <div class="support-body" id="support-body">
+        <div class="support-msg bot">Hi! How can we help you today? Leave a message and we'll get back to you!</div>
+      </div>
+      <div class="support-input">
+        <input type="text" id="support-input-field" placeholder="Type your query..."
+          onkeypress="if(event.key === 'Enter') sendSupportMessage()">
+        <button onclick="sendSupportMessage()"><i class="fas fa-paper-plane"></i></button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    /* Support Chat Styles */
+    .support-chat {
+      position: fixed;
+      bottom: 20px;
+      left: 30px;
+      z-index: 1000;
+      font-family: 'Inter', sans-serif;
+    }
+
+    .support-toggle {
+      background: linear-gradient(135deg, #ff6b6b, #ff8e8e);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 10px 20px rgba(255, 107, 107, 0.3);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      transition: 0.3s;
+    }
+
+    .support-toggle:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 15px 30px rgba(255, 107, 107, 0.4);
+    }
+
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+    }
+
+    .status-dot.online {
+      background: #3bd45a;
+      box-shadow: 0 0 10px #3bd45a;
+    }
+
+    .status-dot.offline {
+      background: #ff5e7e;
+    }
+
+    .support-window {
+      position: absolute;
+      bottom: 70px;
+      left: 0;
+      width: 320px;
+      height: 450px;
+      background: #0f1229;
+      border: 1px solid rgba(158, 139, 255, 0.3);
+      border-radius: 20px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideInSupport 0.3s ease-out;
+    }
+
+    .support-header {
+      padding: 15px 20px;
+      background: rgba(255, 255, 255, 0.05);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .support-body {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .support-msg {
+      max-width: 80%;
+      padding: 10px 15px;
+      border-radius: 15px;
+      font-size: 0.9rem;
+    }
+
+    .support-msg.user {
+      align-self: flex-end;
+      background: #9e8bff;
+      color: white;
+      border-bottom-right-radius: 2px;
+    }
+
+    .support-msg.bot {
+      align-self: flex-start;
+      background: rgba(255, 255, 255, 0.1);
+      color: #cfd2ff;
+      border-bottom-left-radius: 2px;
+    }
+
+    .support-input {
+      padding: 15px;
+      display: flex;
+      gap: 10px;
+      background: rgba(0, 0, 0, 0.2);
+    }
+
+    .support-input input {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      padding: 8px 12px;
+      color: white;
+      outline: none;
+    }
+
+    .support-input button {
+      background: #9e8bff;
+      border: none;
+      color: white;
+      width: 35px;
+      height: 35px;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+
+    @keyframes slideInSupport {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+
+  <script>
+    // --- Live Support Chat System ---
+    let supportUserId = localStorage.getItem('support_user_id') || 'support_' + Math.random().toString(36).substr(2, 9);
+    localStorage.setItem('support_user_id', supportUserId);
+
+    function toggleSupport() {
+      const sw = document.getElementById('support-window');
+      const isHidden = sw.style.display === 'none' || sw.style.display === '';
+      if (sw) sw.style.display = isHidden ? 'flex' : 'none';
+      if (isHidden) {
+        checkAdminStatus();
+        loadSupportMessages();
+      }
+    }
+
+    async function checkAdminStatus() {
+      try {
+        const res = await fetch('/api/support/status');
+        const data = await res.json();
+        const dot1 = document.getElementById('admin-status-dot');
+        const dot2 = document.getElementById('admin-status-dot-inner');
+        const text = document.getElementById('admin-status-text');
+
+        if (data.online) {
+          if (dot1) { dot1.classList.remove('offline'); dot1.classList.add('online'); }
+          if (dot2) { dot2.classList.remove('offline'); dot2.classList.add('online'); }
+          if (text) text.innerText = 'We are online!';
+        } else {
+          if (dot1) { dot1.classList.remove('online'); dot1.classList.add('offline'); }
+          if (dot2) { dot2.classList.remove('online'); dot2.classList.add('offline'); }
+          if (text) text.innerText = 'We are offline';
+        }
+      } catch (e) { }
+    }
+
+    async function loadSupportMessages() {
+      try {
+        const res = await fetch(`/api/support/messages/${supportUserId}`);
+        const messages = await res.json();
+        const body = document.getElementById('support-body');
+        if (!body) return;
+        body.innerHTML = '';
+
+        if (messages.length === 0) {
+          body.innerHTML = '<div class="support-msg bot">Hi! How can we help you today? Leave a message and we\'ll get back to you!</div>';
+        }
+
+        messages.forEach(m => {
+          const div = document.createElement('div');
+          div.className = `support-msg ${m.senderRole === 'user' ? 'user' : 'bot'}`;
+          div.innerText = m.text;
+          body.appendChild(div);
+        });
+        body.scrollTop = body.scrollHeight;
+      } catch (e) { }
+    }
+
+    async function sendSupportMessage() {
+      const input = document.getElementById('support-input-field');
+      if (!input) return;
+      const text = input.value.trim();
+      if (!text) return;
+
+      // Optimistic UI
+      const body = document.getElementById('support-body');
+      const div = document.createElement('div');
+      div.className = 'support-msg user';
+      div.innerText = text;
+      body.appendChild(div);
+      body.scrollTop = body.scrollHeight;
+      input.value = '';
+
+      try {
+        await fetch('/api/support/user', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userId: supportUserId,
+            text: text,
+            userName: localStorage.getItem('username') || 'Guest'
+          })
+        });
+      } catch (e) { }
+    }
+
+    // Auto-refresh support chat every 10 seconds if window is open
+    setInterval(() => {
+      const sw = document.getElementById('support-window');
+      if (sw && sw.style.display === 'flex') {
+        loadSupportMessages();
+        checkAdminStatus();
+      }
+    }, 10000);
+
+    // Check status on load
+    checkAdminStatus();
+  </script>
 </body>
 
 </html>

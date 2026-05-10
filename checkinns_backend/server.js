@@ -31,6 +31,8 @@ import paymentRoutes from "./routes/paymentRoutes.js";
 import reviewRoutes from "./routes/reviewRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
 import messageRoutes from "./routes/messageRoutes.js";
+import blogRoutes from "./routes/blogRoutes.js";
+import supportRoutes from "./routes/supportRoutes.js";
 
 const app = express();
 
@@ -116,6 +118,8 @@ app.use("/api/payments", paymentRoutes); // ✅ stripe routes
 app.use("/api/reviews", reviewRoutes); // ✅ review & ratings routes
 app.use("/api/admin", adminRoutes); // ✅ super admin routes
 app.use("/api/messages", messageRoutes); // ✅ direct messaging routes
+app.use("/api/blogs", blogRoutes); // ✅ travel blogs routes
+app.use("/api/support", supportRoutes); // ✅ live support chat routes
 
 // ✅ Serve static frontend files
 app.use(express.static("public"));

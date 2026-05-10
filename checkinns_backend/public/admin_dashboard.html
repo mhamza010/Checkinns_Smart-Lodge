@@ -184,6 +184,7 @@
         .nav-menu {
             flex: 1;
             padding: 20px 0;
+            overflow-y: auto;
         }
 
         .nav-item {
@@ -547,6 +548,8 @@
                 </div>
                 <div class="nav-item" onclick="switchTab('memberships')"><i class="fas fa-crown"></i> Premium
                     Memberships</div>
+                <div class="nav-item" onclick="switchTab('blogs')"><i class="fas fa-blog"></i> Manage Blogs</div>
+                <div class="nav-item" onclick="switchTab('support')"><i class="fas fa-headset"></i> Live Support</div>
                 <div class="nav-item" onclick="switchTab('config')"><i class="fas fa-cogs"></i> Global Config Engine
                 </div>
             </div>
@@ -819,6 +822,74 @@
                 </div>
             </div>
 
+            <!-- MANAGE BLOGS -->
+            <div id="blogs-section" class="section">
+                <h1 class="page-title">Manage Travel Blogs</h1>
+                <div class="stat-card" style="margin-bottom: 30px;">
+                    <h3 style="margin-bottom: 20px;">Create New Blog Post</h3>
+                    <form id="blog-form" onsubmit="event.preventDefault(); createBlog();">
+                        <div class="input-group">
+                            <label>Title</label>
+                            <input type="text" id="blog-title" required>
+                        </div>
+                        <div class="input-group">
+                            <label>Main Image (Upload from system)</label>
+                            <input type="file" id="blog-image-file" accept="image/*">
+                        </div>
+                        <div class="input-group">
+                            <label>Tags (Comma separated)</label>
+                            <input type="text" id="blog-tags" placeholder="Luxury, Travel, Guide">
+                        </div>
+                        <div class="input-group">
+                            <label>Content (HTML supported)</label>
+                            <textarea id="blog-content" style="width:100%; height:200px; background:rgba(0,0,0,0.3); border:1px solid var(--border); color:white; padding:15px; border-radius:8px;"></textarea>
+                        </div>
+                        <button type="submit" class="login-btn" id="publish-blog-btn">Publish Blog Post</button>
+                    </form>
+                </div>
+                <div class="data-table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Views</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="blogs-table-body"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- LIVE SUPPORT -->
+            <div id="support-section" class="section">
+                <h1 class="page-title">Live Support Center</h1>
+                <div style="display: grid; grid-template-columns: 300px 1fr; gap: 20px; height: 600px;">
+                    <div class="data-table-container" style="overflow-y: auto;">
+                        <div style="padding: 15px; border-bottom: 1px solid var(--border); background: rgba(255,255,255,0.02);">
+                            <h3 style="font-size: 14px;">Active Chats</h3>
+                        </div>
+                        <div id="chat-list-container">
+                            <!-- Chats will be listed here -->
+                        </div>
+                    </div>
+                    <div class="stat-card" style="display: flex; flex-direction: column; padding: 0;">
+                        <div id="active-chat-header" style="padding: 15px 20px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center;">
+                            <div id="chat-user-name">Select a chat to begin</div>
+                            <div class="status-dot online" id="admin-live-status"></div>
+                        </div>
+                        <div id="admin-chat-body" style="flex: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+                            <!-- Messages -->
+                        </div>
+                        <div style="padding: 15px; background: rgba(0,0,0,0.2); display: flex; gap: 10px;">
+                            <input type="text" id="admin-chat-input" placeholder="Type your reply..." style="flex:1; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:white; padding:10px; border-radius:8px;" onkeypress="if(event.key === 'Enter') sendAdminReply()">
+                            <button onclick="sendAdminReply()" style="background:var(--accent-gold); border:none; padding:0 20px; border-radius:8px; font-weight:bold; cursor:pointer;">Reply</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -882,6 +953,8 @@
             if (tabId === 'bossincome') fetchBossIncome();
             if (tabId === 'memberships') fetchMemberships();
             if (tabId === 'config') fetchConfigEngine();
+            if (tabId === 'blogs') fetchBlogs();
+            if (tabId === 'support') fetchChats();
         }
 
         function toggleSidebar() {
@@ -1372,6 +1445,169 @@
                 else alert('Configuration synchronization failed.');
             } catch (e) { console.error(e); }
         }
+
+        // --- BLOGS LOGIC ---
+        async function fetchBlogs() {
+            try {
+                const res = await fetch('/api/blogs');
+                const data = await res.json();
+                const tbody = document.getElementById('blogs-table-body');
+                tbody.innerHTML = data.map(b => `
+                    <tr>
+                        <td>${new Date(b.createdAt).toLocaleDateString()}</td>
+                        <td>${b.title}</td>
+                        <td>${b.views}</td>
+                        <td>
+                            <button class="action-btn" onclick="deleteBlog('${b._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
+        async function createBlog() {
+            const btn = document.getElementById('publish-blog-btn');
+            const originalText = btn.innerText;
+            
+            const title = document.getElementById('blog-title').value;
+            const content = document.getElementById('blog-content').value;
+            const tags = document.getElementById('blog-tags').value.split(',').map(t => t.trim());
+            const imageFile = document.getElementById('blog-image-file').files[0];
+            
+            if(!title || !content) return alert("Title and Content are required.");
+
+            // Show loading state
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading & Publishing...';
+
+            let mainImage = "";
+
+            try {
+                // First upload image if exists
+                if (imageFile) {
+                    const formData = new FormData();
+                    formData.append('images', imageFile);
+                    const uploadRes = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    const uploadData = await uploadRes.json();
+                    if (uploadData.files && uploadData.files.length > 0) {
+                        mainImage = uploadData.files[0];
+                    }
+                }
+
+                const res = await fetch('/api/blogs', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ title, content, mainImage, tags })
+                });
+                if (res.ok) {
+                    alert('Blog post published!');
+                    document.getElementById('blog-form').reset();
+                    fetchBlogs();
+                } else {
+                    const err = await res.json();
+                    alert("Error: " + (err.details || err.error));
+                }
+            } catch (e) { 
+                console.error(e); 
+                alert("An error occurred while publishing.");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = originalText;
+            }
+        }
+
+        async function deleteBlog(id) {
+            if(!confirm('Delete this blog post?')) return;
+            try {
+                await fetch(`/api/blogs/${id}`, { method: 'DELETE' });
+                fetchBlogs();
+            } catch (e) { console.error(e); }
+        }
+
+        // --- SUPPORT CHAT LOGIC ---
+        let activeSupportUserId = null;
+        let chatPollInterval = null;
+
+        async function fetchChats() {
+            try {
+                const res = await fetch('/api/support/chats');
+                const data = await res.json();
+                const container = document.getElementById('chat-list-container');
+                container.innerHTML = data.map(c => `
+                    <div class="chat-list-item ${activeSupportUserId === c._id ? 'active' : ''}" 
+                         onclick="selectChat('${c._id}', '${c.userName}')"
+                         style="padding:15px; border-bottom:1px solid var(--border); cursor:pointer; transition:0.3s;">
+                        <div style="font-weight:bold; display:flex; justify-content:space-between;">
+                            ${c.userName} 
+                            ${c.unreadCount > 0 ? `<span style="background:var(--accent-red); color:white; font-size:10px; padding:2px 6px; border-radius:10px;">${c.unreadCount}</span>` : ''}
+                        </div>
+                        <div style="font-size:12px; color:var(--text-muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.lastMessage}</div>
+                    </div>
+                `).join('');
+                
+                // Ping status
+                fetch('/api/support/status/ping', { method: 'POST' });
+            } catch (e) { console.error(e); }
+        }
+
+        async function selectChat(userId, userName) {
+            activeSupportUserId = userId;
+            document.getElementById('chat-user-name').innerText = userName;
+            fetchMessages();
+            
+            if(chatPollInterval) clearInterval(chatPollInterval);
+            chatPollInterval = setInterval(fetchMessages, 5000);
+            
+            // Highlight selected
+            document.querySelectorAll('.chat-list-item').forEach(el => el.style.background = 'transparent');
+            event.currentTarget.style.background = 'rgba(212,175,55,0.1)';
+        }
+
+        async function fetchMessages() {
+            if(!activeSupportUserId) return;
+            try {
+                const res = await fetch(`/api/support/messages/${activeSupportUserId}`);
+                const data = await res.json();
+                const body = document.getElementById('admin-chat-body');
+                body.innerHTML = data.map(m => `
+                    <div style="align-self: ${m.senderRole === 'admin' ? 'flex-end' : 'flex-start'}; 
+                                background: ${m.senderRole === 'admin' ? 'rgba(212,175,55,0.2)' : 'rgba(255,255,255,0.05)'};
+                                padding: 10px 15px; border-radius: 12px; max-width: 80%; border: 1px solid ${m.senderRole === 'admin' ? 'var(--accent-gold)' : 'var(--border)'};">
+                        <div style="font-size:13px;">${m.text}</div>
+                        <div style="font-size:9px; color:var(--text-muted); margin-top:5px; text-align:right;">${new Date(m.createdAt).toLocaleTimeString()}</div>
+                    </div>
+                `).join('');
+                body.scrollTop = body.scrollHeight;
+            } catch (e) { console.error(e); }
+        }
+
+        async function sendAdminReply() {
+            const input = document.getElementById('admin-chat-input');
+            const text = input.value.trim();
+            if(!text || !activeSupportUserId) return;
+            
+            try {
+                const res = await fetch('/api/support/admin', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ userId: activeSupportUserId, text })
+                });
+                if(res.ok) {
+                    input.value = '';
+                    fetchMessages();
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        // Start admin ping
+        setInterval(() => {
+            if(document.getElementById('support-section').classList.contains('active')) {
+                fetch('/api/support/status/ping', { method: 'POST' });
+            }
+        }, 30000);
     </script>
 </body>
 
