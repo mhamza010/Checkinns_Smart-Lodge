@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://checkinns-smart-lodge.onrender.com/sitemap.xml
